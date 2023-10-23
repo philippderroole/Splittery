@@ -1,0 +1,16 @@
+# Rust artifacts
+target/
+
+# Cargo.lock file
+Cargo.lock
+
+# Generated documentation
+doc/
+
+# Rust toolchain configuration file
+rust-toolchain
+
+# Editor-specific files
+.vscode/
+.idea/
+*.swp

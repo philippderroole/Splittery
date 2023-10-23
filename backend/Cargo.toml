@@ -1,0 +1,11 @@
+[package]
+name = "share_expenses_backend"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+chrono = "0.4.31"
+dotenvy = "0.15.7"
+rocket = "0.4.11"
+sqlx = { version = "0.7.2", features = ["postgres", "runtime-tokio-rustls"] }
+tokio = { version =  "1.33.0", features = ["full"] }
