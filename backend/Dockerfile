@@ -20,7 +20,7 @@ COPY --from=builder /usr/local/cargo/bin/share_expenses_backend /usr/local/bin/s
 ENV DATABASE_URL=postgres://postgres:1234@db:5432/share_expenses
 
 # Expose the port that the application will run on
-EXPOSE 8000
+EXPOSE 8080
 
 # Start the application
 CMD ["share_expenses_backend"]
