@@ -1,3 +1,5 @@
+use std::error::Error;
+
 use rand::Rng;
 use sqlx::Row;
 use tide::{Request, Response};
@@ -28,4 +30,18 @@ pub async fn create_activity(request: Request<sqlx::PgPool>) -> tide::Result {
     Ok(Response::builder(200)
         .body(tide::Body::from_json(&activity)?)
         .build())
+}
+
+pub async fn get_activity(id: i32, pool: &sqlx::PgPool) -> Result<Activity, Box<dyn Error>> {
+    let query = "SELECT * FROM activities WHERE id = $1";
+
+    let row = sqlx::query(query).bind(id).fetch_one(pool).await?;
+
+    let activity = Activity {
+        id: row.get("id"),
+        expenses: Vec::new(),
+        users: Vec::new(),
+    };
+
+    Ok(activity)
 }

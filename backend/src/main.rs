@@ -33,6 +33,7 @@ struct Balance {
 #[derive(Debug, Serialize, Deserialize)]
 struct User {
     name: String,
+    activity: Activity,
 }
 
 #[async_std::main]
@@ -43,7 +44,7 @@ async fn main() -> tide::Result<()> {
     sqlx::migrate!("./migrations").run(&pool).await?;
 
     let cors = CorsMiddleware::new()
-        .allow_methods("GET, POST, OPTIONS".parse::<HeaderValue>().unwrap())
+        .allow_methods("GET, POST, PUT, DELETE".parse::<HeaderValue>().unwrap())
         .allow_origin(Origin::from("*"))
         .allow_credentials(false);
 
@@ -52,6 +53,11 @@ async fn main() -> tide::Result<()> {
     app.at("/activity/create")
         .post(endpoints::activity::create_activity);
 
-    app.listen("127.0.0.1:8080").await?;
+    app.at("/user/create").post(endpoints::user::create_user);
+
+    println!("Server running on port 8000");
+
+    let listen_url = dotenvy::var("LISTEN_URL")?;
+    app.listen(&listen_url).await?;
     Ok(())
 }

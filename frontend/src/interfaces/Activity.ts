@@ -1,6 +1,6 @@
-import { Balance } from "./Balance";
+import Balance from "./Balance";
 
 export default interface Activity {
-    title: string;
+    id: number;
     expenses: Balance[];
 }

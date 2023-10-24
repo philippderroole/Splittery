@@ -1,3 +1,6 @@
+import ActivityProvider from "@/contexts/Activity/ActivityProvider";
+import BalanceProvider from "@/contexts/Balance/BalanceProvider";
+import UserProvider from "@/contexts/User/UserProvider";
 import type { NextPage } from "next";
 import type { AppProps } from "next/app";
 import type { ReactElement, ReactNode } from "react";
@@ -13,5 +16,13 @@ type AppPropsWithLayout = AppProps & {
 export default function App({ Component, pageProps }: AppPropsWithLayout) {
     const getLayout = Component.getLayout ?? ((page) => page);
 
-    return getLayout(<Component {...pageProps}></Component>);
+    return getLayout(
+        <ActivityProvider>
+            <BalanceProvider>
+                <UserProvider>
+                    <Component {...pageProps} />
+                </UserProvider>
+            </BalanceProvider>
+        </ActivityProvider>
+    );
 }

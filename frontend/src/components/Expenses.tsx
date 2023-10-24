@@ -37,6 +37,7 @@ export default function Expenses({
     expenses: Expense[];
     setExpenses: Function;
     users: User[];
+    setUsers: Function;
     isOpen: boolean;
     onOpen: () => void;
     onClose: () => void;

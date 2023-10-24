@@ -1,5 +1,5 @@
 import Layout from "@/components/Layout";
-import { Balance } from "@/interfaces/Balance";
+import Balance from "@/interfaces/Balance";
 import User from "@/interfaces/User";
 import {
     Button,

@@ -1,6 +1,6 @@
 import User from "./User";
 
-export interface Balance {
+export default interface Balance {
     selected: boolean;
     share: number;
     user: User;

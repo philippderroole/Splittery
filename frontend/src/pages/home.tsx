@@ -2,8 +2,9 @@ import Balances from "@/components/Balances";
 import { DarkModeSwitch } from "@/components/DarkModeSwitch";
 import Expenses from "@/components/Expenses";
 import Layout from "@/components/Layout";
-import { Balance } from "@/interfaces/Balance";
+import Balance from "@/interfaces/Balance";
 import Expense from "@/interfaces/Expense";
+import User from "@/interfaces/User";
 import {
     Flex,
     Tab,
@@ -21,6 +22,7 @@ const Home: NextPageWithLayout = () => {
     const router = useRouter();
     const id = router.query.id as string;
 
+    const [users, setUsers] = useState([] as User[]);
     const [expenses, setExpenses] = useState([] as Expense[]);
     const [balances, setBalances] = useState([] as Balance[]);
 
@@ -30,17 +32,6 @@ const Home: NextPageWithLayout = () => {
         onOpen: onOpen2,
         onClose: onClose2,
     } = useDisclosure();
-
-    function sum(myNums: number[]): number {
-        let sum = 0;
-
-        // calculate sum using forEach() method
-        myNums.forEach((num) => {
-            sum += num;
-        });
-
-        return sum;
-    }
 
     return (
         <Flex
@@ -68,7 +59,8 @@ const Home: NextPageWithLayout = () => {
                         <Expenses
                             expenses={expenses}
                             setExpenses={setExpenses}
-                            users={balances.map((balance) => balance.user)}
+                            users={users}
+                            setUsers={setUsers}
                             isOpen={isOpen}
                             onOpen={onOpen}
                             onClose={onClose}></Expenses>

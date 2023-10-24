@@ -1,4 +1,9 @@
-import { Balance } from "@/interfaces/Balance";
+import useActivities from "@/contexts/Activity/useActivities";
+import useBalances from "@/contexts/Balance/useBalances";
+import useUsers from "@/contexts/User/useUsers";
+import Balance from "@/interfaces/Balance";
+import User from "@/interfaces/User";
+import { UserService } from "@/services/user-service";
 import { SmallCloseIcon } from "@chakra-ui/icons";
 import {
     Button,
@@ -24,8 +29,6 @@ import {
 import { ReactElement, useState } from "react";
 
 export default function Balances({
-    balances,
-    setBalances,
     isOpen,
     onOpen,
     onClose,
@@ -36,6 +39,9 @@ export default function Balances({
     onOpen: () => void;
     onClose: () => void;
 }): ReactElement {
+    const { users, setUsers } = useUsers();
+    const { balances, setBalances } = useBalances();
+    const { activity, setActivity } = useActivities();
     const [username, setUsername] = useState("");
 
     function isUsernameValid(username: string): boolean {
@@ -131,7 +137,6 @@ export default function Balances({
                             </FormErrorMessage>
                         </FormControl>
                     </ModalBody>
-
                     <ModalFooter>
                         <Button variant="ghost" onClick={() => onClose()}>
                             Cancel
@@ -144,11 +149,21 @@ export default function Balances({
                                     return;
                                 }
 
+                                let user: User = {
+                                    name: username,
+                                    activity: activity,
+                                };
+
+                                UserService.createUser(user).then((user) => {
+                                    setUsers([...users, user]);
+                                });
+
                                 let balance: Balance = {
                                     selected: true,
                                     share: 1,
                                     user: {
                                         name: username,
+                                        activity: activity,
                                     },
                                     amount: 0,
                                 };
