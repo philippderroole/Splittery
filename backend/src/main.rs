@@ -10,7 +10,7 @@ use tide::{
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Activity {
-    id: i32,
+    id: String,
     expenses: Vec<Expense>,
     users: Vec<User>,
 }
