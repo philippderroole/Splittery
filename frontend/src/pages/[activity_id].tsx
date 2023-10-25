@@ -59,8 +59,6 @@ const Home: NextPageWithLayout = () => {
                         <Expenses
                             expenses={expenses}
                             setExpenses={setExpenses}
-                            users={users}
-                            setUsers={setUsers}
                             isOpen={isOpen}
                             onOpen={onOpen}
                             onClose={onClose}></Expenses>
