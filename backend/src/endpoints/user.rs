@@ -15,7 +15,7 @@ pub async fn create_user(mut request: Request<sqlx::PgPool>) -> tide::Result {
 
     let _ = sqlx::query(query)
         .bind(&user.name)
-        .bind(user.activity.id)
+        .bind(&user.activity.id)
         .execute(request.state())
         .await
         .expect("failed to create user");
@@ -24,12 +24,12 @@ pub async fn create_user(mut request: Request<sqlx::PgPool>) -> tide::Result {
 
     let row = sqlx::query(query)
         .bind(&user.name)
-        .bind(user.activity.id)
+        .bind(&user.activity.id)
         .fetch_one(request.state())
         .await
         .unwrap();
 
-    let activity = activity::get_activity(user.activity.id, request.state())
+    let activity = activity::get_activity(&user.activity.id, request.state())
         .await
         .expect("failed to get activity");
 
