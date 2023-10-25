@@ -1,4 +1,4 @@
-name: Build backend image
+name: Build frontend image
 
 on:
     push:
@@ -25,7 +25,7 @@ jobs:
             - name: Build and push
               uses: docker/build-push-action@v5
               with:
-                  context: ./backend
-                  file: ./backend/Dockerfile
+                  context: ./frontend
+                  file: ./frontend/Dockerfile
                   push: ${{ GitHub.event_name != 'pull_request' }}
-                  tags: ${{ secrets.DOCKERHUB_USERNAME }}/share-expenses-backend:latest
+                  tags: ${{ secrets.DOCKERHUB_USERNAME }}/share-expenses-frontend:latest
