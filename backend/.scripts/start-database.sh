@@ -1,5 +1,6 @@
 #/bin/bash
+docker kill postgres > /dev/null 2>&1
 
-cd ..
+sleep 1
 
-docker compose up
+docker run --rm --name postgres -e POSTGRES_PASSWORD=1234 -e POSTGRES_USER=postgres -e POSTGRES_DB=share_expenses -p 5432:5432 postgres
