@@ -22,8 +22,7 @@ const Page: NextPageWithLayout = () => {
                     ActivityService.createActivity().then((activity) => {
                         setActivity(activity);
                         router.push({
-                            pathname: "/home",
-                            query: { id: activity.id },
+                            pathname: "/" + activity.id,
                         });
                     })
                 }>

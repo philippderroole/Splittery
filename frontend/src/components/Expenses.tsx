@@ -1,3 +1,5 @@
+import useActivities from "@/contexts/Activity/useActivities";
+import useUsers from "@/contexts/User/useUsers";
 import Expense from "@/interfaces/Expense";
 import User from "@/interfaces/User";
 import { SmallCloseIcon } from "@chakra-ui/icons";
@@ -29,15 +31,12 @@ import { ReactElement, useState } from "react";
 export default function Expenses({
     expenses,
     setExpenses,
-    users,
     isOpen,
     onOpen,
     onClose,
 }: {
     expenses: Expense[];
     setExpenses: Function;
-    users: User[];
-    setUsers: Function;
     isOpen: boolean;
     onOpen: () => void;
     onClose: () => void;
@@ -46,6 +45,8 @@ export default function Expenses({
     const [title, setTitle] = useState("");
     const [amount, setAmount] = useState(0);
     const [user, setUser] = useState({} as User);
+    const { users, setUsers } = useUsers();
+    const { activity, setActivity } = useActivities();
 
     function isTitleValid(title: string): boolean {
         return !isEmpty(title) && !isTooLong(title) && !isTitleTaken(title);
@@ -85,10 +86,10 @@ export default function Expenses({
                                 key={expense.title}
                                 onClick={() =>
                                     router.push({
-                                        pathname: "/expenses/" + expense.title,
-                                        query: {
-                                            title: expense.title,
-                                        },
+                                        pathname:
+                                            activity.id +
+                                            "/expenses/" +
+                                            expense.title,
                                     })
                                 }>
                                 <Td>{expense.title}</Td>
