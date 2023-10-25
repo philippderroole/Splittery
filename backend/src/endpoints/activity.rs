@@ -9,11 +9,7 @@ use crate::Activity;
 pub async fn create_activity(request: Request<sqlx::PgPool>) -> tide::Result {
     let query = "INSERT INTO activities (id) VALUES ($1)";
 
-    let id: String = rand::thread_rng()
-        .sample_iter(&Alphanumeric)
-        .take(63)
-        .map(char::from)
-        .collect();
+    let id: String = create_unique_activity_id(request.state()).await;
 
     let _ = sqlx::query(query).bind(&id).execute(request.state()).await;
 
@@ -48,4 +44,26 @@ pub async fn get_activity(id: &String, pool: &sqlx::PgPool) -> Result<Activity, 
     };
 
     Ok(activity)
+}
+
+async fn create_unique_activity_id(pool: &sqlx::PgPool) -> String {
+    let query = "SELECT * FROM activities WHERE id = $1";
+
+    loop {
+        let id: String = rand::thread_rng()
+            .sample_iter(&Alphanumeric)
+            .take(63)
+            .map(char::from)
+            .collect();
+
+        let row = sqlx::query(query)
+            .bind(&id)
+            .fetch_optional(pool)
+            .await
+            .expect("failed to get activity");
+
+        if row.is_some() {
+            return id;
+        }
+    }
 }
