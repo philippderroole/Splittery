@@ -8,29 +8,29 @@ use tide::{
     security::{CorsMiddleware, Origin},
 };
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct Activity {
     id: String,
-    expenses: Vec<Expense>,
-    users: Vec<User>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct Expense {
+    id: String,
     name: String,
     amount: f64,
-    description: String,
-    balance: Option<Balance>,
+    user: User,
+    balances: Vec<Balance>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct Balance {
-    user: User,
     is_selected: bool,
     amount: f64,
+    share: f64,
+    user: User,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct User {
     name: String,
     activity: Activity,
@@ -50,10 +50,20 @@ async fn main() -> tide::Result<()> {
 
     let mut app = tide::with_state(pool);
     app.with(cors);
+
     app.at("/activity/create")
         .post(endpoints::activity::create_activity);
+    app.at("/activity/get")
+        .post(endpoints::activity::get_activity);
 
     app.at("/user/create").post(endpoints::user::create_user);
+    app.at("/user/delete").delete(endpoints::user::delete_user);
+    app.at("/user/getAll").post(endpoints::user::get_all_users);
+
+    app.at("/expense/create")
+        .post(endpoints::expense::create_expense);
+    app.at("/expense/getAll")
+        .post(endpoints::expense::get_all_expenses);
 
     println!("Server running on port 8000");
 

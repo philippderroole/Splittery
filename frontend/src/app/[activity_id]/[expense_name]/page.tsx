@@ -1,6 +1,5 @@
-import Layout from "@/components/Layout";
-import Balance from "@/interfaces/Balance";
-import User from "@/interfaces/User";
+"use client";
+
 import {
     Button,
     Checkbox,
@@ -19,10 +18,9 @@ import {
     Tr,
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
-import { ReactElement, useEffect, useState } from "react";
-import { NextPageWithLayout } from "../../_app";
+import { useState } from "react";
 
-const ExpenseInfo: NextPageWithLayout = () => {
+export default async function ExpenseInfoPage() {
     const router = useRouter();
     const title = router.query.title as string;
 
@@ -32,19 +30,19 @@ const ExpenseInfo: NextPageWithLayout = () => {
         {
             user: { name: "Philipp" } as User,
             amount: 0,
-            selected: true,
+            is_selected: true,
             share: 1,
         },
         {
             user: { name: "Lukas" } as User,
             amount: 0,
-            selected: false,
+            is_selected: false,
             share: 1,
         },
         {
             user: { name: "Julian" } as User,
             amount: 0,
-            selected: false,
+            is_selected: false,
             share: 1,
         },
     ] as Balance[];
@@ -72,37 +70,6 @@ const ExpenseInfo: NextPageWithLayout = () => {
         return (
             Math.round((num + Number.EPSILON) * 10 * decimals) / (10 * decimals)
         );
-    }
-
-    useEffect(() => {
-        updateBalances();
-    }, [amount, balances]);
-
-    function updateBalances() {
-        const selectedBalances = balances.filter((balance) => balance.selected);
-        const selectedShareSum = sum(
-            selectedBalances.map((balance) => balance.share)
-        );
-        const amountPerShare =
-            selectedShareSum === 0 ? 0 : amount / selectedShareSum;
-
-        console.log(amountPerShare);
-
-        let newBalances = balances.map((balance) => {
-            balance.share = rountToDecimals(balance.share, 1);
-
-            if (balance.selected) {
-                balance.amount = rountToDecimals(
-                    amountPerShare * balance.share,
-                    2
-                );
-            } else {
-                balance.amount = 0;
-            }
-            return balance;
-        });
-
-        setBalances(newBalances);
     }
 
     return (
@@ -163,9 +130,9 @@ const ExpenseInfo: NextPageWithLayout = () => {
                                 <Td>{balance.user.name}</Td>
                                 <Td textAlign="right">
                                     <Checkbox
-                                        isChecked={balance.selected}
+                                        isChecked={balance.is_selected}
                                         onChange={(event) => {
-                                            balance.selected =
+                                            balance.is_selected =
                                                 event.target.checked;
                                         }}></Checkbox>
                                 </Td>
@@ -209,10 +176,4 @@ const ExpenseInfo: NextPageWithLayout = () => {
             </TableContainer>
         </Flex>
     );
-};
-
-ExpenseInfo.getLayout = function getLayout(page: ReactElement) {
-    return <Layout>{page}</Layout>;
-};
-
-export default ExpenseInfo;
+}

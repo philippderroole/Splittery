@@ -1,69 +1,112 @@
-use std::error::Error;
-
 use sqlx::Row;
+use tide::{Request, Response};
 
-use crate::Expense;
+use crate::{endpoints::create_id, Activity, Expense, User};
 
-pub async fn create_expense(expense: &Expense, pool: &sqlx::PgPool) -> Result<(), Box<dyn Error>> {
-    let query = "INSERT INTO expenses (name, amount, description) VALUES ($1, $2, $3)";
+use super::balance::{create_balances, get_balances_by_expense_id};
 
-    sqlx::query(query)
+pub async fn create_expense(mut request: Request<sqlx::PgPool>) -> tide::Result {
+    let expense = request
+        .body_json::<Expense>()
+        .await
+        .expect("failed to parse expense");
+
+    let balances = expense.balances;
+
+    let id = create_unique_expense_id(&request.state()).await;
+
+    let query = "INSERT INTO expenses (id, name, amount, activity_id, user_name) VALUES ($1, $2, $3, $4, $5)";
+
+    let _ = sqlx::query(query)
+        .bind(&id)
         .bind(&expense.name)
-        .bind(expense.amount)
-        .bind(&expense.description)
-        .execute(pool)
-        .await?;
+        .bind(&expense.amount)
+        .bind(&expense.user.activity.id)
+        .bind(&expense.user.name)
+        .execute(request.state())
+        .await
+        .expect("failed to create expense");
 
-    Ok(())
-}
-
-pub async fn update_expense(
-    expense: &Expense,
-    pool: &sqlx::PgPool,
-) -> Result<Expense, Box<dyn Error>> {
-    let query = "UPDATE expenses SET amount = $1, description = $2 WHERE name = $3";
+    let query = "SELECT * FROM expenses WHERE id = $1";
 
     let row = sqlx::query(query)
-        .bind(expense.amount)
-        .bind(&expense.description)
-        .bind(&expense.name)
-        .fetch_one(pool)
-        .await?;
+        .bind(&id)
+        .fetch_one(request.state())
+        .await
+        .unwrap();
 
-    let expense = Expense {
+    let mut expense = Expense {
+        id: row.get("id"),
         name: row.get("name"),
         amount: row.get("amount"),
-        description: row.get("description"),
-        balance: todo!(),
+        user: User {
+            name: row.get("user_name"),
+            activity: Activity {
+                id: row.get("activity_id"),
+            },
+        },
+        balances: Vec::new(),
     };
 
-    Ok(expense)
+    expense.balances = create_balances(&balances, &expense, &request).await;
+
+    Ok(Response::builder(200)
+        .body(tide::Body::from_json(&expense)?)
+        .build())
 }
 
-pub async fn delete_expense(name: &str, pool: &sqlx::PgPool) -> Result<(), Box<dyn Error>> {
-    let query = "DELETE FROM expenses WHERE name = $1";
+pub async fn get_all_expenses(mut request: Request<sqlx::PgPool>) -> tide::Result {
+    let activity = request
+        .body_json::<Activity>()
+        .await
+        .expect("failed to parse activity");
 
-    sqlx::query(query).bind(name).execute(pool).await?;
+    let query = "SELECT * FROM expenses WHERE activity_id = $1";
 
-    Ok(())
-}
+    let rows = sqlx::query(query)
+        .bind(&activity.id)
+        .fetch_all(request.state())
+        .await
+        .expect("failed to get expenses");
 
-pub async fn get_all_expenses(
-    name: &str,
-    pool: &sqlx::PgPool,
-) -> Result<Vec<Expense>, Box<dyn Error>> {
-    let query = "SELECT * FROM expenses WHERE name = $1";
+    let mut expenses = Vec::new();
 
-    let rows = sqlx::query(query).bind(name).fetch_all(pool).await?;
-    let expenses = rows
-        .iter()
-        .map(|row| Expense {
+    for row in rows {
+        let expense = Expense {
+            id: row.get("id"),
             name: row.get("name"),
             amount: row.get("amount"),
-            description: row.get("description"),
-            balance: None,
-        })
-        .collect::<Vec<Expense>>();
+            user: User {
+                name: row.get("user_name"),
+                activity: activity.clone(),
+            },
+            balances: get_balances_by_expense_id(&row.get("id"), &request).await,
+        };
 
-    Ok(expenses)
+        expenses.push(expense);
+    }
+
+    Ok(Response::builder(200)
+        .body(tide::Body::from_json(&expenses)?)
+        .build())
+}
+
+async fn create_unique_expense_id(pool: &sqlx::PgPool) -> String {
+    let query = "SELECT * FROM expenses WHERE id = $1";
+
+    loop {
+        let id = create_id(63);
+
+        let row = sqlx::query(query)
+            .bind(&id)
+            .fetch_optional(pool)
+            .await
+            .expect("failed to get expense");
+
+        if row.is_none() {
+            return id;
+        }
+
+        println!("id already exists, trying again")
+    }
 }

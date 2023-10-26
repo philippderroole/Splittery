@@ -1,10 +1,9 @@
 use std::error::Error;
 
-use rand::{distributions::Alphanumeric, Rng};
 use sqlx::Row;
 use tide::{Request, Response};
 
-use crate::Activity;
+use crate::{endpoints::create_id, Activity};
 
 pub async fn create_activity(request: Request<sqlx::PgPool>) -> tide::Result {
     let query = "INSERT INTO activities (id) VALUES ($1)";
@@ -21,27 +20,33 @@ pub async fn create_activity(request: Request<sqlx::PgPool>) -> tide::Result {
         .await
         .expect("failed to create activity");
 
-    let activity = Activity {
-        id: row.get("id"),
-        expenses: Vec::new(),
-        users: Vec::new(),
-    };
+    let activity = Activity { id: row.get("id") };
 
     Ok(Response::builder(200)
         .body(tide::Body::from_json(&activity)?)
         .build())
 }
 
-pub async fn get_activity(id: &String, pool: &sqlx::PgPool) -> Result<Activity, Box<dyn Error>> {
+pub async fn get_activity(mut request: Request<sqlx::PgPool>) -> tide::Result {
+    let activity = request.body_json::<Activity>().await?;
+
+    let activity = get_activity_by_id(&activity.id, request.state())
+        .await
+        .expect("failed to get activity");
+
+    Ok(Response::builder(200)
+        .body(tide::Body::from_json(&activity)?)
+        .build())
+}
+pub async fn get_activity_by_id(
+    id: &String,
+    pool: &sqlx::PgPool,
+) -> Result<Activity, Box<dyn Error>> {
     let query = "SELECT * FROM activities WHERE id = $1";
 
     let row = sqlx::query(query).bind(id).fetch_one(pool).await?;
 
-    let activity = Activity {
-        id: row.get("id"),
-        expenses: Vec::new(),
-        users: Vec::new(),
-    };
+    let activity = Activity { id: row.get("id") };
 
     Ok(activity)
 }
@@ -50,11 +55,7 @@ async fn create_unique_activity_id(pool: &sqlx::PgPool) -> String {
     let query = "SELECT * FROM activities WHERE id = $1";
 
     loop {
-        let id: String = rand::thread_rng()
-            .sample_iter(&Alphanumeric)
-            .take(63)
-            .map(char::from)
-            .collect();
+        let id = create_id(63);
 
         let row = sqlx::query(query)
             .bind(&id)
@@ -62,8 +63,10 @@ async fn create_unique_activity_id(pool: &sqlx::PgPool) -> String {
             .await
             .expect("failed to get activity");
 
-        if row.is_some() {
+        if row.is_none() {
             return id;
         }
+
+        println!("id already exists, trying again")
     }
 }
