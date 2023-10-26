@@ -43,6 +43,24 @@ pub async fn create_user(mut request: Request<sqlx::PgPool>) -> tide::Result {
         .build())
 }
 
+pub async fn delete_user(mut request: Request<sqlx::PgPool>) -> tide::Result {
+    let query = "DELETE FROM users WHERE activity = $1 AND name = $2";
+
+    let user = request
+        .body_json::<User>()
+        .await
+        .expect("failed to parse user");
+
+    let _ = sqlx::query(query)
+        .bind(user.activity.id)
+        .bind(user.name)
+        .execute(request.state())
+        .await
+        .expect("failed to delete user");
+
+    Ok(Response::builder(200).build())
+}
+
 pub async fn get_all_users(mut request: Request<sqlx::PgPool>) -> tide::Result {
     let query = "SELECT * FROM users WHERE activity = $1";
 

@@ -1,6 +1,5 @@
 import { HttpService } from "@/services/HttpService";
 import {
-    IconButton,
     Table,
     TableContainer,
     Tbody,
@@ -9,6 +8,7 @@ import {
     Thead,
     Tr,
 } from "@chakra-ui/react";
+import DeleteUser from "./DeleteUser";
 
 export default async function BalancesTable({ params }) {
     const activity: Activity = {
@@ -56,9 +56,7 @@ export default async function BalancesTable({ params }) {
 
                             <Td isNumeric>{share.amount}</Td>
                             <Td textAlign="right">
-                                <IconButton
-                                    aria-label={"delete user"}
-                                    variant="unstyled"></IconButton>
+                                <DeleteUser user={share.user} />
                             </Td>
                         </Tr>
                     ))}

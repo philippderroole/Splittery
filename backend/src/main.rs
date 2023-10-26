@@ -55,6 +55,7 @@ async fn main() -> tide::Result<()> {
         .post(endpoints::activity::get_activity);
 
     app.at("/user/create").post(endpoints::user::create_user);
+    app.at("/user/delete").delete(endpoints::user::delete_user);
     app.at("/user/getAll").post(endpoints::user::get_all_users);
 
     app.at("/expense/getAll")

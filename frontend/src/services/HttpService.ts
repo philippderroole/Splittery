@@ -16,8 +16,8 @@ export abstract class HttpService {
         return await this.request("POST", route, body, cachingBehaviour);
     }
 
-    static DELETE() {
-        throw new Error("Method not implemented.");
+    static async DELETE(route: string, body?: any): Promise<any> {
+        return await this.request("DELETE", route, body);
     }
 
     private static async request(
