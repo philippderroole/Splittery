@@ -1,8 +1,11 @@
 use std::error::Error;
 
 use sqlx::Row;
+use tide::{Request, Response};
 
-use crate::Expense;
+use crate::{Activity, Expense};
+
+use super::activity;
 
 pub async fn create_expense(expense: &Expense, pool: &sqlx::PgPool) -> Result<(), Box<dyn Error>> {
     let query = "INSERT INTO expenses (name, amount, description) VALUES ($1, $2, $3)";
@@ -48,13 +51,20 @@ pub async fn delete_expense(name: &str, pool: &sqlx::PgPool) -> Result<(), Box<d
     Ok(())
 }
 
-pub async fn get_all_expenses(
-    name: &str,
-    pool: &sqlx::PgPool,
-) -> Result<Vec<Expense>, Box<dyn Error>> {
-    let query = "SELECT * FROM expenses WHERE name = $1";
+pub async fn get_all_expenses(mut request: Request<sqlx::PgPool>) -> tide::Result {
+    let query = "SELECT * FROM expenses WHERE activity = $1";
 
-    let rows = sqlx::query(query).bind(name).fetch_all(pool).await?;
+    let activity = request
+        .body_json::<Activity>()
+        .await
+        .expect("failed to parse activity");
+
+    let rows = sqlx::query(query)
+        .bind(&activity.id)
+        .fetch_all(request.state())
+        .await
+        .expect("failed to get expenses");
+
     let expenses = rows
         .iter()
         .map(|row| Expense {
@@ -65,5 +75,7 @@ pub async fn get_all_expenses(
         })
         .collect::<Vec<Expense>>();
 
-    Ok(expenses)
+    Ok(Response::builder(200)
+        .body(tide::Body::from_json(&expenses)?)
+        .build())
 }
