@@ -1,4 +1,4 @@
-use sqlx::{query, Row};
+use sqlx::Row;
 use tide::{Request, Response};
 
 use crate::{Activity, User};
@@ -6,7 +6,7 @@ use crate::{Activity, User};
 use super::activity;
 
 pub async fn create_user(mut request: Request<sqlx::PgPool>) -> tide::Result {
-    let query = "INSERT INTO users (name, activity) VALUES ($1, $2)";
+    let query = "INSERT INTO users (name, activity_id) VALUES ($1, $2)";
 
     let user = request
         .body_json::<User>()
@@ -20,7 +20,7 @@ pub async fn create_user(mut request: Request<sqlx::PgPool>) -> tide::Result {
         .await
         .expect("failed to create user");
 
-    let query = "SELECT * FROM users WHERE name = $1 AND activity = $2";
+    let query = "SELECT * FROM users WHERE name = $1 AND activity_id = $2";
 
     let row = sqlx::query(query)
         .bind(&user.name)
@@ -44,7 +44,7 @@ pub async fn create_user(mut request: Request<sqlx::PgPool>) -> tide::Result {
 }
 
 pub async fn delete_user(mut request: Request<sqlx::PgPool>) -> tide::Result {
-    let query = "DELETE FROM users WHERE activity = $1 AND name = $2";
+    let query = "DELETE FROM users WHERE activity_id = $1 AND name = $2";
 
     let user = request
         .body_json::<User>()
@@ -62,7 +62,7 @@ pub async fn delete_user(mut request: Request<sqlx::PgPool>) -> tide::Result {
 }
 
 pub async fn get_all_users(mut request: Request<sqlx::PgPool>) -> tide::Result {
-    let query = "SELECT * FROM users WHERE activity = $1";
+    let query = "SELECT * FROM users WHERE activity_id = $1";
 
     let activity = request
         .body_json::<Activity>()

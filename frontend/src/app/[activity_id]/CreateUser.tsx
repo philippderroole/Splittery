@@ -13,14 +13,16 @@ import {
     ModalFooter,
     ModalHeader,
     useDisclosure,
+    useToast,
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function CreateUser({ params }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     const router = useRouter();
+    const toast = useToast();
 
     const activity: Activity = {
         id: Array.isArray(params.activity_id)
@@ -28,56 +30,80 @@ export default function CreateUser({ params }) {
             : params.activity_id,
     };
 
-    const balances = [] as Balance[];
-
     const [username, setUsername] = useState("");
+    const [isUsernameValid, setIsUsernameValid] = useState<Validity>({
+        message: "Username is empty.",
+    } as Validity);
 
-    function isUsernameValid(username: string): boolean {
-        return (
-            !isUsernameTaken(username) &&
-            !isEmpty(username) &&
-            !isTooLong(username)
-        );
-    }
+    useEffect(() => {
+        if (username.length === 0 || username === undefined) {
+            setIsUsernameValid({
+                valid: false,
+                message: "Username is empty.",
+            });
+            return;
+        }
+        if (username.length > 32) {
+            setIsUsernameValid({
+                valid: false,
+                message: "Username is too long. (max 32 characters)",
+            });
+            return;
+        }
 
-    function isUsernameTaken(username: string): boolean {
-        return balances.some((expense) => expense.user.name === username);
-    }
-
-    function isEmpty(username: string): boolean {
-        return username.length === 0;
-    }
-
-    function isTooLong(username: string): boolean {
-        return username.length > 32;
-    }
+        setIsUsernameValid({
+            valid: true,
+            message: "",
+        });
+    }, [username]);
 
     const create = async () => {
-        let user = {
+        if (!isUsernameValid.valid) {
+            return;
+        }
+
+        let user: User = {
             name: username,
             activity: activity,
-        } as User;
+        };
 
-        await HttpService.POST("/user/create", user);
+        let result = HttpService.POST("/user/create", user);
 
-        router.refresh();
-        setUsername("");
-        onClose();
+        result
+            .then(() => {
+                toast({
+                    title: "User created.",
+                    description: `${username} was created successfully.`,
+                    status: "success",
+                    duration: 5000,
+                    isClosable: true,
+                    position: "bottom",
+                });
+
+                setUsername("");
+                onClose();
+                router.refresh();
+            })
+            .catch(() => {
+                toast({
+                    title: "Failed to create user.",
+                    description: `User ${username} was not created.`,
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                    position: "bottom",
+                });
+            });
     };
 
     return (
-        <div>
-            <Button
-                onClick={() => {
-                    onOpen();
-                }}>
-                Add User
-            </Button>
+        <>
+            <Button onClick={() => onOpen()}>Add User</Button>
             <Modal isOpen={isOpen} onClose={onClose}>
                 <ModalContent>
                     <ModalHeader>Add User</ModalHeader>
                     <ModalBody>
-                        <FormControl isInvalid={!isUsernameValid(username)}>
+                        <FormControl isInvalid={!isUsernameValid.valid}>
                             <FormLabel>Username</FormLabel>
                             <Input
                                 type="text"
@@ -87,13 +113,7 @@ export default function CreateUser({ params }) {
                                 }
                             />
                             <FormErrorMessage>
-                                {isUsernameTaken(username)
-                                    ? "Username is taken"
-                                    : isEmpty(username)
-                                    ? "Username is empty"
-                                    : isTooLong(username)
-                                    ? "Username is too long"
-                                    : ""}
+                                {isUsernameValid.message}
                             </FormErrorMessage>
                         </FormControl>
                     </ModalBody>
@@ -110,6 +130,6 @@ export default function CreateUser({ params }) {
                     </ModalFooter>
                 </ModalContent>
             </Modal>
-        </div>
+        </>
     );
 }

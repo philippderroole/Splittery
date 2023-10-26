@@ -4,20 +4,26 @@ type Activity = {
 
 type Balance = {
     user: User;
-    selected: boolean;
+    is_selected: boolean;
     share: number;
     amount: number;
 };
 
 type Expense = {
+    id: string;
     activity: Activity;
-    title: string;
+    name: string;
     amount: number;
     user: User;
-    balance: Balance[];
+    balances: Balance[];
 };
 
 type User = {
     activity: Activity;
     name: string;
+};
+
+type Validity = {
+    valid: boolean;
+    message: string;
 };

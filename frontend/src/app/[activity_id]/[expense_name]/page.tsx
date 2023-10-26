@@ -30,19 +30,19 @@ export default async function ExpenseInfoPage() {
         {
             user: { name: "Philipp" } as User,
             amount: 0,
-            selected: true,
+            is_selected: true,
             share: 1,
         },
         {
             user: { name: "Lukas" } as User,
             amount: 0,
-            selected: false,
+            is_selected: false,
             share: 1,
         },
         {
             user: { name: "Julian" } as User,
             amount: 0,
-            selected: false,
+            is_selected: false,
             share: 1,
         },
     ] as Balance[];
@@ -130,9 +130,9 @@ export default async function ExpenseInfoPage() {
                                 <Td>{balance.user.name}</Td>
                                 <Td textAlign="right">
                                     <Checkbox
-                                        isChecked={balance.selected}
+                                        isChecked={balance.is_selected}
                                         onChange={(event) => {
-                                            balance.selected =
+                                            balance.is_selected =
                                                 event.target.checked;
                                         }}></Checkbox>
                                 </Td>

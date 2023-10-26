@@ -8,35 +8,65 @@ import {
     Thead,
     Tr,
 } from "@chakra-ui/react";
+
+import Utils from "@/lib/utils";
 import DeleteUser from "./DeleteUser";
 
 export default async function BalancesTable({ params }) {
+    type UserBalances = {
+        user: User;
+        amount: number;
+    };
+
     const activity: Activity = {
         id: Array.isArray(params.activity_id)
             ? params.activity_id[0]
             : params.activity_id,
     };
 
-    const overallBalances: Balance[] = await getOverallBalances(activity);
+    const overallBalances: UserBalances[] = await getOverallBalances(activity);
 
     async function getAllUsers(activity: Activity): Promise<User[]> {
         return HttpService.POST("/user/getAll", activity, "no-store");
     }
 
+    async function getExpenses(activity: Activity): Promise<Expense[]> {
+        return HttpService.POST("/expense/getAll", activity, "no-store");
+    }
+
     async function getOverallBalances(activity: Activity) {
         let users: User[] = await getAllUsers(activity);
-        let overallBalances: Balance[] = [];
+
+        let userBalances: UserBalances[] = [];
 
         users.forEach((user) => {
-            overallBalances.push({
+            userBalances.push({
                 user: user,
                 amount: 0,
-                selected: false,
-                share: 1,
             });
         });
 
-        return overallBalances;
+        let expenses: Expense[] = await getExpenses(activity);
+
+        let balances = expenses.flatMap((expense) => expense.balances);
+
+        balances.forEach((balance) => {
+            let overallBalance = userBalances.find(
+                (userBalance) =>
+                    userBalance.user.name === balance.user.name &&
+                    userBalance.user.activity.id === balance.user.activity.id
+            );
+
+            if (overallBalance) {
+                overallBalance.amount += balance.amount;
+            }
+        });
+
+        userBalances.forEach((userBalance) => {
+            userBalance.amount = Utils.rountToDecimals(userBalance.amount, 2);
+        });
+
+        return userBalances;
     }
 
     return (

@@ -13,22 +13,24 @@ struct Activity {
     id: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct Expense {
+    id: String,
     name: String,
     amount: f64,
-    description: String,
-    balance: Option<Balance>,
+    user: User,
+    balances: Vec<Balance>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct Balance {
-    user: User,
     is_selected: bool,
     amount: f64,
+    share: f64,
+    user: User,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct User {
     name: String,
     activity: Activity,
@@ -58,6 +60,8 @@ async fn main() -> tide::Result<()> {
     app.at("/user/delete").delete(endpoints::user::delete_user);
     app.at("/user/getAll").post(endpoints::user::get_all_users);
 
+    app.at("/expense/create")
+        .post(endpoints::expense::create_expense);
     app.at("/expense/getAll")
         .post(endpoints::expense::get_all_expenses);
 

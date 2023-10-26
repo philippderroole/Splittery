@@ -1,10 +1,9 @@
 use std::error::Error;
 
-use rand::{distributions::Alphanumeric, Rng};
 use sqlx::Row;
 use tide::{Request, Response};
 
-use crate::Activity;
+use crate::{endpoints::create_id, Activity};
 
 pub async fn create_activity(request: Request<sqlx::PgPool>) -> tide::Result {
     let query = "INSERT INTO activities (id) VALUES ($1)";
@@ -56,11 +55,7 @@ async fn create_unique_activity_id(pool: &sqlx::PgPool) -> String {
     let query = "SELECT * FROM activities WHERE id = $1";
 
     loop {
-        let id: String = rand::thread_rng()
-            .sample_iter(&Alphanumeric)
-            .take(63)
-            .map(char::from)
-            .collect();
+        let id = create_id(63);
 
         let row = sqlx::query(query)
             .bind(&id)

@@ -1,6 +1,5 @@
-import { SmallCloseIcon } from "@chakra-ui/icons";
+import { HttpService } from "@/services/HttpService";
 import {
-    IconButton,
     Table,
     TableContainer,
     Tbody,
@@ -9,44 +8,45 @@ import {
     Thead,
     Tr,
 } from "@chakra-ui/react";
+import DeleteExpense from "./DeleteExpense";
 
-export default function ExpensesTable({ params }) {
-    const expenses: Expense[] = [] as Expense[];
+export default async function ExpensesTable({ params }) {
+    const activity: Activity = {
+        id: Array.isArray(params.activity_id)
+            ? params.activity_id[0]
+            : params.activity_id,
+    };
 
-    async function deleteExpense(expense: Expense) {}
+    const expenses: Expense[] = await getAllExpenses(activity);
+
+    async function getAllExpenses(activity: Activity): Promise<Expense[]> {
+        return HttpService.POST("/expense/getAll", activity, "no-store");
+    }
 
     return (
-        <div>
-            <TableContainer>
-                <Table variant="simple">
-                    <Thead>
-                        <Tr>
-                            <Th>Title</Th>
-                            <Th isNumeric>Amount</Th>
-                            <Th>Buyer</Th>
-                            <Th></Th>
+        <TableContainer>
+            <Table variant="simple">
+                <Thead>
+                    <Tr>
+                        <Th>Title</Th>
+                        <Th isNumeric>Amount</Th>
+                        <Th>Buyer</Th>
+                        <Th></Th>
+                    </Tr>
+                </Thead>
+                <Tbody>
+                    {expenses?.map((expense) => (
+                        <Tr key={expense.name}>
+                            <Td>{expense.name}</Td>
+                            <Td isNumeric>{expense.amount}</Td>
+                            <Td>{expense.user?.name}</Td>
+                            <Td textAlign="right">
+                                <DeleteExpense expense={expense} />
+                            </Td>
                         </Tr>
-                    </Thead>
-                    <Tbody>
-                        {expenses?.map((expense) => (
-                            <Tr key={expense.title} onClick={() => {}}>
-                                <Td>{expense.title}</Td>
-                                <Td isNumeric>{expense.amount}</Td>
-                                <Td>{expense.user.name}</Td>
-                                <Td textAlign="right">
-                                    <IconButton
-                                        aria-label={"delete expense"}
-                                        icon={<SmallCloseIcon></SmallCloseIcon>}
-                                        variant="unstyled"
-                                        onClick={() => {
-                                            deleteExpense(expense);
-                                        }}></IconButton>
-                                </Td>
-                            </Tr>
-                        ))}
-                    </Tbody>
-                </Table>
-            </TableContainer>
-        </div>
+                    ))}
+                </Tbody>
+            </Table>
+        </TableContainer>
     );
 }

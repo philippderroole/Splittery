@@ -65,9 +65,9 @@ export default function EditExpense({ params, isOpen, onOpen, onClose }) {
                                         <Td>{balance.user.name}</Td>
                                         <Td textAlign="right">
                                             <Checkbox
-                                                isChecked={balance.selected}
+                                                isChecked={balance.is_selected}
                                                 onChange={(event) => {
-                                                    balance.selected =
+                                                    balance.is_selected =
                                                         event.target.checked;
                                                 }}></Checkbox>
                                         </Td>

@@ -43,12 +43,8 @@ export abstract class HttpService {
             body: JSON.stringify(body),
         })
             .then((response) => {
-                if (!response.ok) {
-                    Promise.reject(response);
-                }
                 return response.json();
             })
-            .catch((response) => console.log(response))
             .then((data) => {
                 console.log("Response: " + JSON.stringify(data));
                 return data;

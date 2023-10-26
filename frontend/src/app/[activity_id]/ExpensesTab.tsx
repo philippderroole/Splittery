@@ -1,21 +1,20 @@
-"use client";
-
-import { Button, Flex, useDisclosure } from "@chakra-ui/react";
+import { HttpService } from "@/services/HttpService";
+import { Flex } from "@chakra-ui/react";
 import CreateExpense from "./CreateExpense";
-import EditExpense from "./EditExpense";
 import ExpensesTable from "./ExpensesTable";
 
-export default function ExpensesTab({ params }) {
-    const {
-        isOpen: isOpenCreateExpense,
-        onOpen: onOpenCreateExpense,
-        onClose: onCloseCreateExpense,
-    } = useDisclosure();
-    const {
-        isOpen: isOpenEditExpense,
-        onOpen: onOpenEditExpense,
-        onClose: onCloseEditExpense,
-    } = useDisclosure();
+export default async function ExpensesTab({ params }) {
+    const activity: Activity = {
+        id: Array.isArray(params.activity_id)
+            ? params.activity_id[0]
+            : params.activity_id,
+    };
+
+    const users: User[] = await getAllUsers(activity);
+
+    async function getAllUsers(activity: Activity): Promise<User[]> {
+        return HttpService.POST("/user/getAll", activity, "no-store");
+    }
 
     return (
         <div>
@@ -25,23 +24,8 @@ export default function ExpensesTab({ params }) {
                 justify="center"
                 align="center"
                 paddingTop="1vb">
-                <Button
-                    onClick={() => {
-                        onOpenCreateExpense();
-                    }}>
-                    Add Expense
-                </Button>
+                <CreateExpense params={params} users={users} />
             </Flex>
-            <CreateExpense
-                params={params}
-                isOpen={isOpenCreateExpense}
-                onOpen={onOpenCreateExpense}
-                onClose={onCloseCreateExpense}></CreateExpense>
-            <EditExpense
-                params={params}
-                isOpen={isOpenEditExpense}
-                onOpen={onOpenEditExpense}
-                onClose={onCloseEditExpense}></EditExpense>
         </div>
     );
 }

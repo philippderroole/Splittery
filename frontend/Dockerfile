@@ -16,6 +16,8 @@ COPY . .
 # Build the application
 RUN npm run build
 
+ENV NEXT_PUBLIC_API_URL="http://193.31.27.94:8000/"
+
 # Expose port 3000 for the application
 EXPOSE 3000
 
