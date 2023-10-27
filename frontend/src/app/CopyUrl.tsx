@@ -11,12 +11,15 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import { useParams } from "next/navigation";
-import { CSSProperties } from "react";
+import { CSSProperties, useEffect, useState } from "react";
 
 export default function CopyUrl(props?: CSSProperties) {
     const { onCopy, value, setValue, hasCopied } = useClipboard("");
+
     const toast = useToast();
     const params = useParams();
+
+    const [url, setUrl] = useState("");
 
     function copyUrl() {
         toast({
@@ -30,7 +33,11 @@ export default function CopyUrl(props?: CSSProperties) {
         onCopy();
     }
 
-    const url = window.location.href;
+    useEffect(() => {
+        if (params.activity_id === undefined) return;
+
+        setUrl(window?.location.href);
+    });
 
     return (
         <>
