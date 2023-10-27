@@ -43,26 +43,22 @@ async fn main() -> tide::Result<()> {
 
     sqlx::migrate!("./migrations").run(&pool).await?;
 
-    let cors = CorsMiddleware::new()
-        .allow_methods("GET, POST, PUT, DELETE".parse::<HeaderValue>().unwrap())
-        .allow_origin(Origin::from("*"))
-        .allow_credentials(false);
-
     let mut app = tide::with_state(pool);
-    app.with(cors);
-
-    app.at("/activity/create")
+    app.at("/api/activity/create")
         .post(endpoints::activity::create_activity);
-    app.at("/activity/get")
+    app.at("/api/activity/get")
         .post(endpoints::activity::get_activity);
 
-    app.at("/user/create").post(endpoints::user::create_user);
-    app.at("/user/delete").delete(endpoints::user::delete_user);
-    app.at("/user/getAll").post(endpoints::user::get_all_users);
+    app.at("/api/user/create")
+        .post(endpoints::user::create_user);
+    app.at("/api/user/delete")
+        .delete(endpoints::user::delete_user);
+    app.at("/api/user/getAll")
+        .post(endpoints::user::get_all_users);
 
-    app.at("/expense/create")
+    app.at("/api/expense/create")
         .post(endpoints::expense::create_expense);
-    app.at("/expense/getAll")
+    app.at("/api/expense/getAll")
         .post(endpoints::expense::get_all_expenses);
 
     println!("Server running on port 8000");
