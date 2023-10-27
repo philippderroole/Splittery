@@ -55,7 +55,7 @@ async fn create_unique_activity_id(pool: &sqlx::PgPool) -> String {
     let query = "SELECT * FROM activities WHERE id = $1";
 
     loop {
-        let id = create_id(63);
+        let id = create_id(15);
 
         let row = sqlx::query(query)
             .bind(&id)
