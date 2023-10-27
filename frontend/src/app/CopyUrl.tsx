@@ -11,8 +11,9 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import { useParams } from "next/navigation";
+import { CSSProperties } from "react";
 
-export default function CopyUrl() {
+export default function CopyUrl(props?: CSSProperties) {
     const { onCopy, value, setValue, hasCopied } = useClipboard("");
     const toast = useToast();
     const params = useParams();
@@ -33,7 +34,11 @@ export default function CopyUrl() {
 
     return (
         <>
-            <Flex direction="row" position="fixed" top="2.37vb" left="4.3vb">
+            <Flex
+                direction="row"
+                style={props}
+                width="fit-content"
+                hidden={params.activity_id === undefined}>
                 <InputGroup>
                     <Input
                         value={url}

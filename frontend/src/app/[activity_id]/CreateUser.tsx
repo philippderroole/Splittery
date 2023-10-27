@@ -85,6 +85,11 @@ export default function CreateUser({ params }) {
                 router.refresh();
             })
             .catch(() => {
+                setIsUsernameValid({
+                    valid: false,
+                    message: "Username is already taken.",
+                });
+
                 toast({
                     title: "Failed to create user.",
                     description: `User ${username} was not created.`,
@@ -103,19 +108,25 @@ export default function CreateUser({ params }) {
                 <ModalContent>
                     <ModalHeader>Add User</ModalHeader>
                     <ModalBody>
-                        <FormControl isInvalid={!isUsernameValid.valid}>
-                            <FormLabel>Username</FormLabel>
-                            <Input
-                                type="text"
-                                value={username}
-                                onChange={(event) =>
-                                    setUsername(event.target.value)
-                                }
-                            />
-                            <FormErrorMessage>
-                                {isUsernameValid.message}
-                            </FormErrorMessage>
-                        </FormControl>
+                        <form
+                            onSubmit={(event) => {
+                                event.preventDefault();
+                                create();
+                            }}>
+                            <FormControl isInvalid={!isUsernameValid.valid}>
+                                <FormLabel>Username</FormLabel>
+                                <Input
+                                    type="text"
+                                    value={username}
+                                    onChange={(event) =>
+                                        setUsername(event.target.value)
+                                    }
+                                />
+                                <FormErrorMessage>
+                                    {isUsernameValid.message}
+                                </FormErrorMessage>
+                            </FormControl>
+                        </form>
                     </ModalBody>
                     <ModalFooter>
                         <Button variant="ghost" onClick={() => onClose()}>
