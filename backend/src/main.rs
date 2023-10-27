@@ -3,10 +3,6 @@
 mod endpoints;
 
 use serde::{Deserialize, Serialize};
-use tide::{
-    http::headers::HeaderValue,
-    security::{CorsMiddleware, Origin},
-};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Activity {
