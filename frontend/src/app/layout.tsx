@@ -4,11 +4,14 @@ import {
     Flex,
     Grid,
     GridItem,
+    Hide,
+    Show,
 } from "@chakra-ui/react";
 import AppTitle from "./AppTitle";
 import CopyUrl from "./CopyUrl";
 import { DarkModeSwitch } from "./DarkModeSwitch";
 import IconBar from "./IconBar";
+import ShareActivity from "./ShareActivity";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
@@ -27,7 +30,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                                 direction="row"
                                 alignItems="center"
                                 justifyContent="left">
-                                <CopyUrl />
+                                <Hide below="70em">
+                                    <CopyUrl />
+                                </Hide>
+                                <Show below="70em">
+                                    <ShareActivity></ShareActivity>
+                                </Show>
                             </Flex>
                         </GridItem>
                         <GridItem>
@@ -44,7 +52,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                                 alignItems="center"
                                 justifyContent="right"
                                 gap="0.5vw">
-                                <IconBar />
+                                <Hide below="35em">
+                                    <IconBar />
+                                </Hide>
                                 <DarkModeSwitch />
                             </Flex>
                         </GridItem>
