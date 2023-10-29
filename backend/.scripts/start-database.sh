@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 docker kill postgres > /dev/null 2>&1
 
 sleep 1
