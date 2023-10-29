@@ -12,14 +12,14 @@ export default function ShareActivity() {
         shareOnMobile({
             text: "Let's share expenses!",
             url: window.location.href,
-            title: "Share Expenses",
+            title: "Splittery",
         });
     }
 
     return (
         <>
             <IconButton
-                aria-label={"copy url to clipboard"}
+                aria-label={"share activity"}
                 colorScheme="green"
                 icon={<BsFillShareFill />}
                 hidden={params.activity_id === undefined}
