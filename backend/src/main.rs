@@ -3,10 +3,6 @@
 mod endpoints;
 
 use serde::{Deserialize, Serialize};
-use tide::{
-    http::headers::HeaderValue,
-    security::{CorsMiddleware, Origin},
-};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Activity {
@@ -45,28 +41,18 @@ async fn main() -> tide::Result<()> {
 
     let mut app = tide::with_state(pool);
 
-    let cors = CorsMiddleware::new()
-        .allow_methods("GET, POST, PUT, DELETE".parse::<HeaderValue>().unwrap())
-        .allow_origin(Origin::from("*"))
-        .allow_credentials(false);
-
-    app.with(cors);
-
-    app.at("/api/activity/create")
+    app.at("/activity/create")
         .post(endpoints::activity::create_activity);
-    app.at("/api/activity/get")
+    app.at("/activity/get")
         .post(endpoints::activity::get_activity);
 
-    app.at("/api/user/create")
-        .post(endpoints::user::create_user);
-    app.at("/api/user/delete")
-        .delete(endpoints::user::delete_user);
-    app.at("/api/user/getAll")
-        .post(endpoints::user::get_all_users);
+    app.at("/user/create").post(endpoints::user::create_user);
+    app.at("/user/delete").delete(endpoints::user::delete_user);
+    app.at("/user/getAll").post(endpoints::user::get_all_users);
 
-    app.at("/api/expense/create")
+    app.at("/expense/create")
         .post(endpoints::expense::create_expense);
-    app.at("/api/expense/getAll")
+    app.at("/expense/getAll")
         .post(endpoints::expense::get_all_expenses);
 
     println!("Server running on port 8000");
