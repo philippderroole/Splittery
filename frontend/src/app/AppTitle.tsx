@@ -6,7 +6,7 @@ export default async function AppTitle() {
         <>
             <Link href="/">
                 <Heading size={["lg", "2xl"]} whiteSpace="nowrap">
-                    Share Expenses
+                    Splittery
                 </Heading>
             </Link>
         </>
