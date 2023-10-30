@@ -13,10 +13,6 @@ export default function CreateActivity() {
 
     return (
         <Button
-            position="absolute"
-            top={["40vh", "40vh"]}
-            left="50%"
-            transform="translate(-50%, 0)"
             size="lg"
             onClick={() =>
                 createActivity().then((activity) => {
