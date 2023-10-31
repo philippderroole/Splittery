@@ -91,6 +91,18 @@ pub async fn get_all_expenses(mut request: Request<sqlx::PgPool>) -> tide::Resul
         .build())
 }
 
+pub async fn get_expense_count(request: Request<sqlx::PgPool>) -> tide::Result {
+    let query = "SELECT COUNT(*) FROM expenses";
+
+    let row = sqlx::query(query).fetch_one(request.state()).await?;
+
+    let amount = row.get::<i64, usize>(0);
+
+    Ok(Response::builder(200)
+        .body(tide::Body::from_json(&amount)?)
+        .build())
+}
+
 async fn create_unique_expense_id(pool: &sqlx::PgPool) -> String {
     let query = "SELECT * FROM expenses WHERE id = $1";
 

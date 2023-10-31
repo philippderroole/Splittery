@@ -5,7 +5,7 @@ export abstract class HttpService {
         route: string,
         cachingBehaviour?: RequestCache
     ): Promise<any> {
-        return await this.request("GET", route, cachingBehaviour);
+        return await this.request("GET", route, undefined, cachingBehaviour);
     }
 
     static async POST(

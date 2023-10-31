@@ -45,15 +45,20 @@ async fn main() -> tide::Result<()> {
         .post(endpoints::activity::create_activity);
     app.at("/activity/get")
         .post(endpoints::activity::get_activity);
+    app.at("/activity/count")
+        .get(endpoints::activity::get_activity_count);
 
     app.at("/user/create").post(endpoints::user::create_user);
     app.at("/user/delete").delete(endpoints::user::delete_user);
     app.at("/user/getAll").post(endpoints::user::get_all_users);
+    app.at("/user/count").get(endpoints::user::get_user_count);
 
     app.at("/expense/create")
         .post(endpoints::expense::create_expense);
     app.at("/expense/getAll")
         .post(endpoints::expense::get_all_expenses);
+    app.at("/expense/count")
+        .get(endpoints::expense::get_expense_count);
 
     println!("Server running on port 8000");
 

@@ -49,7 +49,7 @@ export default function CopyUrl(props?: CSSProperties) {
                 <InputGroup>
                     <Input
                         value={url}
-                        fontSize="sm"
+                        fontSize="md"
                         width="33vb"
                         variant="filled"
                         isReadOnly

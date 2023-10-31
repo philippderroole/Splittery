@@ -83,8 +83,7 @@ export default async function BalancesTable({ params }) {
                     {overallBalances.map((share) => (
                         <Tr key={share.user.name}>
                             <Td>{share.user.name}</Td>
-
-                            <Td isNumeric>{share.amount}</Td>
+                            <Td isNumeric>{share.amount} €</Td>
                             <Td textAlign="right">
                                 <DeleteUser user={share.user} />
                             </Td>
