@@ -38,6 +38,7 @@ pub async fn get_activity(mut request: Request<sqlx::PgPool>) -> tide::Result {
         .body(tide::Body::from_json(&activity)?)
         .build())
 }
+
 pub async fn get_activity_by_id(
     id: &String,
     pool: &sqlx::PgPool,
@@ -49,6 +50,18 @@ pub async fn get_activity_by_id(
     let activity = Activity { id: row.get("id") };
 
     Ok(activity)
+}
+
+pub async fn get_activity_count(request: Request<sqlx::PgPool>) -> tide::Result {
+    let query = "SELECT COUNT(*) FROM activities";
+
+    let row = sqlx::query(query).fetch_one(request.state()).await?;
+
+    let amount = row.get::<i64, usize>(0);
+
+    Ok(Response::builder(200)
+        .body(tide::Body::from_json(&amount)?)
+        .build())
 }
 
 async fn create_unique_activity_id(pool: &sqlx::PgPool) -> String {

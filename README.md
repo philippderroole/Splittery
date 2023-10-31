@@ -1,1 +1,1 @@
-# ShareExpenses
+# Splittery

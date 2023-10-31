@@ -87,3 +87,18 @@ pub async fn get_all_users(mut request: Request<sqlx::PgPool>) -> tide::Result {
         .body(tide::Body::from_json(&users)?)
         .build())
 }
+
+pub async fn get_user_count(request: Request<sqlx::PgPool>) -> tide::Result {
+    let query = "SELECT COUNT(*) FROM users";
+
+    let row = sqlx::query(query)
+        .fetch_one(request.state())
+        .await
+        .expect("failed to get user count");
+
+    let amount = row.get::<i64, usize>(0);
+
+    Ok(Response::builder(200)
+        .body(tide::Body::from_json(&amount)?)
+        .build())
+}

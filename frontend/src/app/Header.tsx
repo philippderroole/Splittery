@@ -1,9 +1,28 @@
-import { Flex, Grid, GridItem, Hide, Show } from "@chakra-ui/react";
-import AppTitle from "./AppTitle";
+import {
+    Flex,
+    Grid,
+    GridItem,
+    Heading,
+    Hide,
+    Link,
+    Show,
+} from "@chakra-ui/react";
 import CopyUrl from "./CopyUrl";
 import { DarkModeSwitch } from "./DarkModeSwitch";
 import IconBar from "./IconBar";
 import ShareActivity from "./ShareActivity";
+
+const AppTitle = () => {
+    return (
+        <>
+            <Link href="/">
+                <Heading size={["lg", "2xl"]} whiteSpace="nowrap">
+                    Splittery
+                </Heading>
+            </Link>
+        </>
+    );
+};
 
 export default async function Header({ height }: { height?: any }) {
     return (
