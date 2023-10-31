@@ -45,6 +45,7 @@ export default function Hero() {
                             onClick={() =>
                                 createActivity().then((activity) => {
                                     router.push("/" + activity.id);
+                                    router.refresh();
                                 })
                             }>
                             Create activity

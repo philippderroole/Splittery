@@ -1,66 +1,20 @@
-"use client";
-
-import {
-    Box,
-    Flex,
-    SimpleGrid,
-    Stat,
-    StatLabel,
-    StatNumber,
-    useColorModeValue,
-} from "@chakra-ui/react";
-import { ReactNode } from "react";
+import { HttpService } from "@/services/HttpService";
+import { Box, SimpleGrid } from "@chakra-ui/react";
 import { BsPerson, BsPiggyBank } from "react-icons/bs";
 import { FaMoneyBillTransfer } from "react-icons/fa6";
+import StatsCard from "./StatsCard";
 
-interface StatsCardProps {
-    title: string;
-    stat: string;
-    icon: ReactNode;
+interface StatisticsProps {
+    paddingBottom: string;
 }
 
-function StatsCard(props: StatsCardProps) {
-    const { title, stat, icon } = props;
-    return (
-        <Stat
-            paddingX={{ base: 2, md: 4 }}
-            paddingY={"5"}
-            shadow={"xl"}
-            border={"1px solid"}
-            borderColor={useColorModeValue("gray.800", "gray.500")}
-            rounded={"lg"}>
-            <Flex justifyContent={"space-between"}>
-                <Box paddingLeft={{ base: 2, md: 4 }}>
-                    <StatLabel fontWeight={"medium"} isTruncated>
-                        {title}
-                    </StatLabel>
-                    <StatNumber fontSize={"2xl"} fontWeight={"medium"}>
-                        {stat}
-                    </StatNumber>
-                </Box>
-                <Box
-                    paddingLeft={3}
-                    marginY={"auto"}
-                    color={useColorModeValue("gray.800", "gray.200")}
-                    alignContent={"center"}>
-                    {icon}
-                </Box>
-            </Flex>
-        </Stat>
-    );
-}
+export default async function Statistics(props: StatisticsProps) {
+    const { paddingBottom } = props;
 
-export default function Statistics({
-    activity_count,
-    expense_count,
-    user_count,
-    paddingBottom,
-}: {
-    activity_count: number;
-    expense_count: number;
-    user_count: number;
-    paddingBottom?: any;
-}) {
+    const activity_count: number = await HttpService.GET("/activity/count");
+    const expense_count: number = await HttpService.GET("/expense/count");
+    const user_count: number = await HttpService.GET("/user/count");
+
     return (
         <Box
             maxW="7xl"
