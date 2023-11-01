@@ -1,3 +1,5 @@
+-- Your SQL goes here
+
 CREATE TABLE
     users (
         name VARCHAR NOT NULL,

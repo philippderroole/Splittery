@@ -1,3 +1,5 @@
+-- Your SQL goes here
+
 ALTER TABLE users
 ADD
     CONSTRAINT activities_users_fkey FOREIGN KEY (activity_id) REFERENCES activities (id);
