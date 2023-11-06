@@ -16,6 +16,14 @@ export abstract class HttpService {
         return await this.request("POST", route, body, cachingBehaviour);
     }
 
+    static async PUT(
+        route: string,
+        body?: any,
+        cachingBehaviour?: RequestCache
+    ): Promise<any> {
+        return await this.request("PUT", route, body, cachingBehaviour);
+    }
+
     static async DELETE(route: string, body?: any): Promise<any> {
         return await this.request("DELETE", route, body);
     }

@@ -1,24 +1,17 @@
-import { HttpService } from "@/services/HttpService";
+"use client";
+
+import { ActivityContext } from "@/lib/ActivityProvider";
 import { Flex } from "@chakra-ui/react";
+import { useContext } from "react";
 import CreateExpense from "./CreateExpense";
 import ExpensesTable from "./ExpensesTable";
 
-export default async function ExpensesTab({ params }) {
-    const activity: Activity = {
-        id: Array.isArray(params.activity_id)
-            ? params.activity_id[0]
-            : params.activity_id,
-    };
-
-    const users: User[] = await getAllUsers(activity);
-
-    async function getAllUsers(activity: Activity): Promise<User[]> {
-        return HttpService.POST("/user/getAll", activity, "no-store");
-    }
+export default function ExpensesTab({ params }) {
+    const users: User[] = useContext(ActivityContext).users;
 
     return (
         <div>
-            <ExpensesTable params={params} />
+            <ExpensesTable />
             <Flex
                 direction="row"
                 justify="center"

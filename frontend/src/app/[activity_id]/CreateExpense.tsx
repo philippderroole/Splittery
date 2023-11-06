@@ -22,12 +22,6 @@ export default function CreateExpense({ params, users }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
     const router = useRouter();
 
-    const activity: Activity = {
-        id: Array.isArray(params.activity_id)
-            ? params.activity_id[0]
-            : params.activity_id,
-    };
-
     const [title, setTitle] = useState("");
     const [amount, setAmount] = useState(0);
     const [user, setUser] = useState({} as User);

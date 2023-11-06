@@ -25,7 +25,7 @@ export default async function Activity({ params }) {
                 </TabList>
                 <TabPanels>
                     <TabPanel>
-                        <BalancesTab params={params} />
+                        <BalancesTab />
                     </TabPanel>
                     <TabPanel>
                         <ExpensesTab params={params} />

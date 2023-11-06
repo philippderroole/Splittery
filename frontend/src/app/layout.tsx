@@ -2,7 +2,11 @@ import { ChakraProvider, Divider, Flex } from "@chakra-ui/react";
 import Footer from "./Footer";
 import Header from "./Header";
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default async function Layout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     return (
         <html>
             <head></head>

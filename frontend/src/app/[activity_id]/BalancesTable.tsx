@@ -1,4 +1,5 @@
-import { HttpService } from "@/services/HttpService";
+"use client";
+
 import {
     Table,
     TableContainer,
@@ -9,46 +10,32 @@ import {
     Tr,
 } from "@chakra-ui/react";
 
+import { ActivityContext } from "@/lib/ActivityProvider";
 import Utils from "@/lib/utils";
+import { useContext } from "react";
 import DeleteUser from "./DeleteUser";
 
-export default async function BalancesTable({ params }) {
+export default function BalancesTable() {
+    const activity_state = useContext(ActivityContext);
+
     type UserBalances = {
         user: User;
         amount: number;
     };
 
-    const activity: Activity = {
-        id: Array.isArray(params.activity_id)
-            ? params.activity_id[0]
-            : params.activity_id,
-    };
-
-    const overallBalances: UserBalances[] = await getOverallBalances(activity);
-
-    async function getAllUsers(activity: Activity): Promise<User[]> {
-        return HttpService.POST("/user/getAll", activity, "no-store");
-    }
-
-    async function getExpenses(activity: Activity): Promise<Expense[]> {
-        return HttpService.POST("/expense/getAll", activity, "no-store");
-    }
-
-    async function getOverallBalances(activity: Activity) {
-        let users: User[] = await getAllUsers(activity);
-
+    function getOverallBalances() {
         let userBalances: UserBalances[] = [];
 
-        users.forEach((user) => {
+        activity_state.users.forEach((user) => {
             userBalances.push({
                 user: user,
                 amount: 0,
             });
         });
 
-        let expenses: Expense[] = await getExpenses(activity);
-
-        let balances = expenses.flatMap((expense) => expense.balances);
+        let balances = activity_state.activity.expenses.flatMap(
+            (expense) => expense.balances
+        );
 
         balances.forEach((balance) => {
             let overallBalance = userBalances.find(
@@ -80,7 +67,7 @@ export default async function BalancesTable({ params }) {
                     </Tr>
                 </Thead>
                 <Tbody>
-                    {overallBalances.map((share) => (
+                    {getOverallBalances().map((share) => (
                         <Tr key={share.user.name}>
                             <Td>{share.user.name}</Td>
                             <Td isNumeric>{share.amount} €</Td>

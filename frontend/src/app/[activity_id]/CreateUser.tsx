@@ -1,6 +1,7 @@
 "use client";
 
-import { HttpService } from "@/services/HttpService";
+import { ActivityContext } from "@/lib/ActivityProvider";
+import { UserService } from "@/services/UserService";
 import {
     Button,
     FormControl,
@@ -16,19 +17,14 @@ import {
     useToast,
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
-export default function CreateUser({ params }) {
+export default function CreateUser() {
     const { isOpen, onOpen, onClose } = useDisclosure();
 
+    const activity_state = useContext(ActivityContext);
     const router = useRouter();
     const toast = useToast();
-
-    const activity: Activity = {
-        id: Array.isArray(params.activity_id)
-            ? params.activity_id[0]
-            : params.activity_id,
-    };
 
     const [username, setUsername] = useState("");
     const [isUsernameValid, setIsUsernameValid] = useState<Validity>({
@@ -63,14 +59,18 @@ export default function CreateUser({ params }) {
         }
 
         let user: User = {
+            id: "",
             name: username,
-            activity: activity,
+            activity_ids: [activity_state.activity.id],
+            metadata: {
+                created_at: "2023-11-02T22:45:48.558036Z",
+                updated_at: "2023-11-02T22:45:48.558036Z",
+                deleted_at: null,
+            },
         };
 
-        let result = HttpService.POST("/user/create", user);
-
-        result
-            .then(() => {
+        UserService.postUser(user)
+            .then((user) => {
                 toast({
                     title: "User created.",
                     description: `${username} was created successfully.`,
@@ -80,14 +80,15 @@ export default function CreateUser({ params }) {
                     position: "bottom",
                 });
 
+                activity_state.addUser(user);
                 setUsername("");
                 onClose();
                 router.refresh();
             })
-            .catch(() => {
+            .catch((error) => {
                 setIsUsernameValid({
                     valid: false,
-                    message: "Username is already taken.",
+                    message: error.message,
                 });
 
                 toast({

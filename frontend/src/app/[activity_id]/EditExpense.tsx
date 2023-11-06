@@ -21,7 +21,7 @@ import {
     Tr,
 } from "@chakra-ui/react";
 
-export default function EditExpense({ params, isOpen, onOpen, onClose }) {
+export default function EditExpense({ isOpen, onOpen, onClose }) {
     const balances = [] as Balance[];
 
     return (

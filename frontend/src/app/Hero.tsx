@@ -8,7 +8,7 @@ export default function Hero() {
     const router = useRouter();
 
     async function createActivity() {
-        return await HttpService.POST("/activity/create");
+        return await HttpService.POST("/activity");
     }
 
     return (

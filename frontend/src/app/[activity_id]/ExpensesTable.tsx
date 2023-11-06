@@ -1,4 +1,4 @@
-import { HttpService } from "@/services/HttpService";
+import { ActivityContext } from "@/lib/ActivityProvider";
 import {
     Table,
     TableContainer,
@@ -8,20 +8,11 @@ import {
     Thead,
     Tr,
 } from "@chakra-ui/react";
+import { useContext } from "react";
 import DeleteExpense from "./DeleteExpense";
 
-export default async function ExpensesTable({ params }) {
-    const activity: Activity = {
-        id: Array.isArray(params.activity_id)
-            ? params.activity_id[0]
-            : params.activity_id,
-    };
-
-    const expenses: Expense[] = await getAllExpenses(activity);
-
-    async function getAllExpenses(activity: Activity): Promise<Expense[]> {
-        return HttpService.POST("/expense/getAll", activity, "no-store");
-    }
+export default async function ExpensesTable() {
+    const activity_state = useContext(ActivityContext);
 
     return (
         <TableContainer>
@@ -35,7 +26,7 @@ export default async function ExpensesTable({ params }) {
                     </Tr>
                 </Thead>
                 <Tbody>
-                    {expenses?.map((expense) => (
+                    {activity_state.activity.expenses?.map((expense) => (
                         <Tr key={expense.name}>
                             <Td>{expense.name}</Td>
                             <Td isNumeric>{expense.amount}</Td>
