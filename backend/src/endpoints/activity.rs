@@ -5,28 +5,6 @@ use tide::{Request, Response};
 
 use crate::{endpoints::create_id, Activity};
 
-pub async fn create_activity(request: Request<sqlx::PgPool>) -> tide::Result {
-    let query = "INSERT INTO activities (id) VALUES ($1)";
-
-    let id: String = create_unique_activity_id(request.state()).await;
-
-    let _ = sqlx::query(query).bind(&id).execute(request.state()).await;
-
-    let query = "SELECT * FROM activities WHERE id = $1";
-
-    let row = sqlx::query(query)
-        .bind(&id)
-        .fetch_one(request.state())
-        .await
-        .expect("failed to create activity");
-
-    let activity = Activity { id: row.get("id") };
-
-    Ok(Response::builder(200)
-        .body(tide::Body::from_json(&activity)?)
-        .build())
-}
-
 pub async fn get_activity(mut request: Request<sqlx::PgPool>) -> tide::Result {
     let activity = request.body_json::<Activity>().await?;
 
