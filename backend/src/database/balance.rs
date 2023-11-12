@@ -1,20 +1,19 @@
 use std::error::Error;
 
 use sqlx::Row;
+use tide::Request;
 
 use crate::entities::{Balance, Metadata};
 
-use super::user::get_user_by_id;
-
 pub async fn get_balances_by_expense_id(
     id: &String,
-    pool: &sqlx::PgPool,
+    request: &Request<sqlx::PgPool>,
 ) -> Result<Vec<Balance>, Box<dyn Error>> {
     let query = "SELECT * FROM balances WHERE expense_id = $1";
 
     let rows = sqlx::query(query)
         .bind(&id)
-        .fetch_all(pool)
+        .fetch_all(request.state())
         .await
         .expect("failed to get balances");
 
@@ -24,7 +23,7 @@ pub async fn get_balances_by_expense_id(
         let balance = get_balance_by_user_id_and_expense_id(
             &row.get("user_id"),
             &row.get("expense_id"),
-            pool,
+            request,
         )
         .await?;
 
@@ -37,17 +36,15 @@ pub async fn get_balances_by_expense_id(
 pub async fn get_balance_by_user_id_and_expense_id(
     user_id: &String,
     expense_id: &String,
-    pool: &sqlx::PgPool,
+    request: &Request<sqlx::PgPool>,
 ) -> Result<Balance, Box<dyn Error>> {
     let query = "SELECT * FROM balances WHERE user_id = $1 AND expense_id = $2";
 
     let row = sqlx::query(query)
         .bind(&user_id)
         .bind(&expense_id)
-        .fetch_one(pool)
+        .fetch_one(request.state())
         .await?;
-
-    let user = get_user_by_id(&row.get("user_id"), pool).await?;
 
     let metadata = Metadata {
         created_at: row.get("created_at"),
@@ -57,10 +54,11 @@ pub async fn get_balance_by_user_id_and_expense_id(
     };
 
     Ok(Balance {
-        user: Some(user),
         amount: row.get("amount"),
-        metadata: Some(metadata),
+        metadata: metadata,
         is_selected: row.get("is_selected"),
         share: row.get("share"),
+        id: todo!(),
+        user_id: todo!(),
     })
 }

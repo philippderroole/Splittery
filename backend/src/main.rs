@@ -5,6 +5,7 @@ use tide::security::CorsMiddleware;
 use tide::security::Origin;
 
 mod database;
+pub mod dtos;
 mod endpoints;
 pub mod entities;
 

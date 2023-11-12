@@ -2,14 +2,18 @@ use sqlx::Row;
 use tide::{Request, Response};
 
 use crate::{
-    database::activity::{create_unique_activity_id, get_activity_by_id},
+    database::{
+        self,
+        activity::{create_unique_activity_id, get_activity_by_id},
+    },
+    dtos::ActivityDto,
     entities::{Activity, Metadata},
 };
 
 pub async fn get_activity(request: Request<sqlx::PgPool>) -> tide::Result {
     let id = request.param("id")?.parse().unwrap();
 
-    let activity = get_activity_by_id(&id, request.state()).await;
+    let activity = database::activity::get_activity_by_id(&id, &request).await;
 
     match activity {
         Ok(activity) => Ok(Response::builder(200)
@@ -19,35 +23,41 @@ pub async fn get_activity(request: Request<sqlx::PgPool>) -> tide::Result {
     }
 }
 
-pub async fn post_activity(request: Request<sqlx::PgPool>) -> tide::Result {
-    let id: String = create_unique_activity_id(request.state()).await;
+pub async fn post_activity(mut request: Request<sqlx::PgPool>) -> tide::Result {
+    let pool = request.state().clone();
+
+    let activity_dto = request.body_json::<ActivityDto>().await?;
+
+    let id: String = create_unique_activity_id(&request).await;
+
+    let now = chrono::Utc::now();
 
     let metadata = Metadata {
-        created_at: Some(chrono::Utc::now()),
-        updated_at: Some(chrono::Utc::now()),
+        created_at: now,
+        updated_at: now,
         deleted_at: None,
-        is_deleted: Some(false),
+        is_deleted: false,
     };
 
     let activity = Activity {
-        id: Some(id.clone()),
-        metadata: Some(metadata),
-        user_ids: Some(Vec::new()),
-        expenses: Some(Vec::new()),
+        id: id,
+        metadata: metadata,
+        user_ids: activity_dto.user_ids.unwrap_or(Vec::new()),
+        expense_ids: activity_dto.expense_ids.unwrap_or(Vec::new()),
     };
 
-    let query =
-        "INSERT INTO activities (created_at, updated_at, deleted_at, id) VALUES ($1, $2, $3, $4)";
+    let result = database::activity::insert_activity(&activity, &pool).await;
 
-    let _ = sqlx::query(query)
-        .bind(&activity.metadata.created_at)
-        .bind(&activity.metadata.updated_at)
-        .bind(&activity.metadata.deleted_at)
-        .bind(&activity.id)
-        .execute(request.state())
-        .await;
+    if result.is_err() {
+        return Ok(Response::builder(500)
+            .body(format!(
+                "Failed to create activity: {}",
+                result.unwrap_err().to_string()
+            ))
+            .build());
+    }
 
-    let activity = get_activity_by_id(&activity.id, request.state()).await;
+    let activity = database::activity::get_activity_by_id(&activity.id, &pool).await;
 
     match activity {
         Ok(activity) => Ok(Response::builder(200)
@@ -58,22 +68,27 @@ pub async fn post_activity(request: Request<sqlx::PgPool>) -> tide::Result {
 }
 
 pub async fn put_activity(mut request: Request<sqlx::PgPool>) -> tide::Result {
-    let activity = request.body_json::<Activity>().await?;
+    let activity_dto = request.body_json::<ActivityDto>().await?;
 
-    let query = "UPDATE activities SET updated_at = $1, deleted_at = $2 WHERE id = $3";
+    let activity = Activity {
+        id: todo!(),
+        metadata: todo!(),
+        user_ids: todo!(),
+        expense_ids: todo!(),
+    };
 
-    let result = sqlx::query(query)
-        .bind(chrono::Utc::now())
-        .bind(&activity.metadata.deleted_at)
-        .bind(&activity.id)
-        .execute(request.state())
-        .await;
+    let result = database::activity::update_activity(&activity, request).await;
 
     if result.is_err() {
-        return Ok(Response::builder(500).build());
+        return Ok(Response::builder(500)
+            .body(format!(
+                "Failed to update activity: {}",
+                result.unwrap_err()
+            ))
+            .build());
     }
 
-    let activity = get_activity_by_id(&activity.id, request.state()).await;
+    let activity = get_activity_by_id(&activity.id, &request).await;
 
     match activity {
         Ok(activity) => Ok(Response::builder(200)
@@ -84,18 +99,22 @@ pub async fn put_activity(mut request: Request<sqlx::PgPool>) -> tide::Result {
 }
 
 pub async fn delete_activity(mut request: Request<sqlx::PgPool>) -> tide::Result {
-    let activity = request.body_json::<Activity>().await?;
+    let activity = request.body_json::<ActivityDto>().await?;
 
-    let query = "DELETE FROM activities WHERE id = $1";
+    let activity_id = match &activity.id {
+        Some(id) => id,
+        None => {
+            return Ok(Response::builder(500)
+                .body(format!("Cannot delete activity without an id"))
+                .build())
+        }
+    };
 
-    let result = sqlx::query(query)
-        .bind(&activity.id)
-        .execute(request.state())
-        .await;
+    let result = database::activity::delete_activity(activity_id, request).await;
 
     match result {
         Ok(_) => Ok(Response::builder(200).build()),
-        Err(_) => Ok(Response::builder(500).build()),
+        Err(err) => Ok(Response::builder(500).body(err.to_string()).build()),
     }
 }
 
