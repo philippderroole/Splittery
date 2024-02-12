@@ -1,6 +1,19 @@
 import { ChakraProvider, Divider, Flex } from "@chakra-ui/react";
-import Footer from "./Footer";
-import Header from "./Header";
+import Footer from "./components/Footer";
+import Navbar from "./components/navbar";
+
+import { Inter, Roboto } from "next/font/google";
+
+const inter = Inter({
+    subsets: ["latin"],
+    display: "swap",
+});
+
+const roboto = Roboto({
+    weight: "400",
+    subsets: ["latin"],
+    display: "swap",
+});
 
 export default async function Layout({
     children,
@@ -8,7 +21,7 @@ export default async function Layout({
     children: React.ReactNode;
 }) {
     return (
-        <html>
+        <html lang="en" className={inter.className}>
             <head></head>
             <body>
                 <ChakraProvider>
@@ -17,7 +30,7 @@ export default async function Layout({
                         minHeight="100vh"
                         justifyContent="space-between">
                         <Flex flexGrow={1} direction="column">
-                            <Header height="7vh" />
+                            <Navbar />
                             <Divider />
                             {children}
                         </Flex>

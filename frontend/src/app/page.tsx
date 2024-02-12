@@ -1,14 +1,12 @@
 import { Center } from "@chakra-ui/react";
-import Hero from "./Hero";
-import Statistics from "./Statistics";
+import Hero from "./components/hero";
 
-export default async function HomePage() {
+export default async function LandingPage() {
     return (
         <>
             <Center flexGrow={1}>
                 <Hero />
             </Center>
-            <Statistics paddingBottom="10vh" />
         </>
     );
 }

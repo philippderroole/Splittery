@@ -35,7 +35,8 @@ export abstract class HttpService {
         cachingBehaviour?: RequestCache
     ): Promise<any> {
         console.log(
-            "Request to url: " +
+            method +
+                " request to url: " +
                 this.api_url +
                 route +
                 " with body: " +
@@ -46,6 +47,7 @@ export abstract class HttpService {
             method: method,
             headers: {
                 charset: "UTF-8",
+                "Content-Type": "application/json",
             },
             cache: cachingBehaviour,
             body: JSON.stringify(body),
