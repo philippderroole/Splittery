@@ -1,5 +1,5 @@
-import { ChakraProvider, Divider, Flex } from "@chakra-ui/react";
-import Footer from "./components/Footer";
+import { ChakraProvider, Flex } from "@chakra-ui/react";
+import Footer from "./components/footer";
 import Navbar from "./components/navbar";
 
 import { Inter, Roboto } from "next/font/google";
@@ -22,7 +22,9 @@ export default async function Layout({
 }) {
     return (
         <html lang="en" className={inter.className}>
-            <head></head>
+            <head>
+                <link rel="icon" href="/favicon.ico" />
+            </head>
             <body>
                 <ChakraProvider>
                     <Flex
@@ -31,7 +33,6 @@ export default async function Layout({
                         justifyContent="space-between">
                         <Flex flexGrow={1} direction="column">
                             <Navbar />
-                            <Divider />
                             {children}
                         </Flex>
                         <Footer />

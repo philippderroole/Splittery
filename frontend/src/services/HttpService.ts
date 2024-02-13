@@ -3,25 +3,34 @@ export abstract class HttpService {
 
     static async GET(
         route: string,
+        tags?: string[],
         cachingBehaviour?: RequestCache
     ): Promise<any> {
-        return await this.request("GET", route, undefined, cachingBehaviour);
+        return await this.request(
+            "GET",
+            route,
+            undefined,
+            tags,
+            cachingBehaviour
+        );
     }
 
     static async POST(
         route: string,
         body?: any,
+        tags?: string[],
         cachingBehaviour?: RequestCache
     ): Promise<any> {
-        return await this.request("POST", route, body, cachingBehaviour);
+        return await this.request("POST", route, body, tags, cachingBehaviour);
     }
 
     static async PUT(
         route: string,
         body?: any,
+        tags?: string[],
         cachingBehaviour?: RequestCache
     ): Promise<any> {
-        return await this.request("PUT", route, body, cachingBehaviour);
+        return await this.request("PUT", route, body, tags, cachingBehaviour);
     }
 
     static async DELETE(route: string, body?: any): Promise<any> {
@@ -32,6 +41,7 @@ export abstract class HttpService {
         method: string,
         route: string,
         body?: any,
+        tags?: string[],
         cachingBehaviour?: RequestCache
     ): Promise<any> {
         console.log(
@@ -49,7 +59,7 @@ export abstract class HttpService {
                 charset: "UTF-8",
                 "Content-Type": "application/json",
             },
-            cache: cachingBehaviour,
+            cache: cachingBehaviour ? cachingBehaviour : "default",
             body: JSON.stringify(body),
         })
             .then((response) => {

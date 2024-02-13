@@ -1,5 +1,5 @@
-use actix_web::{get, http::header::ContentType, web, HttpResponse, Responder};
-use serde::Serialize;
+use actix_web::{get, http::header::ContentType, post, web, HttpResponse, Responder};
+use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
 #[derive(Serialize)]
@@ -62,6 +62,44 @@ pub async fn get_multiple(pool: web::Data<Pool<Postgres>>, path: web::Path<i32>)
         .collect();
 
     let body = serde_json::to_string(&users).unwrap();
+
+    HttpResponse::Ok()
+        .content_type(ContentType::json())
+        .body(body)
+}
+
+#[derive(Deserialize)]
+pub struct UserDto {
+    name: String,
+}
+
+#[post("/splits/{split_id}/users")]
+pub async fn post(
+    pool: web::Data<Pool<Postgres>>,
+    path: web::Path<i32>,
+    user: web::Json<UserDto>,
+) -> impl Responder {
+    let split_id = path.into_inner();
+
+    let rows = sqlx::query!(
+        "
+        INSERT INTO \"user\" (split_id, name)
+        VALUES ($1, $2)
+        RETURNING *
+        ",
+        split_id,
+        user.name
+    )
+    .fetch_one(pool.get_ref())
+    .await
+    .unwrap();
+
+    let user = User {
+        id: rows.id,
+        name: rows.name.clone(),
+    };
+
+    let body = serde_json::to_string(&user).unwrap();
 
     HttpResponse::Ok()
         .content_type(ContentType::json())

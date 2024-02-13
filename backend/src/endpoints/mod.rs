@@ -21,6 +21,7 @@ pub async fn start_web_server(pool: Pool<Postgres>) -> std::io::Result<()> {
             .service(transactions::get)
             .service(transactions::get_multiple)
             .service(users::get)
+            .service(users::post)
             .service(users::get_multiple)
     })
     .bind(("127.0.0.1", 8000))?
