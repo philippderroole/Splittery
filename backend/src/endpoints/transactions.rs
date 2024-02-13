@@ -1,4 +1,10 @@
-use actix_web::{get, http::header::ContentType, web, HttpResponse, Responder};
+use actix_web::{
+    get,
+    http::header::ContentType,
+    post,
+    web::{self},
+    HttpResponse, Responder,
+};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
@@ -31,7 +37,7 @@ pub async fn get(pool: web::Data<Pool<Postgres>>, path: web::Path<(i32, i32)>) -
         id: row.id,
         name: row.name.clone(),
         amount: row.amount as f64,
-        user_id: row.payer_id,
+        user_id: row.user_id,
     };
 
     let body = serde_json::to_string(&transaction).unwrap();
@@ -61,7 +67,7 @@ pub async fn get_multiple(
                 "
                 SELECT *
                 FROM transaction
-                WHERE payer_id = $1 AND split_id = $2
+                WHERE user_id = $1 AND split_id = $2
                 ",
                 user_id,
                 split_id
@@ -75,7 +81,7 @@ pub async fn get_multiple(
                     id: row.id,
                     name: row.name.clone(),
                     amount: row.amount as f64,
-                    user_id: row.payer_id,
+                    user_id: row.user_id,
                 })
                 .collect::<Vec<Transaction>>()
         }
@@ -97,13 +103,58 @@ pub async fn get_multiple(
                     id: row.id,
                     name: row.name.clone(),
                     amount: row.amount as f64,
-                    user_id: row.payer_id,
+                    user_id: row.user_id,
                 })
                 .collect::<Vec<Transaction>>()
         }
     };
 
     let body = serde_json::to_string(&transactions).unwrap();
+
+    HttpResponse::Ok()
+        .content_type(ContentType::json())
+        .body(body)
+}
+
+#[derive(Deserialize)]
+struct TransactionDto {
+    name: String,
+    amount: f64,
+    user_id: i32,
+}
+
+#[post("/splits/{split_id}/transactions")]
+pub async fn post(
+    pool: web::Data<Pool<Postgres>>,
+    path: web::Path<i32>,
+    body: web::Json<TransactionDto>,
+) -> impl Responder {
+    let split_id = path.into_inner();
+    let transaction = body.into_inner();
+
+    let row = sqlx::query!(
+        "
+        INSERT INTO transaction (name, amount, user_id, split_id)
+        VALUES ($1, $2, $3, $4)
+        RETURNING *
+        ",
+        transaction.name,
+        transaction.amount as f32,
+        transaction.user_id,
+        split_id
+    )
+    .fetch_one(pool.get_ref())
+    .await
+    .unwrap();
+
+    let transaction = Transaction {
+        id: row.id,
+        name: row.name.clone(),
+        amount: row.amount as f64,
+        user_id: row.user_id,
+    };
+
+    let body = serde_json::to_string(&transaction).unwrap();
 
     HttpResponse::Ok()
         .content_type(ContentType::json())
