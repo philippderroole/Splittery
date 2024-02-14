@@ -17,6 +17,7 @@ import {
     ModalFooter,
     ModalHeader,
     ModalOverlay,
+    Select,
     Tab,
     TabList,
     TabPanel,
@@ -34,31 +35,78 @@ export default function AddTransactionButton({
     users: any[];
 }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
-    const initialRef = React.useRef(null);
+
+    const [tabIndex, setTabIndex] = React.useState(0);
 
     const [name, setName] = React.useState("");
-    const [touched, setTouched] = React.useState(false);
+    const [nameTouched, setNameTouched] = React.useState(false);
+
+    const [amount, setAmount] = React.useState(0);
+    const [amountTouched, setAmountTouched] = React.useState(false);
+
+    const [payerId, setPayerId] = React.useState(0);
+    const [receiver, setReceiver] = React.useState(0);
 
     function validate_name(): string | undefined {
-        if (name.length === 0 && touched) {
+        if (name.length === 0 && nameTouched) {
             return "Name is required";
         }
     }
 
-    const handleCreateTransaction = async () => {
+    function validate_amount(): string | undefined {
+        if (amount === 0 && amountTouched) {
+            return "Amount is required";
+        }
+
+        if (amount < 0) {
+            return "Amount can't be negative";
+        }
+
+        if (isNaN(amount)) {
+            return "Amount must be a number";
+        }
+    }
+
+    function validate_payer(): string | undefined {
+        if (tabIndex !== 0) {
+            return;
+        }
+    }
+
+    function validate_receiver(): string | undefined {
+        if (tabIndex === 2) {
+            if (payerId === receiver) {
+                return "Payer and receiver can't be the same";
+            }
+        } else {
+            return;
+        }
+    }
+
+    async function handleCreateTransaction() {
         if (validate_name() != undefined) {
+            return;
+        }
+        if (validate_amount() != undefined) {
+            return;
+        }
+        if (validate_receiver() != undefined) {
             return;
         }
 
         try {
-            let new_user = {
+            let new_amount = tabIndex === 0 ? -amount : amount;
+
+            let new_transaction = {
                 split_id: split_id,
                 name: name,
+                amount: new_amount,
+                user_id: users.find((user) => user.id === payerId).id,
             };
 
             const response = await HttpService.POST(
                 `/splits/${split_id}/transactions`,
-                new_user
+                new_transaction
             );
 
             revalidateTag("transactions");
@@ -66,134 +114,170 @@ export default function AddTransactionButton({
         } catch (error) {
             console.error("Error creating transaction", error);
         }
-    };
+    }
 
-    const button = (
-        <IconButton
-            colorScheme="green"
-            borderRadius="full"
-            icon={<AddIcon />}
-            aria-label={"add transaction"}
-            onClick={onOpen}></IconButton>
-    );
-
-    function NameForm() {
+    function AddTransactionButton() {
         return (
-            <FormControl isRequired isInvalid={validate_name() != undefined}>
+            <IconButton
+                colorScheme="green"
+                borderRadius="full"
+                icon={<AddIcon />}
+                aria-label={"add transaction"}
+                onClick={onOpen}></IconButton>
+        );
+    }
+
+    const name_form = () => {
+        return (
+            <FormControl
+                paddingY={2}
+                isRequired
+                isInvalid={validate_name() != undefined}>
                 <FormLabel>Name</FormLabel>
                 <Input
-                    ref={initialRef}
+                    key="name"
                     placeholder="Name"
-                    onFocus={() => setTouched(true)}
+                    onFocus={() => setNameTouched(true)}
                     onChange={(e) => setName(e.target.value)}
                 />
                 <FormErrorMessage>{validate_name()}</FormErrorMessage>
             </FormControl>
         );
-    }
+    };
 
-    function AmountForm() {
+    const amount_form = () => {
         return (
-            <FormControl>
+            <FormControl
+                paddingY={2}
+                isRequired
+                isInvalid={validate_amount() != undefined}>
                 <FormLabel>Amount</FormLabel>
-                <Input placeholder="Amount" />
+                <Input
+                    key="amount"
+                    placeholder="Amount"
+                    onFocus={() => setAmountTouched(true)}
+                    onChange={(e) => setAmount(parseFloat(e.target.value))}
+                />
+                <FormErrorMessage>{validate_amount()}</FormErrorMessage>
             </FormControl>
         );
-    }
+    };
 
-    function PayerForm() {
+    const payer_form = () => {
         return (
-            <FormControl>
+            <FormControl
+                paddingY={2}
+                isRequired
+                isInvalid={validate_payer() != undefined}>
                 <FormLabel>Payer</FormLabel>
-                <Input placeholder="Payer" />
+                <Select
+                    defaultValue={payerId}
+                    onChange={(e) => {
+                        console.log(e.target.value);
+                        setPayerId(parseInt(e.target.value));
+                    }}>
+                    {users.map((user) => (
+                        <option key={user.id} value={user.id}>
+                            {user.name}
+                        </option>
+                    ))}
+                </Select>
             </FormControl>
         );
-    }
+    };
 
-    function ReceiverForm() {
+    const receiver_form = () => {
         return (
-            <FormControl>
+            <FormControl
+                paddingY={2}
+                isRequired
+                isInvalid={validate_receiver() != undefined}>
                 <FormLabel>Receiver</FormLabel>
-                <Input placeholder="Receiver" />
+                <Select
+                    defaultValue={receiver}
+                    onChange={(e) => setReceiver(parseInt(e.target.value))}>
+                    {users.map((user) => (
+                        <option key={user.id} value={user.name}>
+                            {user.name}
+                        </option>
+                    ))}
+                </Select>
+                <FormErrorMessage>{validate_receiver()}</FormErrorMessage>
             </FormControl>
         );
-    }
+    };
 
-    function ExpenseForm() {
+    const expense_form = () => {
         return (
             <>
-                <NameForm />
-                <AmountForm />
-                <PayerForm />
+                {name_form()}
+                {amount_form()}
+                {payer_form()}
             </>
         );
-    }
+    };
 
-    function IncomeForm() {
+    const income_form = () => {
         return (
             <>
-                <NameForm />
-                <AmountForm />
-                <ReceiverForm />
+                {name_form()}
+                {amount_form()}
+                {receiver_form()}
             </>
         );
-    }
+    };
 
-    function TransferForm() {
+    const transfer_form = () => {
         return (
             <>
-                <NameForm />
-                <AmountForm />
-                <PayerForm />
-                <ReceiverForm />
+                {name_form()}
+                {amount_form()}
+                {payer_form()}
+                {receiver_form()}
             </>
         );
-    }
+    };
 
-    const modal = (
-        <Modal isOpen={isOpen} onClose={onClose}>
-            <ModalOverlay />
-            <ModalContent>
-                <ModalHeader>Add a new transaction</ModalHeader>
-                <ModalCloseButton />
-                <ModalBody pb={6}>
-                    <Tabs>
-                        <TabList>
-                            <Tab>Expense</Tab>
-                            <Tab>Income</Tab>
-                            <Tab>Transfer</Tab>
-                        </TabList>
+    const transaction_modal = () => {
+        return (
+            <Modal isOpen={isOpen} onClose={onClose}>
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Add a new transaction</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody pb={6}>
+                        <Tabs onChange={(index) => setTabIndex(index)}>
+                            <TabList>
+                                <Tab>Expense</Tab>
+                                <Tab>Income</Tab>
+                                <Tab>Transfer</Tab>
+                            </TabList>
 
-                        <TabPanels>
-                            <TabPanel>
-                                <ExpenseForm />
-                            </TabPanel>
-                            <TabPanel>
-                                <IncomeForm />
-                            </TabPanel>
-                            <TabPanel>
-                                <TransferForm />
-                            </TabPanel>
-                        </TabPanels>
-                    </Tabs>
-                </ModalBody>
-                <ModalFooter>
-                    <Button
-                        colorScheme="green"
-                        mr={3}
-                        onClick={handleCreateTransaction}>
-                        Save
-                    </Button>
-                    <Button onClick={onClose}>Cancel</Button>
-                </ModalFooter>
-            </ModalContent>
-        </Modal>
-    );
+                            <TabPanels>
+                                <TabPanel>{expense_form()}</TabPanel>
+                                <TabPanel>{income_form()}</TabPanel>
+                                <TabPanel>{transfer_form()}</TabPanel>
+                            </TabPanels>
+                        </Tabs>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button
+                            colorScheme="green"
+                            mr={3}
+                            onClick={handleCreateTransaction}>
+                            Save
+                        </Button>
+                        <Button onClick={onClose}>Cancel</Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+        );
+    };
 
     return (
         <>
-            {button}
-            {modal}
+            <AddTransactionButton />
+            {transaction_modal()}
         </>
     );
 }

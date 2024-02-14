@@ -13,7 +13,11 @@ import {
 import AddTransactionButton from "./add_transaction_button";
 import LayoutBox from "./layout_box";
 
-export default async function TransactionOverview({ users, transactions }) {
+export default async function TransactionOverview({
+    split,
+    users,
+    transactions,
+}) {
     function TransactionTable() {
         return (
             <TableContainer>
@@ -22,7 +26,7 @@ export default async function TransactionOverview({ users, transactions }) {
                         <Tr>
                             <Th>Name</Th>
                             <Th>Amount</Th>
-                            <Th>Payer</Th>
+                            <Th>User</Th>
                         </Tr>
                     </Thead>
                     <Tbody>
@@ -47,7 +51,7 @@ export default async function TransactionOverview({ users, transactions }) {
     }
 
     return (
-        <LayoutBox>
+        <LayoutBox name="Transactions">
             <TransactionTable />
             <Flex
                 paddingTop={3}
@@ -55,8 +59,8 @@ export default async function TransactionOverview({ users, transactions }) {
                 justifyContent="right"
                 alignItems="center">
                 <AddTransactionButton
-                    split_id={0}
-                    users={[]}></AddTransactionButton>
+                    split_id={split.id}
+                    users={users}></AddTransactionButton>
             </Flex>
         </LayoutBox>
     );

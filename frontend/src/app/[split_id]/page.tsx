@@ -55,7 +55,11 @@ export default async function Page({
                 users={users}
                 transactions={transactions}
             />
-            <TransactionOverview users={users} transactions={transactions} />
+            <TransactionOverview
+                split={split}
+                users={users}
+                transactions={transactions}
+            />
         </Flex>
     );
 }

@@ -19,7 +19,7 @@ import LayoutBox from "./layout_box";
 export default async function UserOverview({ split, users, transactions }) {
     function getTotalAmountSpent(transactions) {
         return transactions.reduce(
-            (acc, transaction) => acc + transaction.amount,
+            (acc, transaction) => acc - transaction.amount,
             0
         );
     }
@@ -27,6 +27,14 @@ export default async function UserOverview({ split, users, transactions }) {
     function getAmountSpent(transactions, user_id: number) {
         return transactions
             .filter((transaction) => transaction.user_id === user_id)
+            .filter((transaction) => transaction.amount < 0)
+            .reduce((acc, transaction) => acc - transaction.amount, 0);
+    }
+
+    function getAmountReceived(transactions, user_id: number) {
+        return transactions
+            .filter((transaction) => transaction.user_id === user_id)
+            .filter((transaction) => transaction.amount > 0)
             .reduce((acc, transaction) => acc + transaction.amount, 0);
     }
 
@@ -49,7 +57,9 @@ export default async function UserOverview({ split, users, transactions }) {
                                 <Td isNumeric>
                                     {getAmountSpent(transactions, user.id)}€
                                 </Td>
-                                <Td isNumeric>0.00€</Td>
+                                <Td isNumeric>
+                                    {getAmountReceived(transactions, user.id)}€
+                                </Td>
                                 <Td isNumeric>0.00€</Td>
                             </Tr>
                         ))}
@@ -88,7 +98,7 @@ export default async function UserOverview({ split, users, transactions }) {
     }
 
     return (
-        <LayoutBox>
+        <LayoutBox name="Overview">
             <UsersTable />
             <TableFooter />
         </LayoutBox>

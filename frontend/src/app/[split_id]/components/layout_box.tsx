@@ -1,10 +1,12 @@
 "use server";
 
-import { Box } from "@chakra-ui/react";
+import { Box, Heading } from "@chakra-ui/react";
 
 export default async function LayoutBox({
+    name,
     children,
 }: {
+    name: string;
     children?: React.ReactNode;
 }) {
     return (
@@ -18,6 +20,9 @@ export default async function LayoutBox({
                 margin={5}
                 borderRadius={10}
                 width="fit-content">
+                <Heading size="md" paddingTop={2} marginBottom={3}>
+                    {name}
+                </Heading>
                 {children}
             </Box>
         </>
