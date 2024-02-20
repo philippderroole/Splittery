@@ -39,7 +39,6 @@ export abstract class HttpService {
                 if (this.log_requests) {
                     console.log("Response: " + JSON.stringify(data));
                 }
-                console.log("Response: " + JSON.stringify(data));
                 return data;
             });
     }
