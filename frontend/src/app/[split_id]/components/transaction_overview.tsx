@@ -1,5 +1,6 @@
 "use server";
 
+import { CurrencyFormat } from "@/services/CurrencyFormat";
 import {
     Flex,
     Table,
@@ -33,7 +34,9 @@ export default async function TransactionOverview({
                         {transactions.map((transaction) => (
                             <Tr key={transaction.id}>
                                 <Td>{transaction.name}</Td>
-                                <Td isNumeric>{transaction.amount}€</Td>
+                                <Td isNumeric>
+                                    {CurrencyFormat.format(transaction.amount)}
+                                </Td>
                                 <Td>
                                     {
                                         users.find(

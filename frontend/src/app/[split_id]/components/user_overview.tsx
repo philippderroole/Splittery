@@ -1,5 +1,6 @@
 "use server";
 
+import { CurrencyFormat } from "@/services/CurrencyFormat";
 import {
     Box,
     Flex,
@@ -55,10 +56,14 @@ export default async function UserOverview({ split, users, transactions }) {
                             <Tr key={user.id}>
                                 <Td>{user.name}</Td>
                                 <Td isNumeric>
-                                    {getAmountSpent(transactions, user.id)}€
+                                    {CurrencyFormat.format(
+                                        getAmountSpent(transactions, user.id)
+                                    )}
                                 </Td>
                                 <Td isNumeric>
-                                    {getAmountReceived(transactions, user.id)}€
+                                    {CurrencyFormat.format(
+                                        getAmountReceived(transactions, user.id)
+                                    )}
                                 </Td>
                                 <Td isNumeric>0.00€</Td>
                             </Tr>
@@ -88,7 +93,7 @@ export default async function UserOverview({ split, users, transactions }) {
         return (
             <Box>
                 <Heading fontSize="3xl">
-                    {getTotalAmountSpent(transactions)}€
+                    {CurrencyFormat.format(getTotalAmountSpent(transactions))}
                 </Heading>
                 <Text opacity={0.7} fontSize="sm">
                     Total Spent

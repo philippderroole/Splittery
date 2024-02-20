@@ -44,8 +44,8 @@ export default function AddTransactionButton({
     const [amount, setAmount] = React.useState(0);
     const [amountTouched, setAmountTouched] = React.useState(false);
 
-    const [payerId, setPayerId] = React.useState(0);
-    const [receiver, setReceiver] = React.useState(0);
+    const [payerId, setPayerId] = React.useState(users[0].id);
+    const [receiver, setReceiver] = React.useState(users[0].id);
 
     function validate_name(): string | undefined {
         if (name.length === 0 && nameTouched) {
@@ -173,7 +173,6 @@ export default function AddTransactionButton({
                 <Select
                     defaultValue={payerId}
                     onChange={(e) => {
-                        console.log(e.target.value);
                         setPayerId(parseInt(e.target.value));
                     }}>
                     {users.map((user) => (
