@@ -7,8 +7,8 @@ mod transactions;
 mod users;
 
 pub async fn start_web_server(pool: Pool<Postgres>) -> std::io::Result<()> {
-    let listen_url = dotenv::var("LISTEN_URL").unwrap();
-    let listen_port: u16 = dotenv::var("LISTEN_PORT").unwrap().parse().unwrap();
+    let listen_url = dotenvy::var("LISTEN_URL").unwrap();
+    let listen_port: u16 = dotenvy::var("LISTEN_PORT").unwrap().parse().unwrap();
 
     HttpServer::new(move || {
         let cors = Cors::default()
