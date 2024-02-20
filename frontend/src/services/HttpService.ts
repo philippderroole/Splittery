@@ -83,15 +83,6 @@ export abstract class HttpService {
             );
         }
 
-        console.log(
-            method +
-                " request to url: " +
-                this.api_url +
-                route +
-                " with body: " +
-                JSON.stringify(body)
-        );
-
         return fetch(this.api_url + route, {
             method: method,
             headers: {
