@@ -10,5 +10,7 @@ async fn main() {
         .await
         .unwrap();
 
+    sqlx::migrate!("./migrations").run(&pool).await.unwrap();
+
     endpoints::start_web_server(pool).await.unwrap();
 }
