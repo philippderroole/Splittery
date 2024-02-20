@@ -6,7 +6,7 @@ mod endpoints;
 async fn main() {
     let pool = PgPoolOptions::new()
         .max_connections(1)
-        .connect(dotenv::var("DATABASE_URL").unwrap().as_str())
+        .connect(dotenvy::var("DATABASE_URL").unwrap().as_str())
         .await
         .unwrap();
 
