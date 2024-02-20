@@ -2,7 +2,8 @@
 
 import { revalidateTag } from "@/app/server_actions";
 import { HttpService } from "@/services/HttpService";
-import { EditIcon } from "@chakra-ui/icons";
+import { validate_name } from "@/services/Validation";
+import { AddIcon } from "@chakra-ui/icons";
 import {
     Button,
     FormControl,
@@ -22,89 +23,99 @@ import {
 } from "@chakra-ui/react";
 import React from "react";
 
-export default function RenameUserButton({
+export default function CreateUserButton({
     split_id,
-    user,
     users,
 }: {
     split_id: number;
-    user: any;
     users: any[];
 }) {
     const toast = useToast();
 
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const initialRef = React.useRef(null);
 
     const [name, setName] = React.useState("");
     const [touched, setTouched] = React.useState(false);
 
-    async function handleRenameUser() {
+    function close() {
+        setTouched(false);
+        onClose();
+    }
+
+    async function handleCreateUser() {
+        setTouched(true);
+
+        if (validate_name(name) != undefined) {
+            return;
+        }
+
         try {
             let new_user = {
+                split_id: split_id,
                 name: name,
             };
 
-            const response = await HttpService.PUT(
-                `/splits/${split_id}/users/${user.id}`,
+            const response = await HttpService.POST(
+                `/splits/${split_id}/users`,
                 new_user
             );
 
             revalidateTag("users");
-            revalidateTag("transactions");
-            onClose();
+            close();
         } catch (error) {
             toast({
-                title: "Unexpected error occurred while renaming user",
+                title: "Unexpected error occurred while creating user",
                 description: error,
                 status: "error",
                 duration: 5000,
                 isClosable: true,
             });
-            console.error("Error renaming user", error);
+            console.error("Error creating user", error);
         }
     }
 
-    function validate_name(): string | undefined {
-        if (name.length === 0 && touched) {
-            return "Name is required";
-        }
-
-        for (let user of users) {
-            if (user.name === name) {
-                return "Name already exists";
-            }
-        }
-    }
+    const button = (
+        <IconButton
+            colorScheme="green"
+            borderRadius="full"
+            icon={<AddIcon />}
+            aria-label={"add user"}
+            onClick={onOpen}></IconButton>
+    );
 
     const name_form = (
-        <FormControl isRequired isInvalid={validate_name() != undefined}>
+        <FormControl
+            isRequired
+            isInvalid={validate_name(name) != undefined && touched}>
             <FormLabel>Name</FormLabel>
             <Input
+                ref={initialRef}
                 placeholder="Name"
-                onFocus={() => setTouched(true)}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {
+                    setName(e.target.value);
+                    setTouched(true);
+                }}
             />
-            <FormErrorMessage>{validate_name()}</FormErrorMessage>
+            <FormErrorMessage>{validate_name(name)}</FormErrorMessage>
         </FormControl>
     );
 
     const modal = (
-        <Modal isOpen={isOpen} onClose={onClose}>
+        <Modal isOpen={isOpen} onClose={close}>
             <ModalOverlay />
             <ModalContent>
-                <ModalHeader>Rename {user.name}</ModalHeader>
+                <ModalHeader>Create a new user</ModalHeader>
                 <ModalCloseButton />
-                <ModalBody>{name_form}</ModalBody>
+                <ModalBody pb={6}>{name_form}</ModalBody>
                 <ModalFooter>
                     <Button
                         colorScheme="green"
                         mr={3}
-                        onClick={handleRenameUser}>
+                        onClick={handleCreateUser}>
                         Save
                     </Button>
-                    <Button variant="ghost" onClick={onClose}>
-                        Cancel
-                    </Button>
+                    <Button onClick={close}>Cancel</Button>
                 </ModalFooter>
             </ModalContent>
         </Modal>
@@ -112,12 +123,7 @@ export default function RenameUserButton({
 
     return (
         <>
-            <IconButton
-                icon={<EditIcon></EditIcon>}
-                aria-label="rename"
-                variant="ghost"
-                onClick={onOpen}></IconButton>
-
+            {button}
             {modal}
         </>
     );
