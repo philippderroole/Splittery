@@ -18,6 +18,7 @@ import {
     ModalHeader,
     ModalOverlay,
     useDisclosure,
+    useToast,
 } from "@chakra-ui/react";
 import React from "react";
 
@@ -28,6 +29,8 @@ export default function AddUserButton({
     split_id: number;
     users: any[];
 }) {
+    const toast = useToast();
+
     const { isOpen, onOpen, onClose } = useDisclosure();
     const initialRef = React.useRef(null);
 
@@ -65,6 +68,13 @@ export default function AddUserButton({
             revalidateTag("users");
             onClose();
         } catch (error) {
+            toast({
+                title: "Unexpected error occurred while creating user",
+                description: error,
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
             console.error("Error creating user", error);
         }
     };

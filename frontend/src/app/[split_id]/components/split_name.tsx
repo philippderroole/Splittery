@@ -1,5 +1,7 @@
 "use client";
 
+import { revalidateTag } from "@/app/server_actions";
+import { HttpService } from "@/services/HttpService";
 import { CheckIcon, CloseIcon, EditIcon } from "@chakra-ui/icons";
 import {
     ButtonGroup,
@@ -10,11 +12,37 @@ import {
     HStack,
     IconButton,
     useEditableControls,
+    useToast,
 } from "@chakra-ui/react";
+import React from "react";
 
-export default function SplitName({ name }) {
-    function handleRenameSplit() {
-        console.log("rename split");
+export default function SplitName({ split }: { split: any }) {
+    const toast = useToast();
+
+    const [name, setName] = React.useState(split.name);
+
+    async function handleRenameSplit() {
+        try {
+            let new_split = {
+                name: name,
+            };
+
+            const response = await HttpService.PUT(
+                `/splits/${split.id}`,
+                new_split
+            );
+
+            revalidateTag("split");
+        } catch (error) {
+            toast({
+                title: "Unexpected error occurred while renaming split",
+                description: error,
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+            console.error("Error renaming user", error);
+        }
     }
 
     function EditableControls() {
@@ -55,11 +83,13 @@ export default function SplitName({ name }) {
         <>
             <Editable
                 textAlign="left"
-                defaultValue={name}
+                defaultValue={split.name}
                 fontSize="3xl"
                 fontWeight="bold"
                 isPreviewFocusable={false}
-                onSubmit={handleRenameSplit}>
+                onChange={(e) => setName(e)}
+                onSubmit={handleRenameSplit}
+                submitOnBlur={false}>
                 <HStack>
                     <EditablePreview />
                     <EditableInput width={"fit-content"} />

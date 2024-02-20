@@ -1,5 +1,7 @@
 "use client";
 
+import { revalidateTag } from "@/app/server_actions";
+import { HttpService } from "@/services/HttpService";
 import { DeleteIcon } from "@chakra-ui/icons";
 import {
     AlertDialog,
@@ -16,20 +18,22 @@ import {
 import React from "react";
 
 export default function DeleteUserButton({
+    split_id,
     user,
     transactions,
 }: {
+    split_id: number;
     user: any;
     transactions: any[];
 }) {
-    const { isOpen, onOpen, onClose } = useDisclosure();
+    const toast = useToast();
     const cancelRef = React.useRef(null);
-    const toasts = useToast();
+    const { isOpen, onOpen, onClose } = useDisclosure();
 
     function validateDeletion() {
         for (let transaction of transactions) {
             if (transaction.user_id === user.id) {
-                toasts({
+                toast({
                     title: user.name + " cannot be deleted",
                     description: "User still has transactions",
                     status: "error",
@@ -51,10 +55,24 @@ export default function DeleteUserButton({
         onOpen();
     }
 
-    function handleDeleteUser() {
-        console.log("delete user");
+    async function handleDeleteUser() {
+        try {
+            const response = await HttpService.DELETE(
+                `/splits/${split_id}/users/${user.id}`
+            );
 
-        onClose();
+            revalidateTag("users");
+            onClose();
+        } catch (error) {
+            toast({
+                title: "Unexpected error occurred while deleting user",
+                description: error,
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+            console.error("Error deleting user", error);
+        }
     }
 
     const dialog = () => {

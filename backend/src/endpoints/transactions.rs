@@ -1,10 +1,4 @@
-use actix_web::{
-    get,
-    http::header::ContentType,
-    post,
-    web::{self},
-    HttpResponse, Responder,
-};
+use actix_web::{delete, get, http::header::ContentType, post, put, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
@@ -159,4 +153,66 @@ pub async fn post(
     HttpResponse::Ok()
         .content_type(ContentType::json())
         .body(body)
+}
+
+#[put("/splits/{split_id}/transactions/{transaction_id}")]
+pub async fn put(
+    pool: web::Data<Pool<Postgres>>,
+    path: web::Path<(i32, i32)>,
+    body: web::Json<TransactionDto>,
+) -> impl Responder {
+    let (split_id, transaction_id) = path.into_inner();
+    let transaction = body.into_inner();
+
+    let row = sqlx::query!(
+        "
+        UPDATE transaction
+        SET name = $1, amount = $2, user_id = $3
+        WHERE id = $4 AND split_id = $5
+        RETURNING *
+        ",
+        transaction.name,
+        transaction.amount as f32,
+        transaction.user_id,
+        transaction_id,
+        split_id
+    )
+    .fetch_one(pool.get_ref())
+    .await
+    .unwrap();
+
+    let transaction = Transaction {
+        id: row.id,
+        name: row.name.clone(),
+        amount: row.amount as f64,
+        user_id: row.user_id,
+    };
+
+    let body = serde_json::to_string(&transaction).unwrap();
+
+    HttpResponse::Ok()
+        .content_type(ContentType::json())
+        .body(body)
+}
+
+#[delete("/splits/{split_id}/transactions/{transaction_id}")]
+pub async fn delete(
+    pool: web::Data<Pool<Postgres>>,
+    path: web::Path<(i32, i32)>,
+) -> impl Responder {
+    let (split_id, transaction_id) = path.into_inner();
+
+    sqlx::query!(
+        "
+        DELETE FROM transaction
+        WHERE id = $1 AND split_id = $2
+        ",
+        transaction_id,
+        split_id
+    )
+    .execute(pool.get_ref())
+    .await
+    .unwrap();
+
+    HttpResponse::Ok()
 }

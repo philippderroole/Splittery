@@ -14,7 +14,7 @@ import {
 import LayoutBox from "../layout_box";
 import AddTransactionButton from "./add_transaction_button";
 import DeleteTransactionButton from "./delete_transaction_button";
-import RenameTransactionButton from "./rename_transaction_button";
+import RenameTransactionButton from "./edit_transaction_button";
 
 export default async function TransactionOverview({
     split,
@@ -49,8 +49,16 @@ export default async function TransactionOverview({
                                     }
                                 </Td>
                                 <Td padding={0}>
-                                    <RenameTransactionButton />
-                                    <DeleteTransactionButton />
+                                    <RenameTransactionButton
+                                        split_id={split.id}
+                                        transaction={transaction}
+                                        users={users}
+                                    />
+                                    <DeleteTransactionButton
+                                        split_id={split.id}
+                                        transaction={transaction}
+                                        transactions={transactions}
+                                    />
                                 </Td>
                             </Tr>
                         ))}

@@ -1,5 +1,7 @@
 "use client";
 
+import { revalidateTag } from "@/app/server_actions";
+import { HttpService } from "@/services/HttpService";
 import { EditIcon } from "@chakra-ui/icons";
 import {
     Button,
@@ -16,25 +18,50 @@ import {
     ModalHeader,
     ModalOverlay,
     useDisclosure,
+    useToast,
 } from "@chakra-ui/react";
 import React from "react";
 
 export default function RenameUserButton({
+    split_id,
     user,
     users,
 }: {
+    split_id: number;
     user: any;
     users: any[];
 }) {
+    const toast = useToast();
+
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     const [name, setName] = React.useState("");
     const [touched, setTouched] = React.useState(false);
 
-    function handleRenameUser() {
-        console.log("rename user");
+    async function handleRenameUser() {
+        try {
+            let new_user = {
+                name: name,
+            };
 
-        onClose();
+            const response = await HttpService.PUT(
+                `/splits/${split_id}/users/${user.id}`,
+                new_user
+            );
+
+            revalidateTag("users");
+            revalidateTag("transactions");
+            onClose();
+        } catch (error) {
+            toast({
+                title: "Unexpected error occurred while renaming user",
+                description: error,
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+            console.error("Error renaming user", error);
+        }
     }
 
     function validate_name(): string | undefined {

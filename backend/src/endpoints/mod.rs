@@ -4,7 +4,6 @@ use sqlx::{Pool, Postgres};
 
 mod splits;
 mod transactions;
-mod transfer;
 mod users;
 
 pub async fn start_web_server(pool: Pool<Postgres>) -> std::io::Result<()> {
@@ -19,15 +18,17 @@ pub async fn start_web_server(pool: Pool<Postgres>) -> std::io::Result<()> {
             .app_data(Data::new(pool.clone()))
             .service(splits::get)
             .service(splits::post)
+            .service(splits::put)
             .service(transactions::get)
             .service(transactions::post)
+            .service(transactions::put)
+            .service(transactions::delete)
             .service(transactions::get_multiple)
             .service(users::get)
             .service(users::post)
+            .service(users::put)
+            .service(users::delete)
             .service(users::get_multiple)
-            .service(transfer::get)
-            .service(transfer::post)
-            .service(transfer::get_multiple)
     })
     .bind(("127.0.0.1", 8000))?
     .run()

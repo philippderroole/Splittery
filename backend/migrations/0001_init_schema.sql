@@ -26,12 +26,3 @@ CREATE TABLE
         FOREIGN KEY ("user_id") REFERENCES "user" ("id"),
         PRIMARY KEY ("id")
     );
-
-CREATE TABLE "transfer" (
-    "id" SERIAL,
-    "from_id" INTEGER NOT NULL,
-    "to_id" INTEGER NOT NULL,
-    FOREIGN KEY ("from_id") REFERENCES "transaction" ("id"),
-    FOREIGN KEY ("to_id") REFERENCES "transaction" ("id"),
-    PRIMARY KEY ("id")
-);

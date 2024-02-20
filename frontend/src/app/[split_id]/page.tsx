@@ -17,16 +17,15 @@ export default async function Page({
     params: { split_id: number };
 }) {
     const split_id = params.split_id;
-    const split = await HttpService.GET(`/splits/${split_id}`);
+    const split = await HttpService.GET(`/splits/${split_id}`, ["split"]);
 
-    const users = await HttpService.GET(
-        `/splits/${params.split_id}/users`,
-        ["users"],
-        "no-cache"
-    );
+    const users = await HttpService.GET(`/splits/${params.split_id}/users`, [
+        "users",
+    ]);
 
     const transactions = await HttpService.GET(
-        `/splits/${split_id}/transactions`
+        `/splits/${split_id}/transactions`,
+        ["transactions"]
     );
 
     const Breadcrumps = () => (
@@ -49,7 +48,7 @@ export default async function Page({
             padding="2em"
             flexGrow={1}>
             <Breadcrumps />
-            <SplitName name={split.name}></SplitName>
+            <SplitName split={split}></SplitName>
             <UserOverview
                 split={split}
                 users={users}

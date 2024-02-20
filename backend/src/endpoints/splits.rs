@@ -1,4 +1,4 @@
-use actix_web::{get, http::header::ContentType, post, web, HttpResponse, Responder};
+use actix_web::{get, http::header::ContentType, post, put, web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
@@ -45,6 +45,41 @@ pub async fn post(pool: web::Data<Pool<Postgres>>, body: web::Json<SplitDto>) ->
         RETURNING *
         ",
         split.name
+    )
+    .fetch_one(pool.get_ref())
+    .await
+    .unwrap();
+
+    let split = Split {
+        id: row.id,
+        name: row.name.clone(),
+    };
+
+    let body = serde_json::to_string(&split).unwrap();
+
+    HttpResponse::Ok()
+        .content_type(ContentType::json())
+        .body(body)
+}
+
+#[put("/splits/{split_id}")]
+pub async fn put(
+    pool: web::Data<Pool<Postgres>>,
+    path: web::Path<i32>,
+    body: web::Json<SplitDto>,
+) -> impl Responder {
+    let split_id = path.into_inner();
+    let split = body.into_inner();
+
+    let row = sqlx::query!(
+        "
+        UPDATE \"split\"
+        SET \"name\" = $1
+        WHERE \"id\" = $2
+        RETURNING *
+        ",
+        split.name,
+        split_id
     )
     .fetch_one(pool.get_ref())
     .await

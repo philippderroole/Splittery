@@ -47,7 +47,11 @@ export default async function UserOverview({ split, users, transactions }) {
 
         const spent = getAmountSpent(transactions, user_id);
         const received = getAmountReceived(transactions, user_id);
-        const user_total = spent + received;
+        const user_total = spent - received;
+
+        if (spent < received) {
+            return 0;
+        }
 
         if (user_total < share_per_user) {
             return 0;
@@ -62,9 +66,13 @@ export default async function UserOverview({ split, users, transactions }) {
 
         const spent = getAmountSpent(transactions, user_id);
         const received = getAmountReceived(transactions, user_id);
-        const user_total = spent + received;
+        const user_total = received - spent;
 
-        if (user_total > share_per_user) {
+        if (spent > received) {
+            return 0;
+        }
+
+        if (user_total + share_per_user < 0) {
             return 0;
         }
 
@@ -119,10 +127,12 @@ export default async function UserOverview({ split, users, transactions }) {
                                 </Td>
                                 <Td padding={0}>
                                     <RenameUserButton
+                                        split_id={split.id}
                                         user={user}
                                         users={users}
                                     />
                                     <DeleteUserButton
+                                        split_id={split.id}
                                         user={user}
                                         transactions={transactions}
                                     />
