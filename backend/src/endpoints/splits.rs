@@ -4,12 +4,12 @@ use sqlx::{Pool, Postgres};
 
 #[derive(Serialize)]
 pub struct Split {
-    id: i32,
+    id: String,
     name: String,
 }
 
 #[get("/splits/{split_id}")]
-pub async fn get(pool: web::Data<Pool<Postgres>>, path: web::Path<i32>) -> impl Responder {
+pub async fn get(pool: web::Data<Pool<Postgres>>, path: web::Path<String>) -> impl Responder {
     let split_id = path.into_inner();
 
     let rows = sqlx::query!("SELECT * FROM \"split\" WHERE \"id\" = $1", split_id)
@@ -51,7 +51,7 @@ pub async fn post(pool: web::Data<Pool<Postgres>>, body: web::Json<SplitDto>) ->
     .unwrap();
 
     let split = Split {
-        id: row.id,
+        id: row.id.clone(),
         name: row.name.clone(),
     };
 
@@ -65,7 +65,7 @@ pub async fn post(pool: web::Data<Pool<Postgres>>, body: web::Json<SplitDto>) ->
 #[put("/splits/{split_id}")]
 pub async fn put(
     pool: web::Data<Pool<Postgres>>,
-    path: web::Path<i32>,
+    path: web::Path<String>,
     body: web::Json<SplitDto>,
 ) -> impl Responder {
     let split_id = path.into_inner();

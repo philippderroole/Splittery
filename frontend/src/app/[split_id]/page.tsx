@@ -14,14 +14,12 @@ import UserOverview from "./components/user_overview/user_overview";
 export default async function Page({
     params,
 }: {
-    params: { split_id: number };
+    params: { split_id: string };
 }) {
     const split_id = params.split_id;
     const split = await HttpService.GET(`/splits/${split_id}`, ["split"]);
 
-    const users = await HttpService.GET(`/splits/${params.split_id}/users`, [
-        "users",
-    ]);
+    const users = await HttpService.GET(`/splits/${split_id}/users`, ["users"]);
 
     const transactions = await HttpService.GET(
         `/splits/${split_id}/transactions`,

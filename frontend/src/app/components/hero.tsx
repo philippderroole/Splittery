@@ -35,8 +35,8 @@ export default function Hero() {
                         onClick={() => {
                             HttpService.POST("/splits", {
                                 name: "My new split",
-                            }).then((response) => {
-                                router.push("/" + response.id);
+                            }).then((split) => {
+                                router.push("/" + split.id);
                             });
                         }}>
                         Create a split →

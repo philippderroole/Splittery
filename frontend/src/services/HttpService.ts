@@ -57,7 +57,6 @@ export abstract class HttpService {
                 if (this.log_requests) {
                     console.log("Response: " + JSON.stringify(data));
                 }
-                console.log("Response: " + JSON.stringify(data));
                 return data;
             });
     }
@@ -83,6 +82,15 @@ export abstract class HttpService {
                     JSON.stringify(body)
             );
         }
+
+        console.log(
+            method +
+                " request to url: " +
+                this.api_url +
+                route +
+                " with body: " +
+                JSON.stringify(body)
+        );
 
         return fetch(this.api_url + route, {
             method: method,

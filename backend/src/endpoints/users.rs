@@ -9,7 +9,10 @@ pub struct User {
 }
 
 #[get("/splits/{split_id}/users/{user_id}")]
-pub async fn get(pool: web::Data<Pool<Postgres>>, path: web::Path<(i32, i32)>) -> impl Responder {
+pub async fn get(
+    pool: web::Data<Pool<Postgres>>,
+    path: web::Path<(String, i32)>,
+) -> impl Responder {
     let (split_id, user_id) = path.into_inner();
 
     let rows = sqlx::query!(
@@ -38,7 +41,10 @@ pub async fn get(pool: web::Data<Pool<Postgres>>, path: web::Path<(i32, i32)>) -
 }
 
 #[get("/splits/{split_id}/users")]
-pub async fn get_multiple(pool: web::Data<Pool<Postgres>>, path: web::Path<i32>) -> impl Responder {
+pub async fn get_multiple(
+    pool: web::Data<Pool<Postgres>>,
+    path: web::Path<String>,
+) -> impl Responder {
     let split_id = path.into_inner();
 
     let rows = sqlx::query!(
@@ -76,7 +82,7 @@ pub struct UserDto {
 #[post("/splits/{split_id}/users")]
 pub async fn post(
     pool: web::Data<Pool<Postgres>>,
-    path: web::Path<i32>,
+    path: web::Path<String>,
     user: web::Json<UserDto>,
 ) -> impl Responder {
     let split_id = path.into_inner();
@@ -109,7 +115,7 @@ pub async fn post(
 #[put("/splits/{split_id}/users/{user_id}")]
 pub async fn put(
     pool: web::Data<Pool<Postgres>>,
-    path: web::Path<(i32, i32)>,
+    path: web::Path<(String, i32)>,
     user: web::Json<UserDto>,
 ) -> impl Responder {
     let (split_id, user_id) = path.into_inner();
@@ -144,7 +150,7 @@ pub async fn put(
 #[delete("/splits/{split_id}/users/{user_id}")]
 pub async fn delete(
     pool: web::Data<Pool<Postgres>>,
-    path: web::Path<(i32, i32)>,
+    path: web::Path<(String, i32)>,
 ) -> impl Responder {
     let (split_id, user_id) = path.into_inner();
 
