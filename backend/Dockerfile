@@ -17,7 +17,8 @@ FROM debian:bullseye-slim
 # Copy the binary from the builder image to the new image
 COPY --from=builder /usr/local/cargo/bin/share_expenses_backend /usr/local/bin/share_expenses_backend
 
-ENV LISTEN_URL=0.0.0.0:8000
+ENV LISTEN_URL=0.0.0.0
+ENV LISTEN_PORT=8000
 
 # Expose the port that the application will run on
 EXPOSE 8000
