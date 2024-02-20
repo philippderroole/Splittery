@@ -1,14 +1,36 @@
-use rand::{distributions::Alphanumeric, Rng};
+use actix_cors::Cors;
+use actix_web::{web::Data, App, HttpServer};
+use sqlx::{Pool, Postgres};
 
-pub mod activity;
-pub mod balance;
-pub mod expense;
-pub mod user;
+mod splits;
+mod transactions;
+mod users;
 
-fn create_id(length: usize) -> String {
-    rand::thread_rng()
-        .sample_iter(&Alphanumeric)
-        .take(length)
-        .map(char::from)
-        .collect()
+pub async fn start_web_server(pool: Pool<Postgres>) -> std::io::Result<()> {
+    HttpServer::new(move || {
+        let cors = Cors::default()
+            .allow_any_origin()
+            .allow_any_method()
+            .allow_any_header();
+
+        App::new()
+            .wrap(cors)
+            .app_data(Data::new(pool.clone()))
+            .service(splits::get)
+            .service(splits::post)
+            .service(splits::put)
+            .service(transactions::get)
+            .service(transactions::post)
+            .service(transactions::put)
+            .service(transactions::delete)
+            .service(transactions::get_multiple)
+            .service(users::get)
+            .service(users::post)
+            .service(users::put)
+            .service(users::delete)
+            .service(users::get_multiple)
+    })
+    .bind(("127.0.0.1", 8000))?
+    .run()
+    .await
 }
