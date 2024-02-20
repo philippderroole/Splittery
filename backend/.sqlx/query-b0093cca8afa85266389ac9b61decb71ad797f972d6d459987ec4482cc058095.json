@@ -16,7 +16,7 @@
       {
         "ordinal": 2,
         "name": "split_id",
-        "type_info": "Int4"
+        "type_info": "Text"
       },
       {
         "ordinal": 3,
@@ -35,7 +35,7 @@
         "Int4",
         "Int4",
         "Int4",
-        "Int4"
+        "Text"
       ]
     },
     "nullable": [

@@ -16,12 +16,12 @@
       {
         "ordinal": 2,
         "name": "split_id",
-        "type_info": "Int4"
+        "type_info": "Text"
       }
     ],
     "parameters": {
       "Left": [
-        "Int4",
+        "Text",
         "Text"
       ]
     },
