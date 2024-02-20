@@ -11,8 +11,10 @@ import {
     Thead,
     Tr,
 } from "@chakra-ui/react";
+import LayoutBox from "../layout_box";
 import AddTransactionButton from "./add_transaction_button";
-import LayoutBox from "./layout_box";
+import DeleteTransactionButton from "./delete_transaction_button";
+import RenameTransactionButton from "./rename_transaction_button";
 
 export default async function TransactionOverview({
     split,
@@ -28,6 +30,7 @@ export default async function TransactionOverview({
                             <Th>Name</Th>
                             <Th>Amount</Th>
                             <Th>User</Th>
+                            <Th></Th>
                         </Tr>
                     </Thead>
                     <Tbody>
@@ -44,6 +47,10 @@ export default async function TransactionOverview({
                                                 user.id === transaction.user_id
                                         ).name
                                     }
+                                </Td>
+                                <Td padding={0}>
+                                    <RenameTransactionButton />
+                                    <DeleteTransactionButton />
                                 </Td>
                             </Tr>
                         ))}

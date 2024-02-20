@@ -14,8 +14,10 @@ import {
     Thead,
     Tr,
 } from "@chakra-ui/react";
+import LayoutBox from "../layout_box";
 import AddUserButton from "./add_user_button";
-import LayoutBox from "./layout_box";
+import DeleteUserButton from "./delete_user_button";
+import RenameUserButton from "./rename_user_button";
 
 export default async function UserOverview({ split, users, transactions }) {
     function getTotalAmountSpent(transactions) {
@@ -39,6 +41,36 @@ export default async function UserOverview({ split, users, transactions }) {
             .reduce((acc, transaction) => acc + transaction.amount, 0);
     }
 
+    function getAmountLent(transactions, users, user_id: number) {
+        const total = getTotalAmountSpent(transactions);
+        const share_per_user = total / users.length;
+
+        const spent = getAmountSpent(transactions, user_id);
+        const received = getAmountReceived(transactions, user_id);
+        const user_total = spent + received;
+
+        if (user_total < share_per_user) {
+            return 0;
+        }
+
+        return user_total - share_per_user;
+    }
+
+    function getAmountDue(transactions, users, user_id: number) {
+        const total = getTotalAmountSpent(transactions);
+        const share_per_user = total / users.length;
+
+        const spent = getAmountSpent(transactions, user_id);
+        const received = getAmountReceived(transactions, user_id);
+        const user_total = spent + received;
+
+        if (user_total > share_per_user) {
+            return 0;
+        }
+
+        return user_total + share_per_user;
+    }
+
     function UsersTable() {
         return (
             <TableContainer>
@@ -48,7 +80,9 @@ export default async function UserOverview({ split, users, transactions }) {
                             <Th>User</Th>
                             <Th>Spent</Th>
                             <Th>Received</Th>
-                            <Th>Gets</Th>
+                            <Th>Due</Th>
+                            <Th>Lent</Th>
+                            <Th></Th>
                         </Tr>
                     </Thead>
                     <Tbody>
@@ -65,7 +99,34 @@ export default async function UserOverview({ split, users, transactions }) {
                                         getAmountReceived(transactions, user.id)
                                     )}
                                 </Td>
-                                <Td isNumeric>0.00€</Td>
+                                <Td isNumeric>
+                                    {CurrencyFormat.format(
+                                        getAmountDue(
+                                            transactions,
+                                            users,
+                                            user.id
+                                        )
+                                    )}
+                                </Td>
+                                <Td isNumeric>
+                                    {CurrencyFormat.format(
+                                        getAmountLent(
+                                            transactions,
+                                            users,
+                                            user.id
+                                        )
+                                    )}
+                                </Td>
+                                <Td padding={0}>
+                                    <RenameUserButton
+                                        user={user}
+                                        users={users}
+                                    />
+                                    <DeleteUserButton
+                                        user={user}
+                                        transactions={transactions}
+                                    />
+                                </Td>
                             </Tr>
                         ))}
                     </Tbody>

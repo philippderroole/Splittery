@@ -8,8 +8,8 @@ import {
     Flex,
 } from "@chakra-ui/react";
 import SplitName from "./components/split_name";
-import TransactionOverview from "./components/transaction_overview";
-import UserOverview from "./components/user_overview";
+import TransactionOverview from "./components/transaction_overview/transaction_overview";
+import UserOverview from "./components/user_overview/user_overview";
 
 export default async function Page({
     params,
