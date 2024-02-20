@@ -12,7 +12,7 @@ import {
     Tr,
 } from "@chakra-ui/react";
 import LayoutBox from "../layout_box";
-import AddTransactionButton from "./add_transaction_button";
+import CreateTransactionButton from "./create_transaction_button";
 import DeleteTransactionButton from "./delete_transaction_button";
 import RenameTransactionButton from "./edit_transaction_button";
 
@@ -76,9 +76,9 @@ export default async function TransactionOverview({
                 direction="row"
                 justifyContent="right"
                 alignItems="center">
-                <AddTransactionButton
+                <CreateTransactionButton
                     split_id={split.id}
-                    users={users}></AddTransactionButton>
+                    users={users}></CreateTransactionButton>
             </Flex>
         </LayoutBox>
     );

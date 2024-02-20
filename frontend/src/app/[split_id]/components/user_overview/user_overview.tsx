@@ -15,9 +15,9 @@ import {
     Tr,
 } from "@chakra-ui/react";
 import LayoutBox from "../layout_box";
-import AddUserButton from "./add_user_button";
+import CreateUserButton from "./create_user_button";
 import DeleteUserButton from "./delete_user_button";
-import RenameUserButton from "./rename_user_button";
+import EditUserButton from "./edit_user_button";
 
 export default async function UserOverview({ split, users, transactions }) {
     function getTotalAmountSpent(transactions) {
@@ -126,7 +126,7 @@ export default async function UserOverview({ split, users, transactions }) {
                                     )}
                                 </Td>
                                 <Td padding={0}>
-                                    <RenameUserButton
+                                    <EditUserButton
                                         split_id={split.id}
                                         user={user}
                                         users={users}
@@ -153,9 +153,9 @@ export default async function UserOverview({ split, users, transactions }) {
                 justifyContent="space-between"
                 alignItems="center">
                 <Total amount={5} />
-                <AddUserButton
+                <CreateUserButton
                     split_id={split.id}
-                    users={users}></AddUserButton>
+                    users={users}></CreateUserButton>
             </Flex>
         );
     }
