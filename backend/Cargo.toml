@@ -1,5 +1,5 @@
 [package]
-name = "share_expenses_backend"
+name = "splittery_backend"
 version = "0.1.0"
 edition = "2021"
 

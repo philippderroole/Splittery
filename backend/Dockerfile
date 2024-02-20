@@ -1,9 +1,9 @@
 # Use the official Rust image as the base image
-FROM rustlang/rust:nightly-slim as builder
+FROM rust:slim-bullseye as builder
 
 # Create a new directory for the application
-RUN mkdir -p /usr/src/share_expenses_backend
-WORKDIR /usr/src/share_expenses_backend
+RUN mkdir -p /usr/src/splittery_backend
+WORKDIR /usr/src/splittery_backend
 
 # Copy the Rust project into the container
 COPY . .
@@ -15,7 +15,7 @@ RUN cargo install --path .
 FROM debian:bullseye-slim
 
 # Copy the binary from the builder image to the new image
-COPY --from=builder /usr/local/cargo/bin/share_expenses_backend /usr/local/bin/share_expenses_backend
+COPY --from=builder /usr/local/cargo/bin/splittery_backend /usr/local/bin/splittery_backend
 
 ENV LISTEN_URL=0.0.0.0
 ENV LISTEN_PORT=8000
@@ -24,4 +24,4 @@ ENV LISTEN_PORT=8000
 EXPOSE 8000
 
 # Start the application
-CMD ["share_expenses_backend"]
+CMD ["splittery_backend"]
