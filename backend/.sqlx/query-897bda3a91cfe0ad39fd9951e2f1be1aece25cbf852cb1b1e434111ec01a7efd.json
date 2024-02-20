@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        DELETE FROM transaction\n        WHERE id = $1 AND split_id = $2\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "897bda3a91cfe0ad39fd9951e2f1be1aece25cbf852cb1b1e434111ec01a7efd"
+}

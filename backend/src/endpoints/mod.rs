@@ -7,6 +7,9 @@ mod transactions;
 mod users;
 
 pub async fn start_web_server(pool: Pool<Postgres>) -> std::io::Result<()> {
+    let listen_url = dotenv::var("LISTEN_URL").unwrap();
+    let listen_port: u16 = dotenv::var("LISTEN_PORT").unwrap().parse().unwrap();
+
     HttpServer::new(move || {
         let cors = Cors::default()
             .allow_any_origin()
@@ -30,7 +33,7 @@ pub async fn start_web_server(pool: Pool<Postgres>) -> std::io::Result<()> {
             .service(users::delete)
             .service(users::get_multiple)
     })
-    .bind(("127.0.0.1", 8000))?
+    .bind((listen_url, listen_port))?
     .run()
     .await
 }

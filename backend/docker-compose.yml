@@ -8,16 +8,17 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: 1234
-      POSTGRES_DB: share_expenses
+      POSTGRES_DB: splittery
     volumes:
       - db-data:/var/lib/postgresql/data
 
   app:
     build: .
     ports:
-      - "8080:8000"
+      - "8000:8000"
     depends_on:
       - db
-
+    environment:
+      - DATABASE_URL=postgres://postgres:1234@db:5432/splittery
 volumes:
   db-data:
