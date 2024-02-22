@@ -1,6 +1,8 @@
 "use client";
 
 import { revalidateTag } from "@/app/server_actions";
+import { Transaction } from "@/app/types/transaction";
+import { CurrencyFormat } from "@/services/CurrencyFormat";
 import { HttpService } from "@/services/HttpService";
 import { EditIcon } from "@chakra-ui/icons";
 import {
@@ -51,8 +53,8 @@ export default function RenameTransactionButton({
         transaction.amount < 0 ? 0 : 1
     );
 
-    const [name, setName] = React.useState(transaction.name);
-    const [nameTouched, setNameTouched] = React.useState(false);
+    const [title, setTitle] = React.useState(transaction.title);
+    const [titleTouched, setTitleTouched] = React.useState(false);
 
     const [amount, setAmount] = React.useState(Math.abs(transaction.amount));
     const [amountTouched, setAmountTouched] = React.useState(false);
@@ -61,7 +63,7 @@ export default function RenameTransactionButton({
     const [receiverId, setReceiverId] = React.useState(transaction.user_id);
 
     function close() {
-        setNameTouched(false);
+        setTitleTouched(false);
         setAmountTouched(false);
         onClose();
     }
@@ -72,8 +74,8 @@ export default function RenameTransactionButton({
         }
 
         try {
-            let new_transaction = {
-                name: name,
+            let new_transaction: Transaction = {
+                title: title,
                 amount: -amount,
                 user_id: payerId,
             };
@@ -89,7 +91,7 @@ export default function RenameTransactionButton({
         } catch (error) {
             toast({
                 title: "Unexpected error occurred while renaming transaction",
-                description: error,
+                description: error.message,
                 status: "error",
                 duration: 5000,
                 isClosable: true,
@@ -104,8 +106,8 @@ export default function RenameTransactionButton({
         }
 
         try {
-            let new_transaction = {
-                name: name,
+            let new_transaction: Transaction = {
+                title: title,
                 amount: amount,
                 user_id: receiverId,
             };
@@ -121,7 +123,7 @@ export default function RenameTransactionButton({
         } catch (error) {
             toast({
                 title: "Unexpected error occurred while renaming transaction",
-                description: error,
+                description: error.message,
                 status: "error",
                 duration: 5000,
                 isClosable: true,
@@ -131,10 +133,10 @@ export default function RenameTransactionButton({
     }
 
     async function handleEditTransaction() {
-        setNameTouched(true);
+        setTitleTouched(true);
         setAmountTouched(true);
 
-        if (validate_name(name) != undefined) {
+        if (validate_name(title) != undefined) {
             return;
         }
         if (validate_amount(amount) != undefined) {
@@ -155,16 +157,16 @@ export default function RenameTransactionButton({
         <FormControl
             paddingY={2}
             isRequired
-            isInvalid={validate_name(name) != undefined && nameTouched}>
-            <FormLabel>Name</FormLabel>
+            isInvalid={validate_name(title) != undefined && titleTouched}>
+            <FormLabel>Title</FormLabel>
             <Input
-                defaultValue={name}
-                key="name"
-                placeholder="Name"
-                onFocus={() => setNameTouched(true)}
-                onChange={(e) => setName(e.target.value)}
+                defaultValue={title}
+                key="title"
+                placeholder="Title"
+                onFocus={() => setTitleTouched(true)}
+                onChange={(e) => setTitle(e.target.value)}
             />
-            <FormErrorMessage>{validate_name(name)}</FormErrorMessage>
+            <FormErrorMessage>{validate_name(title)}</FormErrorMessage>
         </FormControl>
     );
 
@@ -175,9 +177,10 @@ export default function RenameTransactionButton({
             isInvalid={validate_amount(amount) != undefined && amountTouched}>
             <FormLabel>Amount</FormLabel>
             <Input
-                defaultValue={amount || undefined}
+                defaultValue={CurrencyFormat.format(amount) || undefined}
                 key="amount"
                 placeholder="Amount"
+                type="number"
                 onFocus={() => setAmountTouched(true)}
                 onChange={(e) => setAmount(parseFloat(e.target.value))}
             />

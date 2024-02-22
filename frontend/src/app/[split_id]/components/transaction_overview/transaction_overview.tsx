@@ -27,7 +27,7 @@ export default async function TransactionOverview({
                 <Table variant="simple">
                     <Thead>
                         <Tr>
-                            <Th>Name</Th>
+                            <Th>Title</Th>
                             <Th>Amount</Th>
                             <Th>User</Th>
                             <Th></Th>

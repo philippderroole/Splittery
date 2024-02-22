@@ -1,6 +1,7 @@
 "use client";
 
 import { revalidateTag } from "@/app/server_actions";
+import { Transaction } from "@/app/types/transaction";
 import { HttpService } from "@/services/HttpService";
 import { AddIcon } from "@chakra-ui/icons";
 import {
@@ -47,7 +48,7 @@ export default function CreateTransactionButton({
 
     const [tabIndex, setTabIndex] = React.useState(0);
 
-    const [name, setName] = React.useState("");
+    const [title, setName] = React.useState("");
     const [nameTouched, setNameTouched] = React.useState(false);
 
     const [amount, setAmount] = React.useState(0);
@@ -78,9 +79,8 @@ export default function CreateTransactionButton({
         }
 
         try {
-            let new_transaction1 = {
-                split_id: split_id,
-                name: name,
+            let new_transaction1: Transaction = {
+                title: title,
                 amount: -amount,
                 user_id: users.find((user) => user.id === payerId).id,
             };
@@ -90,9 +90,8 @@ export default function CreateTransactionButton({
                 new_transaction1
             );
 
-            let new_transaction2 = {
-                split_id: split_id,
-                name: name,
+            let new_transaction2: Transaction = {
+                title: title,
                 amount: amount,
                 user_id: users.find((user) => user.id === receiverId).id,
             };
@@ -107,7 +106,7 @@ export default function CreateTransactionButton({
         } catch (error) {
             toast({
                 title: "Unexpected error occurred while creating transaction",
-                description: error,
+                description: error.message,
                 status: "error",
                 duration: 5000,
                 isClosable: true,
@@ -122,9 +121,8 @@ export default function CreateTransactionButton({
         }
 
         try {
-            let new_transaction = {
-                split_id: split_id,
-                name: name,
+            let new_transaction: Transaction = {
+                title: title,
                 amount: -amount,
                 user_id: users.find((user) => user.id === payerId).id,
             };
@@ -139,7 +137,7 @@ export default function CreateTransactionButton({
         } catch (error) {
             toast({
                 title: "Unexpected error occurred while creating transaction",
-                description: error,
+                description: error.message,
                 status: "error",
                 duration: 5000,
                 isClosable: true,
@@ -154,9 +152,8 @@ export default function CreateTransactionButton({
         }
 
         try {
-            let new_transaction = {
-                split_id: split_id,
-                name: name,
+            let new_transaction: Transaction = {
+                title: title,
                 amount: amount,
                 user_id: users.find((user) => user.id === payerId).id,
             };
@@ -171,7 +168,7 @@ export default function CreateTransactionButton({
         } catch (error) {
             toast({
                 title: "Unexpected error occurred while creating transaction",
-                description: error,
+                description: error.message,
                 status: "error",
                 duration: 5000,
                 isClosable: true,
@@ -184,7 +181,7 @@ export default function CreateTransactionButton({
         setNameTouched(true);
         setAmountTouched(true);
 
-        if (validate_name(name) != undefined) {
+        if (validate_name(title) != undefined) {
             return;
         }
         if (validate_amount(amount) != undefined) {
@@ -229,17 +226,17 @@ export default function CreateTransactionButton({
         <FormControl
             paddingY={2}
             isRequired
-            isInvalid={validate_name(name) != undefined && nameTouched}>
-            <FormLabel>Name</FormLabel>
+            isInvalid={validate_name(title) != undefined && nameTouched}>
+            <FormLabel>Title</FormLabel>
             <Input
-                key="name"
-                placeholder="Name"
+                key="title"
+                placeholder="Title"
                 onChange={(e) => {
                     setName(e.target.value);
                     setNameTouched(true);
                 }}
             />
-            <FormErrorMessage>{validate_name(name)}</FormErrorMessage>
+            <FormErrorMessage>{validate_name(title)}</FormErrorMessage>
         </FormControl>
     );
 
@@ -252,6 +249,7 @@ export default function CreateTransactionButton({
             <Input
                 key="amount"
                 placeholder="Amount"
+                type="number"
                 onChange={(e) => {
                     setAmount(parseFloat(e.target.value));
                     setAmountTouched(true);

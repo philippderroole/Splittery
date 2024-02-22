@@ -62,7 +62,7 @@ export default function EditUserButton({
         } catch (error) {
             toast({
                 title: "Unexpected error occurred while renaming user",
-                description: error,
+                description: error.message,
                 status: "error",
                 duration: 5000,
                 isClosable: true,

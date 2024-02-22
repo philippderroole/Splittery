@@ -5,7 +5,8 @@ use sqlx::{Pool, Postgres};
 #[derive(Serialize)]
 pub struct Transaction {
     id: i32,
-    name: String,
+    title: String,
+    description: Option<String>,
     amount: f64,
     user_id: i32,
 }
@@ -32,7 +33,8 @@ pub async fn get(
 
     let transaction = Transaction {
         id: row.id,
-        name: row.name.clone(),
+        title: row.title.clone(),
+        description: row.description.clone(),
         amount: row.amount as f64,
         user_id: row.user_id,
     };
@@ -76,8 +78,9 @@ pub async fn get_multiple(
             rows.iter()
                 .map(|row| Transaction {
                     id: row.id,
-                    name: row.name.clone(),
-                    amount: row.amount as f64,
+                    title: row.title.clone(),
+                    description: row.description.clone(),
+                    amount: row.amount,
                     user_id: row.user_id,
                 })
                 .collect::<Vec<Transaction>>()
@@ -98,8 +101,9 @@ pub async fn get_multiple(
             rows.iter()
                 .map(|row| Transaction {
                     id: row.id,
-                    name: row.name.clone(),
-                    amount: row.amount as f64,
+                    title: row.title.clone(),
+                    description: row.description.clone(),
+                    amount: row.amount,
                     user_id: row.user_id,
                 })
                 .collect::<Vec<Transaction>>()
@@ -115,7 +119,8 @@ pub async fn get_multiple(
 
 #[derive(Deserialize)]
 struct TransactionDto {
-    name: String,
+    title: String,
+    description: Option<String>,
     amount: f64,
     user_id: i32,
 }
@@ -131,11 +136,12 @@ pub async fn post(
 
     let row = sqlx::query!(
         "
-        INSERT INTO transaction (name, amount, user_id, split_id)
-        VALUES ($1, $2, $3, $4)
+        INSERT INTO transaction (title, description, amount, user_id, split_id)
+        VALUES ($1, $2, $3, $4, $5)
         RETURNING *
         ",
-        transaction.name,
+        transaction.title,
+        transaction.description,
         transaction.amount as f32,
         transaction.user_id,
         split_id
@@ -146,7 +152,8 @@ pub async fn post(
 
     let transaction = Transaction {
         id: row.id,
-        name: row.name.clone(),
+        title: row.title.clone(),
+        description: row.description.clone(),
         amount: row.amount as f64,
         user_id: row.user_id,
     };
@@ -170,11 +177,13 @@ pub async fn put(
     let row = sqlx::query!(
         "
         UPDATE transaction
-        SET name = $1, amount = $2, user_id = $3
-        WHERE id = $4 AND split_id = $5
+        SET title = $1, description = $2,
+        amount = $3, user_id = $4
+        WHERE id = $5 AND split_id = $6
         RETURNING *
         ",
-        transaction.name,
+        transaction.title,
+        transaction.description,
         transaction.amount as f32,
         transaction.user_id,
         transaction_id,
@@ -186,7 +195,8 @@ pub async fn put(
 
     let transaction = Transaction {
         id: row.id,
-        name: row.name.clone(),
+        title: row.title.clone(),
+        description: row.description.clone(),
         amount: row.amount as f64,
         user_id: row.user_id,
     };

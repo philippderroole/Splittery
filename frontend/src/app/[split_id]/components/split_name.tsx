@@ -36,7 +36,7 @@ export default function SplitName({ split }: { split: any }) {
         } catch (error) {
             toast({
                 title: "Unexpected error occurred while renaming split",
-                description: error,
+                description: error.message,
                 status: "error",
                 duration: 5000,
                 isClosable: true,

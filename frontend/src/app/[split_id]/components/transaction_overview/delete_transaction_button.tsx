@@ -53,7 +53,7 @@ export default function DeleteTransactionButton({
         } catch (error) {
             toast({
                 title: "Unexpected error occurred while deleting transaction",
-                description: error,
+                description: error.message,
                 status: "error",
                 duration: 5000,
                 isClosable: true,

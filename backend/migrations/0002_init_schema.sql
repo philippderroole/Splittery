@@ -20,10 +20,11 @@ CREATE TABLE
 CREATE TABLE
     "transaction" (
         "id" SERIAL,
-        "name" TEXT NOT NULL,
+        "title" TEXT NOT NULL,
+        "description" TEXT,
         "split_id" TEXT NOT NULL,
         "user_id" INTEGER NOT NULL,
-        "amount" INTEGER NOT NULL,
+        "amount" DOUBLE PRECISION NOT NULL,
         FOREIGN KEY ("split_id") REFERENCES "split" ("id"),
         FOREIGN KEY ("user_id") REFERENCES "user" ("id"),
         PRIMARY KEY ("id")
