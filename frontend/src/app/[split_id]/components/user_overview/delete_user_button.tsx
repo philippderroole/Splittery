@@ -66,7 +66,7 @@ export default function DeleteUserButton({
         } catch (error) {
             toast({
                 title: "Unexpected error occurred while deleting user",
-                description: error,
+                description: error.message,
                 status: "error",
                 duration: 5000,
                 isClosable: true,

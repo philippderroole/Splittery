@@ -10,23 +10,28 @@
       },
       {
         "ordinal": 1,
-        "name": "name",
+        "name": "title",
         "type_info": "Text"
       },
       {
         "ordinal": 2,
-        "name": "split_id",
+        "name": "description",
         "type_info": "Text"
       },
       {
         "ordinal": 3,
+        "name": "split_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
         "name": "user_id",
         "type_info": "Int4"
       },
       {
-        "ordinal": 4,
+        "ordinal": 5,
         "name": "amount",
-        "type_info": "Int4"
+        "type_info": "Float8"
       }
     ],
     "parameters": {
@@ -37,6 +42,7 @@
     "nullable": [
       false,
       false,
+      true,
       false,
       false,
       false
