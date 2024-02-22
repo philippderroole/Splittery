@@ -1,10 +1,26 @@
 "use server";
 
 import { CurrencyFormat } from "@/services/CurrencyFormat";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+
 import {
+    Accordion,
+    AccordionButton,
+    AccordionIcon,
+    AccordionItem,
+    AccordionPanel,
     Box,
     Flex,
     Heading,
+    Hide,
+    IconButton,
+    Popover,
+    PopoverArrow,
+    PopoverBody,
+    PopoverContent,
+    PopoverTrigger,
+    Show,
+    Spacer,
     Table,
     TableContainer,
     Tbody,
@@ -79,53 +95,112 @@ export default async function UserOverview({ split, users, transactions }) {
         return user_total + share_per_user;
     }
 
-    function UsersTable() {
-        return (
-            <TableContainer>
-                <Table variant="simple">
-                    <Thead>
-                        <Tr>
-                            <Th>User</Th>
-                            <Th>Spent</Th>
-                            <Th>Received</Th>
-                            <Th>Due</Th>
-                            <Th>Lent</Th>
-                            <Th></Th>
+    const userTable = (
+        <TableContainer>
+            <Table variant="simple">
+                <Thead>
+                    <Tr>
+                        <Th>User</Th>
+                        <Th>Spent</Th>
+                        <Th>Received</Th>
+                        <Th>Due</Th>
+                        <Th>Lent</Th>
+                        <Th></Th>
+                    </Tr>
+                </Thead>
+                <Tbody>
+                    {users.map((user) => (
+                        <Tr key={user.id}>
+                            <Td>{user.name}</Td>
+                            <Td isNumeric>
+                                {CurrencyFormat.format(
+                                    getAmountSpent(transactions, user.id)
+                                )}
+                            </Td>
+                            <Td isNumeric>
+                                {CurrencyFormat.format(
+                                    getAmountReceived(transactions, user.id)
+                                )}
+                            </Td>
+                            <Td isNumeric>
+                                {CurrencyFormat.format(
+                                    getAmountDue(transactions, users, user.id)
+                                )}
+                            </Td>
+                            <Td isNumeric>
+                                {CurrencyFormat.format(
+                                    getAmountLent(transactions, users, user.id)
+                                )}
+                            </Td>
+                            <Td padding={0}>
+                                <EditUserButton
+                                    split_id={split.id}
+                                    user={user}
+                                    users={users}
+                                />
+                                <DeleteUserButton
+                                    split_id={split.id}
+                                    user={user}
+                                    transactions={transactions}
+                                />
+                            </Td>
                         </Tr>
-                    </Thead>
-                    <Tbody>
-                        {users.map((user) => (
-                            <Tr key={user.id}>
-                                <Td>{user.name}</Td>
-                                <Td isNumeric>
-                                    {CurrencyFormat.format(
-                                        getAmountSpent(transactions, user.id)
-                                    )}
-                                </Td>
-                                <Td isNumeric>
-                                    {CurrencyFormat.format(
-                                        getAmountReceived(transactions, user.id)
-                                    )}
-                                </Td>
-                                <Td isNumeric>
-                                    {CurrencyFormat.format(
-                                        getAmountDue(
-                                            transactions,
-                                            users,
-                                            user.id
-                                        )
-                                    )}
-                                </Td>
-                                <Td isNumeric>
-                                    {CurrencyFormat.format(
-                                        getAmountLent(
-                                            transactions,
-                                            users,
-                                            user.id
-                                        )
-                                    )}
-                                </Td>
-                                <Td padding={0}>
+                    ))}
+                </Tbody>
+            </Table>
+        </TableContainer>
+    );
+
+    const total = (
+        <Box>
+            <Heading fontSize="3xl">
+                {CurrencyFormat.format(getTotalAmountSpent(transactions))}
+            </Heading>
+            <Text opacity={0.7} fontSize="sm">
+                Total Spent
+            </Text>
+        </Box>
+    );
+
+    const tableFooter = (
+        <Flex
+            paddingTop={3}
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center">
+            {total}
+            <CreateUserButton
+                split_id={split.id}
+                users={users}></CreateUserButton>
+        </Flex>
+    );
+
+    const userAccordion = (
+        <Accordion width="2xs" allowMultiple>
+            {users.map((user) => (
+                <AccordionItem>
+                    <h2 style={{ display: "flex", alignItems: "center" }}>
+                        <AccordionButton as="div" paddingRight={0}>
+                            {user.name}
+                            <AccordionIcon />
+                            <Spacer />
+                            {CurrencyFormat.format(
+                                getAmountDue(transactions, users, user.id)
+                            )}
+                        </AccordionButton>
+
+                        <Popover>
+                            <PopoverTrigger>
+                                <IconButton
+                                    icon={<MoreVertIcon />}
+                                    aria-label={""}
+                                    variant="link"
+                                    size="sm"
+                                />
+                            </PopoverTrigger>
+                            <PopoverContent width={"fit-content"}>
+                                <PopoverArrow />
+                                <PopoverBody>
                                     <EditUserButton
                                         split_id={split.id}
                                         user={user}
@@ -136,47 +211,83 @@ export default async function UserOverview({ split, users, transactions }) {
                                         user={user}
                                         transactions={transactions}
                                     />
-                                </Td>
-                            </Tr>
-                        ))}
-                    </Tbody>
-                </Table>
-            </TableContainer>
-        );
-    }
-
-    function TableFooter() {
-        return (
-            <Flex
-                paddingTop={3}
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center">
-                <Total amount={5} />
-                <CreateUserButton
-                    split_id={split.id}
-                    users={users}></CreateUserButton>
-            </Flex>
-        );
-    }
-
-    function Total({ amount }: { amount: number }) {
-        return (
-            <Box>
-                <Heading fontSize="3xl">
-                    {CurrencyFormat.format(getTotalAmountSpent(transactions))}
-                </Heading>
-                <Text opacity={0.7} fontSize="sm">
-                    Total Spent
-                </Text>
-            </Box>
-        );
-    }
+                                </PopoverBody>
+                            </PopoverContent>
+                        </Popover>
+                    </h2>
+                    <AccordionPanel paddingBottom={4}>
+                        <TableContainer>
+                            <Table variant="simple">
+                                <Tbody>
+                                    <Tr>
+                                        <Td paddingY={2}>Spent:</Td>
+                                        <Td paddingY={2} isNumeric>
+                                            {CurrencyFormat.format(
+                                                getAmountSpent(
+                                                    transactions,
+                                                    user.id
+                                                )
+                                            )}
+                                        </Td>
+                                    </Tr>
+                                    <Tr>
+                                        <Td paddingY={2}>Received:</Td>
+                                        <Td paddingY={2} isNumeric>
+                                            {CurrencyFormat.format(
+                                                getAmountReceived(
+                                                    transactions,
+                                                    user.id
+                                                )
+                                            )}
+                                        </Td>
+                                    </Tr>
+                                    <Tr>
+                                        <Td paddingY={2}>Due:</Td>
+                                        <Td paddingY={2} isNumeric>
+                                            {CurrencyFormat.format(
+                                                getAmountDue(
+                                                    transactions,
+                                                    users,
+                                                    user.id
+                                                )
+                                            )}
+                                        </Td>
+                                    </Tr>
+                                    <Tr>
+                                        <Td paddingY={2}>Lent:</Td>
+                                        <Td paddingY={2} isNumeric>
+                                            {CurrencyFormat.format(
+                                                getAmountLent(
+                                                    transactions,
+                                                    users,
+                                                    user.id
+                                                )
+                                            )}
+                                        </Td>
+                                    </Tr>
+                                </Tbody>
+                            </Table>
+                        </TableContainer>
+                    </AccordionPanel>
+                </AccordionItem>
+            ))}
+        </Accordion>
+    );
 
     return (
-        <LayoutBox name="Overview">
-            <UsersTable />
-            <TableFooter />
-        </LayoutBox>
+        <>
+            <Show above="md">
+                <LayoutBox name="Overview">
+                    {userTable}
+                    {tableFooter}
+                </LayoutBox>
+            </Show>
+            <Hide above="md">
+                <LayoutBox name="Overview">
+                    {userAccordion}
+                    {tableFooter}
+                </LayoutBox>
+            </Hide>
+        </>
     );
 }
