@@ -92,7 +92,7 @@ export default function SplitName({ split }: { split: any }) {
                 submitOnBlur={false}>
                 <HStack>
                     <EditablePreview />
-                    <EditableInput width={"fit-content"} />
+                    <EditableInput width={["2xs", "xs", "sm"]} />
                     <EditableControls />
                 </HStack>
             </Editable>

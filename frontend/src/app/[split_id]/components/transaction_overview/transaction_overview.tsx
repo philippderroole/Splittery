@@ -23,7 +23,7 @@ export default async function TransactionOverview({
 }) {
     function TransactionTable() {
         return (
-            <TableContainer>
+            <TableContainer width={["2xs", null, "xs"]}>
                 <Table variant="simple">
                     <Thead>
                         <Tr>

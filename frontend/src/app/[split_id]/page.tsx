@@ -6,6 +6,8 @@ import {
     BreadcrumbItem,
     BreadcrumbLink,
     Flex,
+    Hide,
+    Show,
 } from "@chakra-ui/react";
 import SplitName from "./components/split_name";
 import TransactionOverview from "./components/transaction_overview/transaction_overview";
@@ -26,7 +28,7 @@ export default async function Page({
         ["transactions"]
     );
 
-    const Breadcrumps = () => (
+    const breadcrumps = (
         <Breadcrumb>
             <BreadcrumbItem>
                 <BreadcrumbLink href=".">Splittery</BreadcrumbLink>
@@ -41,22 +43,40 @@ export default async function Page({
     return (
         <Flex
             direction="column"
-            justify="start"
-            align="left"
+            justify={"start"}
+            align={"left"}
             padding="2em"
             flexGrow={1}>
-            <Breadcrumps />
+            {breadcrumps}
             <SplitName split={split}></SplitName>
-            <UserOverview
-                split={split}
-                users={users}
-                transactions={transactions}
-            />
-            <TransactionOverview
-                split={split}
-                users={users}
-                transactions={transactions}
-            />
+            <Show above="md">
+                <Flex direction="column" justify={"start"} align={"left"}>
+                    <UserOverview
+                        split={split}
+                        users={users}
+                        transactions={transactions}
+                    />
+                    <TransactionOverview
+                        split={split}
+                        users={users}
+                        transactions={transactions}
+                    />
+                </Flex>
+            </Show>
+            <Hide above="md">
+                <Flex direction="column" justify={"start"} align={"center"}>
+                    <UserOverview
+                        split={split}
+                        users={users}
+                        transactions={transactions}
+                    />
+                    <TransactionOverview
+                        split={split}
+                        users={users}
+                        transactions={transactions}
+                    />
+                </Flex>
+            </Hide>
         </Flex>
     );
 }
