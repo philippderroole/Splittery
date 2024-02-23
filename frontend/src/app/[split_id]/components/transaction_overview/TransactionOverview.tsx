@@ -1,7 +1,6 @@
 "use server";
 
 import { Transaction } from "@/app/types/transaction";
-import { CurrencyFormat } from "@/services/CurrencyFormat";
 import {
     Flex,
     Hide,
@@ -21,7 +20,8 @@ import {
     Tr,
 } from "@chakra-ui/react";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import LayoutBox from "../layout_box";
+import Currency from "../Currency";
+import LayoutBox from "../LayoutBox";
 import CreateTransactionButton from "./CreateTransactionButton";
 import DeleteTransactionButton from "./DeleteTransactionButton";
 import EditTransactionButton from "./EditTransactionButton";
@@ -86,10 +86,12 @@ export default async function TransactionOverview({
             <Table variant="simple">
                 <Thead>
                     <Tr>
-                        <Th paddingX={4}> Title</Th>
-                        <Th paddingX={4}>Amount</Th>
+                        <Th paddingX={4}>Title</Th>
+                        <Th paddingX={4} isNumeric>
+                            Amount
+                        </Th>
                         <Th paddingX={4}>User</Th>
-                        <Th paddingX={0}></Th>
+                        <Th paddingX={0} isNumeric></Th>
                     </Tr>
                 </Thead>
                 <Tbody>
@@ -99,7 +101,14 @@ export default async function TransactionOverview({
                                 {transaction.title}
                             </Td>
                             <Td paddingX={2} isNumeric>
-                                {CurrencyFormat.format(transaction.amount)}
+                                <Currency
+                                    textColor={
+                                        transaction.amount < 0
+                                            ? "red.300"
+                                            : "green.300"
+                                    }
+                                    amount={transaction.amount}
+                                />
                             </Td>
                             <Td paddingX={2}>
                                 {
@@ -109,7 +118,9 @@ export default async function TransactionOverview({
                                     ).name
                                 }
                             </Td>
-                            <Td padding={0}>{buttons(transaction)}</Td>
+                            <Td padding={0} isNumeric>
+                                {buttons(transaction)}
+                            </Td>
                         </Tr>
                     ))}
                 </Tbody>

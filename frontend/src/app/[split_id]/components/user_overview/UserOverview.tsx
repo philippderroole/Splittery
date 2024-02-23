@@ -30,7 +30,9 @@ import {
     Tr,
 } from "@chakra-ui/react";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import LayoutBox from "../layout_box";
+import Currency from "../Currency";
+import LayoutBox from "../LayoutBox";
+import Tooltip from "./Tooltip";
 import CreateUserButton from "./create_user_button";
 import DeleteUserButton from "./delete_user_button";
 import EditUserButton from "./edit_user_button";
@@ -141,16 +143,43 @@ export default async function UserOverview({
         </>
     );
 
+    const spentTooltip = (
+        <Tooltip text="The total amount of money spent by the user." />
+    );
+
+    const receivedTooltip = (
+        <Tooltip text="The total amount of money received by the user." />
+    );
+
+    const dueTooltip = (
+        <Tooltip text="The amount of money the user owes to the group." />
+    );
+    const outstandingTooltip = (
+        <Tooltip text="The amount of money the user still has to receive from the group." />
+    );
+
     const userTable = (
         <TableContainer width={size}>
             <Table variant="simple">
                 <Thead>
                     <Tr>
-                        <Th paddingX={4}>User</Th>
-                        <Th paddingX={4}>Spent</Th>
-                        <Th paddingX={4}>Received</Th>
-                        <Th paddingX={4}>Due</Th>
-                        <Th paddingX={4}>Outstanding</Th>
+                        <Th paddingX={2}>User</Th>
+                        <Th paddingX={2} isNumeric>
+                            Spent
+                            {spentTooltip}
+                        </Th>
+                        <Th paddingX={2} isNumeric>
+                            Received
+                            {receivedTooltip}
+                        </Th>
+                        <Th paddingX={2} isNumeric>
+                            Due
+                            {dueTooltip}
+                        </Th>
+                        <Th paddingX={2} isNumeric>
+                            Outstanding
+                            {outstandingTooltip}
+                        </Th>
                         <Th paddingX={0}></Th>
                     </Tr>
                 </Thead>
@@ -159,30 +188,42 @@ export default async function UserOverview({
                         <Tr key={user.id}>
                             <Td paddingX={2}>{user.name}</Td>
                             <Td paddingX={2} isNumeric>
-                                {CurrencyFormat.format(
-                                    getAmountSpent(transactions, user.id)
-                                )}
+                                <Currency
+                                    amount={getAmountSpent(
+                                        transactions,
+                                        user.id
+                                    )}
+                                />
                             </Td>
                             <Td paddingX={2} isNumeric>
-                                {CurrencyFormat.format(
-                                    getAmountReceived(transactions, user.id)
-                                )}
+                                <Currency
+                                    amount={getAmountReceived(
+                                        transactions,
+                                        user.id
+                                    )}
+                                />
                             </Td>
                             <Td paddingX={2} isNumeric>
-                                {CurrencyFormat.format(
-                                    getAmountDue(transactions, users, user.id)
-                                )}
-                            </Td>
-                            <Td paddingX={2} isNumeric>
-                                {CurrencyFormat.format(
-                                    getAmountOutstanding(
+                                <Currency
+                                    amount={getAmountDue(
                                         transactions,
                                         users,
                                         user.id
-                                    )
-                                )}
+                                    )}
+                                />
                             </Td>
-                            <Td padding={0}>{buttons(user)}</Td>
+                            <Td paddingX={2} isNumeric>
+                                <Currency
+                                    amount={getAmountOutstanding(
+                                        transactions,
+                                        users,
+                                        user.id
+                                    )}
+                                />
+                            </Td>
+                            <Td padding={0} isNumeric>
+                                {buttons(user)}
+                            </Td>
                         </Tr>
                     ))}
                 </Tbody>
@@ -229,33 +270,35 @@ export default async function UserOverview({
                                 users,
                                 user.id
                             ) <= 0 ? (
-                                <Text>{CurrencyFormat.format(0)}</Text>
+                                <Currency fontWeight="bold" amount={0} />
                             ) : null}
                             {getAmountDue(transactions, users, user.id) > 0 ? (
-                                <Text textColor={"red.300"}>
-                                    {CurrencyFormat.format(
+                                <Currency
+                                    fontWeight="bold"
+                                    amount={
                                         -getAmountDue(
                                             transactions,
                                             users,
                                             user.id
                                         )
-                                    )}
-                                </Text>
+                                    }
+                                    textColor={"red.300"}
+                                />
                             ) : null}
                             {getAmountOutstanding(
                                 transactions,
                                 users,
                                 user.id
                             ) > 0 ? (
-                                <Text textColor={"green.300"}>
-                                    {CurrencyFormat.format(
-                                        getAmountOutstanding(
-                                            transactions,
-                                            users,
-                                            user.id
-                                        )
+                                <Currency
+                                    fontWeight="bold"
+                                    amount={getAmountOutstanding(
+                                        transactions,
+                                        users,
+                                        user.id
                                     )}
-                                </Text>
+                                    textColor={"green.300"}
+                                />
                             ) : null}
                         </AccordionButton>
 
@@ -266,49 +309,61 @@ export default async function UserOverview({
                             <Table variant="simple">
                                 <Tbody>
                                     <Tr>
-                                        <Td paddingY={2}>Spent:</Td>
+                                        <Td paddingY={2}>
+                                            Spent
+                                            {spentTooltip}
+                                        </Td>
                                         <Td paddingY={2} isNumeric>
-                                            {CurrencyFormat.format(
-                                                getAmountSpent(
+                                            <Currency
+                                                amount={getAmountSpent(
                                                     transactions,
                                                     user.id
-                                                )
-                                            )}
+                                                )}
+                                            />
                                         </Td>
                                     </Tr>
                                     <Tr>
-                                        <Td paddingY={2}>Received:</Td>
+                                        <Td paddingY={2}>
+                                            Received
+                                            {receivedTooltip}
+                                        </Td>
                                         <Td paddingY={2} isNumeric>
-                                            {CurrencyFormat.format(
-                                                getAmountReceived(
+                                            <Currency
+                                                amount={getAmountReceived(
                                                     transactions,
                                                     user.id
-                                                )
-                                            )}
+                                                )}
+                                            />
                                         </Td>
                                     </Tr>
                                     <Tr>
-                                        <Td paddingY={2}>Due:</Td>
+                                        <Td paddingY={2}>
+                                            Due
+                                            {dueTooltip}
+                                        </Td>
                                         <Td paddingY={2} isNumeric>
-                                            {CurrencyFormat.format(
-                                                getAmountDue(
+                                            <Currency
+                                                amount={getAmountDue(
                                                     transactions,
                                                     users,
                                                     user.id
-                                                )
-                                            )}
+                                                )}
+                                            />
                                         </Td>
                                     </Tr>
                                     <Tr>
-                                        <Td paddingY={2}>Outstanding:</Td>
+                                        <Td paddingY={2}>
+                                            Outstanding
+                                            {outstandingTooltip}
+                                        </Td>
                                         <Td paddingY={2} isNumeric>
-                                            {CurrencyFormat.format(
-                                                getAmountOutstanding(
+                                            <Currency
+                                                amount={getAmountOutstanding(
                                                     transactions,
                                                     users,
                                                     user.id
-                                                )
-                                            )}
+                                                )}
+                                            />
                                         </Td>
                                     </Tr>
                                 </Tbody>

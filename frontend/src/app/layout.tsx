@@ -1,6 +1,6 @@
 import { Box, ChakraProvider, Flex, Hide, Show } from "@chakra-ui/react";
+import Footer from "./components/Footer";
 import Navbar from "./components/Navbar";
-import Footer from "./components/footer";
 
 import { Inter, Roboto } from "next/font/google";
 
