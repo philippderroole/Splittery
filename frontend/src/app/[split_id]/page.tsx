@@ -61,7 +61,7 @@ export default async function Page({
                         split={split}
                         users={users}
                         transactions={transactions}
-                        size={["sm", "md", "xl"]}
+                        size={["sm", "md", "lg"]}
                     />
                 </Flex>
             </Show>
@@ -77,7 +77,7 @@ export default async function Page({
                         split={split}
                         users={users}
                         transactions={transactions}
-                        size={["sm", "md", "xl"]}
+                        size={["sm", "md", "lg"]}
                     />
                 </Flex>
             </Hide>

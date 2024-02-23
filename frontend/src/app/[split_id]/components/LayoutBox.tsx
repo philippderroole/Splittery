@@ -1,8 +1,8 @@
-"use server";
+"use client";
 
-import { Box, Heading } from "@chakra-ui/react";
+import { Box, Heading, useColorModeValue } from "@chakra-ui/react";
 
-export default async function LayoutBox({
+export default function LayoutBox({
     name,
     children,
     size,
@@ -11,12 +11,17 @@ export default async function LayoutBox({
     children?: React.ReactNode;
     size?: string[];
 }) {
+    const backgroundColor = useColorModeValue(
+        "blackAlpha.100",
+        "whiteAlpha.200"
+    );
+
     return (
         <>
             <Box
                 backdropBlur={10}
                 backdropFilter="blur(10px)"
-                backgroundColor={"whiteAlpha.200"}
+                backgroundColor={backgroundColor}
                 paddingX={5}
                 paddingY={3}
                 margin={5}

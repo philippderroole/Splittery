@@ -74,7 +74,7 @@ export default function TransactionModal({
         transaction?.user_id || users[0]?.id
     );
     const [receiverId, setReceiverId] = React.useState(
-        users[1]?.id || users[0]?.id
+        transaction?.user_id || users[1]?.id || users[0]?.id
     );
 
     useEffect(() => {
