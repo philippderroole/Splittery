@@ -53,6 +53,6 @@ export function validate_receiver(
     }
 
     if (tabIndex === 2 && payerId === receiverId) {
-        return "Payer and receiver can't be the same";
+        return "Can't transfer money to the same user";
     }
 }

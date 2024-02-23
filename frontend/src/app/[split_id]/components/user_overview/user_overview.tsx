@@ -1,8 +1,7 @@
 "use server";
 
+import { Transaction } from "@/app/types/transaction";
 import { CurrencyFormat } from "@/services/CurrencyFormat";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-
 import {
     Accordion,
     AccordionButton,
@@ -30,12 +29,23 @@ import {
     Thead,
     Tr,
 } from "@chakra-ui/react";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import LayoutBox from "../layout_box";
 import CreateUserButton from "./create_user_button";
 import DeleteUserButton from "./delete_user_button";
 import EditUserButton from "./edit_user_button";
 
-export default async function UserOverview({ split, users, transactions }) {
+export default async function UserOverview({
+    split,
+    users,
+    transactions,
+    size,
+}: {
+    split: any;
+    users: any[];
+    transactions: Transaction[];
+    size?: string[];
+}) {
     function getTotalAmountSpent(transactions) {
         return transactions.reduce(
             (acc, transaction) => acc - transaction.amount,
@@ -57,7 +67,7 @@ export default async function UserOverview({ split, users, transactions }) {
             .reduce((acc, transaction) => acc + transaction.amount, 0);
     }
 
-    function getAmountLent(transactions, users, user_id: number) {
+    function getAmountOutstanding(transactions, users, user_id: number) {
         const total = getTotalAmountSpent(transactions);
         const share_per_user = total / users.length;
 
@@ -95,8 +105,48 @@ export default async function UserOverview({ split, users, transactions }) {
         return user_total + share_per_user;
     }
 
+    const buttons = (user) => (
+        <>
+            <Show above="sm">
+                <EditUserButton split_id={split.id} user={user} users={users} />
+                <DeleteUserButton
+                    split_id={split.id}
+                    user={user}
+                    transactions={transactions}
+                />
+            </Show>
+            <Hide above="sm">
+                <Popover>
+                    <PopoverTrigger>
+                        <IconButton
+                            icon={<MoreVertIcon />}
+                            aria-label={""}
+                            variant="link"
+                            size="sm"
+                        />
+                    </PopoverTrigger>
+                    <PopoverContent width={"fit-content"}>
+                        <PopoverArrow />
+                        <PopoverBody>
+                            <EditUserButton
+                                split_id={split.id}
+                                user={user}
+                                users={users}
+                            />
+                            <DeleteUserButton
+                                split_id={split.id}
+                                user={user}
+                                transactions={transactions}
+                            />
+                        </PopoverBody>
+                    </PopoverContent>
+                </Popover>
+            </Hide>
+        </>
+    );
+
     const userTable = (
-        <TableContainer>
+        <TableContainer width={size}>
             <Table variant="simple">
                 <Thead>
                     <Tr>
@@ -104,7 +154,7 @@ export default async function UserOverview({ split, users, transactions }) {
                         <Th>Spent</Th>
                         <Th>Received</Th>
                         <Th>Due</Th>
-                        <Th>Lent</Th>
+                        <Th>Outstanding</Th>
                         <Th></Th>
                     </Tr>
                 </Thead>
@@ -129,21 +179,14 @@ export default async function UserOverview({ split, users, transactions }) {
                             </Td>
                             <Td isNumeric>
                                 {CurrencyFormat.format(
-                                    getAmountLent(transactions, users, user.id)
+                                    getAmountOutstanding(
+                                        transactions,
+                                        users,
+                                        user.id
+                                    )
                                 )}
                             </Td>
-                            <Td padding={0}>
-                                <EditUserButton
-                                    split_id={split.id}
-                                    user={user}
-                                    users={users}
-                                />
-                                <DeleteUserButton
-                                    split_id={split.id}
-                                    user={user}
-                                    transactions={transactions}
-                                />
-                            </Td>
+                            <Td padding={0}>{buttons(user)}</Td>
                         </Tr>
                     ))}
                 </Tbody>
@@ -176,7 +219,7 @@ export default async function UserOverview({ split, users, transactions }) {
     );
 
     const userAccordion = (
-        <Accordion width="2xs" allowMultiple>
+        <Accordion allowMultiple>
             {users.map((user) => (
                 <AccordionItem>
                     <h2 style={{ display: "flex", alignItems: "center" }}>
@@ -189,31 +232,7 @@ export default async function UserOverview({ split, users, transactions }) {
                             )}
                         </AccordionButton>
 
-                        <Popover>
-                            <PopoverTrigger>
-                                <IconButton
-                                    icon={<MoreVertIcon />}
-                                    aria-label={""}
-                                    variant="link"
-                                    size="sm"
-                                />
-                            </PopoverTrigger>
-                            <PopoverContent width={"fit-content"}>
-                                <PopoverArrow />
-                                <PopoverBody>
-                                    <EditUserButton
-                                        split_id={split.id}
-                                        user={user}
-                                        users={users}
-                                    />
-                                    <DeleteUserButton
-                                        split_id={split.id}
-                                        user={user}
-                                        transactions={transactions}
-                                    />
-                                </PopoverBody>
-                            </PopoverContent>
-                        </Popover>
+                        {buttons(user)}
                     </h2>
                     <AccordionPanel paddingBottom={4}>
                         <TableContainer>
@@ -254,10 +273,10 @@ export default async function UserOverview({ split, users, transactions }) {
                                         </Td>
                                     </Tr>
                                     <Tr>
-                                        <Td paddingY={2}>Lent:</Td>
+                                        <Td paddingY={2}>Outstanding:</Td>
                                         <Td paddingY={2} isNumeric>
                                             {CurrencyFormat.format(
-                                                getAmountLent(
+                                                getAmountOutstanding(
                                                     transactions,
                                                     users,
                                                     user.id
@@ -275,19 +294,10 @@ export default async function UserOverview({ split, users, transactions }) {
     );
 
     return (
-        <>
-            <Show above="md">
-                <LayoutBox name="Overview">
-                    {userTable}
-                    {tableFooter}
-                </LayoutBox>
-            </Show>
-            <Hide above="md">
-                <LayoutBox name="Overview">
-                    {userAccordion}
-                    {tableFooter}
-                </LayoutBox>
-            </Hide>
-        </>
+        <LayoutBox name="Overview" size={size}>
+            <Show above="md">{userTable}</Show>
+            <Hide above="md">{userAccordion}</Hide>
+            {tableFooter}
+        </LayoutBox>
     );
 }

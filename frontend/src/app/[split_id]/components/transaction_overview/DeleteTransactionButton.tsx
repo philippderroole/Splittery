@@ -67,7 +67,8 @@ export default function DeleteTransactionButton({
             <AlertDialog
                 isOpen={isOpen}
                 leastDestructiveRef={cancelRef}
-                onClose={onClose}>
+                onClose={onClose}
+                size={["sm", "md"]}>
                 <AlertDialogOverlay>
                     <AlertDialogContent>
                         <AlertDialogHeader fontSize="lg" fontWeight="bold">

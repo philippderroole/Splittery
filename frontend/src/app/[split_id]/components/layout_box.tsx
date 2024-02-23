@@ -5,9 +5,11 @@ import { Box, Heading } from "@chakra-ui/react";
 export default async function LayoutBox({
     name,
     children,
+    size,
 }: {
     name: string;
     children?: React.ReactNode;
+    size?: string[];
 }) {
     return (
         <>
@@ -19,7 +21,7 @@ export default async function LayoutBox({
                 paddingY={3}
                 margin={5}
                 borderRadius={10}
-                width="fit-content">
+                width={size}>
                 <Heading size="md" paddingTop={2} marginBottom={3}>
                     {name}
                 </Heading>

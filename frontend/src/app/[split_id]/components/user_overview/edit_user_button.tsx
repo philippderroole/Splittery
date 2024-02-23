@@ -88,7 +88,7 @@ export default function EditUserButton({
     );
 
     const modal = (
-        <Modal isOpen={isOpen} onClose={onClose}>
+        <Modal isOpen={isOpen} onClose={onClose} size={["sm", "md"]}>
             <ModalOverlay />
             <ModalContent>
                 <ModalHeader>Rename {user.name}</ModalHeader>
