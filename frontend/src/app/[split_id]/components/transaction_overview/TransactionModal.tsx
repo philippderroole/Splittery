@@ -1,15 +1,11 @@
 "use client";
 
-import { revalidateTag } from "@/app/server_actions";
 import { Transaction } from "@/app/types/transaction";
-import { HttpService } from "@/services/HttpService";
-import { AddIcon } from "@chakra-ui/icons";
 import {
     Button,
     FormControl,
     FormErrorMessage,
     FormLabel,
-    IconButton,
     Input,
     InputGroup,
     InputRightAddon,
@@ -26,8 +22,6 @@ import {
     TabPanel,
     TabPanels,
     Tabs,
-    useDisclosure,
-    useToast,
 } from "@chakra-ui/react";
 import React, { useEffect } from "react";
 import {
@@ -37,26 +31,48 @@ import {
     validate_receiver,
 } from "../../../../services/Validation";
 
-export default function CreateTransactionButton({
+export default function TransactionModal({
+    header,
     split_id,
     users,
+    onSubmit,
+    isOpen,
+    onOpen,
+    onClose,
+    transaction,
+    allowTransfer,
 }: {
+    header: string;
     split_id: number;
     users: any[];
+    onSubmit: (
+        tabIndex: number,
+        amount: number,
+        title: string,
+        payerId: number,
+        receiverId: number
+    ) => any;
+    isOpen: boolean;
+    onOpen: () => void;
+    onClose: () => void;
+    transaction?: Transaction;
+    allowTransfer?: boolean;
 }) {
-    const toast = useToast();
+    const [tabIndex, setTabIndex] = React.useState(
+        transaction ? (transaction.amount < 0 ? 1 : 0) : 0
+    );
 
-    const { isOpen, onOpen, onClose } = useDisclosure();
-
-    const [tabIndex, setTabIndex] = React.useState(0);
-
-    const [title, setName] = React.useState("");
+    const [title, setName] = React.useState(transaction?.title || "");
     const [nameTouched, setNameTouched] = React.useState(false);
 
-    const [amount, setAmount] = React.useState(0);
+    const [amount, setAmount] = React.useState(
+        transaction ? transaction.amount * -1 : 0
+    );
     const [amountTouched, setAmountTouched] = React.useState(false);
 
-    const [payerId, setPayerId] = React.useState(users[0]?.id);
+    const [payerId, setPayerId] = React.useState(
+        transaction?.user_id || users[0]?.id
+    );
     const [receiverId, setReceiverId] = React.useState(
         users[1]?.id || users[0]?.id
     );
@@ -72,114 +88,7 @@ export default function CreateTransactionButton({
         onClose();
     }
 
-    async function handleCreateTransfer() {
-        if (validate_receiver(tabIndex, payerId, receiverId) != undefined) {
-            return;
-        }
-        if (validate_payer(tabIndex, payerId) != undefined) {
-            return;
-        }
-
-        try {
-            let new_transaction1: Transaction = {
-                title: title,
-                amount: -amount,
-                user_id: users.find((user) => user.id === payerId).id,
-            };
-
-            const response1 = await HttpService.POST(
-                `/splits/${split_id}/transactions`,
-                new_transaction1
-            );
-
-            let new_transaction2: Transaction = {
-                title: title,
-                amount: amount,
-                user_id: users.find((user) => user.id === receiverId).id,
-            };
-
-            const response2 = await HttpService.POST(
-                `/splits/${split_id}/transactions`,
-                new_transaction2
-            );
-
-            revalidateTag("transactions");
-            close();
-        } catch (error) {
-            toast({
-                title: "Unexpected error occurred while creating transaction",
-                description: error.message,
-                status: "error",
-                duration: 5000,
-                isClosable: true,
-            });
-            console.error("Error creating transaction", error);
-        }
-    }
-
-    async function handleCreateExpense() {
-        if (validate_payer(tabIndex, payerId) != undefined) {
-            return;
-        }
-
-        try {
-            let new_transaction: Transaction = {
-                title: title,
-                amount: -amount,
-                user_id: users.find((user) => user.id === payerId).id,
-            };
-
-            const response = await HttpService.POST(
-                `/splits/${split_id}/transactions`,
-                new_transaction
-            );
-
-            revalidateTag("transactions");
-            close();
-        } catch (error) {
-            toast({
-                title: "Unexpected error occurred while creating transaction",
-                description: error.message,
-                status: "error",
-                duration: 5000,
-                isClosable: true,
-            });
-            console.error("Error creating transaction", error);
-        }
-    }
-
-    async function handleCreateIncome() {
-        if (validate_receiver(tabIndex, payerId, receiverId) != undefined) {
-            return;
-        }
-
-        try {
-            let new_transaction: Transaction = {
-                title: title,
-                amount: amount,
-                user_id: users.find((user) => user.id === payerId).id,
-            };
-
-            const response = await HttpService.POST(
-                `/splits/${split_id}/transactions`,
-                new_transaction
-            );
-
-            revalidateTag("transactions");
-            close();
-        } catch (error) {
-            toast({
-                title: "Unexpected error occurred while creating transaction",
-                description: error.message,
-                status: "error",
-                duration: 5000,
-                isClosable: true,
-            });
-            console.error("Error creating transaction", error);
-        }
-    }
-
-    async function handleCreateTransaction() {
+    function handleSubmit() {
         setNameTouched(true);
         setAmountTouched(true);
 
@@ -192,37 +101,34 @@ export default function CreateTransactionButton({
 
         switch (tabIndex) {
             case 0:
-                await handleCreateExpense();
+                if (validate_payer(tabIndex, payerId) != undefined) {
+                    return;
+                }
                 break;
             case 1:
-                await handleCreateIncome();
+                if (
+                    validate_receiver(tabIndex, payerId, receiverId) !=
+                    undefined
+                ) {
+                    return;
+                }
                 break;
             case 2:
-                await handleCreateTransfer();
+                if (
+                    validate_receiver(tabIndex, payerId, receiverId) !=
+                    undefined
+                ) {
+                    return;
+                }
+                if (validate_payer(tabIndex, payerId) != undefined) {
+                    return;
+                }
                 break;
         }
-    }
 
-    const createTransactionButton = (
-        <IconButton
-            colorScheme="green"
-            borderRadius="full"
-            icon={<AddIcon />}
-            aria-label={"add transaction"}
-            onClick={() => {
-                if (users.length === 0) {
-                    toast({
-                        title: "Can't create transaction",
-                        description: "Please create a user first",
-                        status: "error",
-                        duration: 5000,
-                        isClosable: true,
-                    });
-                } else {
-                    onOpen();
-                }
-            }}></IconButton>
-    );
+        onClose();
+        onSubmit(tabIndex, amount, title, payerId, receiverId);
+    }
 
     const name_form = (
         <FormControl
@@ -231,6 +137,7 @@ export default function CreateTransactionButton({
             isInvalid={validate_name(title) != undefined && nameTouched}>
             <FormLabel>Title</FormLabel>
             <Input
+                defaultValue={title}
                 key="title"
                 placeholder="Title"
                 onChange={(e) => {
@@ -250,6 +157,7 @@ export default function CreateTransactionButton({
             <FormLabel>Amount</FormLabel>
             <InputGroup>
                 <Input
+                    defaultValue={amount}
                     key="amount"
                     placeholder="Amount"
                     type="number"
@@ -341,7 +249,7 @@ export default function CreateTransactionButton({
         <Modal isOpen={isOpen} onClose={close} size={["sm", "md"]}>
             <ModalOverlay />
             <ModalContent>
-                <ModalHeader>Create a new transaction</ModalHeader>
+                <ModalHeader>{header}</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody pb={6}>
                     <Tabs
@@ -350,21 +258,21 @@ export default function CreateTransactionButton({
                         <TabList>
                             <Tab>Expense</Tab>
                             <Tab>Income</Tab>
-                            <Tab>Transfer</Tab>
+                            {allowTransfer ? <Tab>Transfer</Tab> : null}
                         </TabList>
 
                         <TabPanels>
                             <TabPanel>{expense_form}</TabPanel>
                             <TabPanel>{income_form}</TabPanel>
+                            {allowTransfer ? (
+                                <TabPanel>{transfer_form}</TabPanel>
+                            ) : null}
                             <TabPanel>{transfer_form}</TabPanel>
                         </TabPanels>
                     </Tabs>
                 </ModalBody>
                 <ModalFooter>
-                    <Button
-                        colorScheme="green"
-                        mr={3}
-                        onClick={handleCreateTransaction}>
+                    <Button colorScheme="green" mr={3} onClick={handleSubmit}>
                         Save
                     </Button>
                     <Button onClick={close}>Cancel</Button>
@@ -373,10 +281,5 @@ export default function CreateTransactionButton({
         </Modal>
     );
 
-    return (
-        <>
-            {createTransactionButton}
-            {transaction_modal}
-        </>
-    );
+    return <>{transaction_modal}</>;
 }

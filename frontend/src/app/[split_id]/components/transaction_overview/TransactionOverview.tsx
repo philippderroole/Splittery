@@ -22,9 +22,9 @@ import {
 } from "@chakra-ui/react";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import LayoutBox from "../layout_box";
-import CreateTransactionButton from "./create_transaction_button";
-import DeleteTransactionButton from "./delete_transaction_button";
-import EditTransactionButton from "./edit_transaction_button";
+import CreateTransactionButton from "./CreateTransactionButton";
+import DeleteTransactionButton from "./DeleteTransactionButton";
+import EditTransactionButton from "./EditTransactionButton";
 
 export default async function TransactionOverview({
     split,

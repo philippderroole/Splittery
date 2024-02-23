@@ -10,7 +10,7 @@ import {
     Show,
 } from "@chakra-ui/react";
 import SplitName from "./components/split_name";
-import TransactionOverview from "./components/transaction_overview/transaction_overview";
+import TransactionOverview from "./components/transaction_overview/TransactionOverview";
 import UserOverview from "./components/user_overview/user_overview";
 
 export default async function Page({
