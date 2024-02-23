@@ -55,11 +55,13 @@ export default async function Page({
                         split={split}
                         users={users}
                         transactions={transactions}
+                        size={["sm", "md", "2xl"]}
                     />
                     <TransactionOverview
                         split={split}
                         users={users}
                         transactions={transactions}
+                        size={["sm", "md"]}
                     />
                 </Flex>
             </Show>
@@ -69,11 +71,13 @@ export default async function Page({
                         split={split}
                         users={users}
                         transactions={transactions}
+                        size={["sm", "md", "2xl"]}
                     />
                     <TransactionOverview
                         split={split}
                         users={users}
                         transactions={transactions}
+                        size={["sm", "md", "2xl"]}
                     />
                 </Flex>
             </Hide>

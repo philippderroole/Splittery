@@ -36,7 +36,7 @@ import {
     validate_receiver,
 } from "../../../../services/Validation";
 
-export default function RenameTransactionButton({
+export default function EditTransactionButton({
     split_id,
     transaction,
     users,
@@ -248,7 +248,7 @@ export default function RenameTransactionButton({
     );
 
     const modal = (
-        <Modal isOpen={isOpen} onClose={close}>
+        <Modal isOpen={isOpen} onClose={close} size={["sm", "md"]}>
             <ModalOverlay />
             <ModalContent>
                 <ModalHeader>Edit {transaction.name}</ModalHeader>

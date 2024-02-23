@@ -1,6 +1,7 @@
 export abstract class HttpService {
     private static api_url = process.env.NEXT_PUBLIC_API_URL;
-    private static log_requests = process.env.NEXT_PUBLIC_LOG_REQUESTS;
+    private static log_requests =
+        process.env.NEXT_PUBLIC_LOG_REQUESTS === "true";
 
     static async GET(
         route: string,

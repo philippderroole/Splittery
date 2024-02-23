@@ -102,7 +102,7 @@ export default function CreateUserButton({
     );
 
     const modal = (
-        <Modal isOpen={isOpen} onClose={close}>
+        <Modal isOpen={isOpen} onClose={close} size={["sm", "md"]}>
             <ModalOverlay />
             <ModalContent>
                 <ModalHeader>Create a new user</ModalHeader>

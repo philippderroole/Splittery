@@ -11,6 +11,8 @@ import {
     FormLabel,
     IconButton,
     Input,
+    InputGroup,
+    InputRightAddon,
     Modal,
     ModalBody,
     ModalCloseButton,
@@ -246,15 +248,18 @@ export default function CreateTransactionButton({
             isRequired
             isInvalid={validate_amount(amount) != undefined && amountTouched}>
             <FormLabel>Amount</FormLabel>
-            <Input
-                key="amount"
-                placeholder="Amount"
-                type="number"
-                onChange={(e) => {
-                    setAmount(parseFloat(e.target.value));
-                    setAmountTouched(true);
-                }}
-            />
+            <InputGroup>
+                <Input
+                    key="amount"
+                    placeholder="Amount"
+                    type="number"
+                    onChange={(e) => {
+                        setAmount(parseFloat(e.target.value));
+                        setAmountTouched(true);
+                    }}
+                />
+                <InputRightAddon children="€" />
+            </InputGroup>
             <FormErrorMessage>{validate_amount(amount)}</FormErrorMessage>
         </FormControl>
     );
@@ -264,7 +269,7 @@ export default function CreateTransactionButton({
             paddingY={2}
             isRequired
             isInvalid={validate_payer(tabIndex, payerId) != undefined}>
-            <FormLabel>Payer</FormLabel>
+            <FormLabel>Paid by</FormLabel>
             <Select
                 defaultValue={payerId}
                 onChange={(e) => {
@@ -291,7 +296,7 @@ export default function CreateTransactionButton({
             isInvalid={
                 validate_receiver(tabIndex, payerId, receiverId) != undefined
             }>
-            <FormLabel>Receiver</FormLabel>
+            <FormLabel>Received by</FormLabel>
             <Select
                 defaultValue={receiverId}
                 onChange={(e) => setReceiverId(parseInt(e.target.value))}>
@@ -333,7 +338,7 @@ export default function CreateTransactionButton({
     );
 
     const transaction_modal = (
-        <Modal isOpen={isOpen} onClose={close}>
+        <Modal isOpen={isOpen} onClose={close} size={["sm", "md"]}>
             <ModalOverlay />
             <ModalContent>
                 <ModalHeader>Create a new transaction</ModalHeader>
