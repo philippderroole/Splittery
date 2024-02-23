@@ -1,10 +1,14 @@
 "use client";
 
-import { Center, IconButton, Stack, useColorModeValue } from "@chakra-ui/react";
+import {
+    Center,
+    HStack,
+    IconButton,
+    useColorModeValue,
+} from "@chakra-ui/react";
 import Link from "next/link";
 import { ReactNode } from "react";
 import { AiFillGithub } from "react-icons/ai";
-import { FaInstagram, FaTwitter, FaYoutube } from "react-icons/fa";
 
 const SocialButton = ({
     children,
@@ -35,21 +39,12 @@ const SocialButton = ({
 
 export default function IconBar() {
     return (
-        <Stack direction={"row"} spacing={5}>
-            <SocialButton label={"Twitter"} href={"#"}>
-                <FaTwitter size="20" />
-            </SocialButton>
-            <SocialButton label={"YouTube"} href={"#"}>
-                <FaYoutube size="25" />
-            </SocialButton>
-            <SocialButton label={"Instagram"} href={"#"}>
-                <FaInstagram size="25" />
-            </SocialButton>
+        <HStack spacing={5}>
             <SocialButton
                 label={"GitHub"}
                 href={"https://github.com/philippderroole/ShareExpenses"}>
                 <AiFillGithub size="25" />
             </SocialButton>
-        </Stack>
+        </HStack>
     );
 }

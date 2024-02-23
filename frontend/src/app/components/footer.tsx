@@ -8,7 +8,7 @@ import {
     useColorModeValue,
 } from "@chakra-ui/react";
 import IconBar from "./IconBar";
-import Logo from "./logo";
+import Logo from "./Logo";
 
 export default function Footer() {
     return (

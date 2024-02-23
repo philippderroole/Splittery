@@ -39,7 +39,7 @@ export default function EditTransactionButton({
 
             revalidateTag("users");
             revalidateTag("transactions");
-            close();
+            onClose();
         } catch (error) {
             toast({
                 title: "Unexpected error occurred while renaming transaction",
@@ -71,7 +71,7 @@ export default function EditTransactionButton({
 
             revalidateTag("users");
             revalidateTag("transactions");
-            close();
+            onClose();
         } catch (error) {
             toast({
                 title: "Unexpected error occurred while renaming transaction",

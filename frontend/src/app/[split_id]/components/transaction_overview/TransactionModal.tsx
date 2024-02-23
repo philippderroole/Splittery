@@ -59,14 +59,14 @@ export default function TransactionModal({
     allowTransfer?: boolean;
 }) {
     const [tabIndex, setTabIndex] = React.useState(
-        transaction ? (transaction.amount < 0 ? 1 : 0) : 0
+        transaction ? (transaction.amount < 0 ? 0 : 1) : 0
     );
 
     const [title, setName] = React.useState(transaction?.title || "");
     const [nameTouched, setNameTouched] = React.useState(false);
 
     const [amount, setAmount] = React.useState(
-        transaction ? transaction.amount * -1 : 0
+        transaction ? Math.abs(transaction.amount) : 0
     );
     const [amountTouched, setAmountTouched] = React.useState(false);
 
@@ -126,7 +126,8 @@ export default function TransactionModal({
                 break;
         }
 
-        onClose();
+        setNameTouched(false);
+        setAmountTouched(false);
         onSubmit(tabIndex, amount, title, payerId, receiverId);
     }
 
@@ -157,7 +158,7 @@ export default function TransactionModal({
             <FormLabel>Amount</FormLabel>
             <InputGroup>
                 <Input
-                    defaultValue={amount}
+                    defaultValue={amount || ""}
                     key="amount"
                     placeholder="Amount"
                     type="number"

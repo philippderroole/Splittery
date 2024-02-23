@@ -1,5 +1,5 @@
 import { Flex } from "@chakra-ui/react";
-import Logo from "./logo";
+import Logo from "./Logo";
 
 export default function Navbar() {
     return (
@@ -7,8 +7,8 @@ export default function Navbar() {
             <Flex
                 direction="row"
                 alignItems="center"
-                justifyContent="left"
-                paddingLeft="10em">
+                justifyContent={["center", null, "left"]}
+                marginLeft={["0", null, "30"]}>
                 <Logo></Logo>
             </Flex>
         </>
