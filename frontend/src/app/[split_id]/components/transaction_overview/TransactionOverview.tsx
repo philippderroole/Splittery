@@ -86,20 +86,22 @@ export default async function TransactionOverview({
             <Table variant="simple">
                 <Thead>
                     <Tr>
-                        <Th>Title</Th>
-                        <Th>Amount</Th>
-                        <Th>User</Th>
-                        <Th padding={0}></Th>
+                        <Th paddingX={4}> Title</Th>
+                        <Th paddingX={4}>Amount</Th>
+                        <Th paddingX={4}>User</Th>
+                        <Th paddingX={0}></Th>
                     </Tr>
                 </Thead>
                 <Tbody>
                     {transactions.map((transaction) => (
                         <Tr key={transaction.id}>
-                            <Td>{transaction.title}</Td>
-                            <Td isNumeric>
+                            <Td paddingX={2} whiteSpace="wrap">
+                                {transaction.title}
+                            </Td>
+                            <Td paddingX={2} isNumeric>
                                 {CurrencyFormat.format(transaction.amount)}
                             </Td>
-                            <Td>
+                            <Td paddingX={2}>
                                 {
                                     users.find(
                                         (user) =>

@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import SplitName from "./components/split_name";
 import TransactionOverview from "./components/transaction_overview/TransactionOverview";
-import UserOverview from "./components/user_overview/user_overview";
+import UserOverview from "./components/user_overview/UserOverview";
 
 export default async function Page({
     params,
@@ -55,13 +55,13 @@ export default async function Page({
                         split={split}
                         users={users}
                         transactions={transactions}
-                        size={["sm", "md", "2xl"]}
+                        size={["sm", "md", "xl"]}
                     />
                     <TransactionOverview
                         split={split}
                         users={users}
                         transactions={transactions}
-                        size={["sm", "md"]}
+                        size={["sm", "md", "xl"]}
                     />
                 </Flex>
             </Show>
@@ -71,13 +71,13 @@ export default async function Page({
                         split={split}
                         users={users}
                         transactions={transactions}
-                        size={["sm", "md", "2xl"]}
+                        size={["sm", "md", "xl"]}
                     />
                     <TransactionOverview
                         split={split}
                         users={users}
                         transactions={transactions}
-                        size={["sm", "md", "2xl"]}
+                        size={["sm", "md", "xl"]}
                     />
                 </Flex>
             </Hide>

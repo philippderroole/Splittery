@@ -94,10 +94,6 @@ export default async function UserOverview({
         const received = getAmountReceived(transactions, user_id);
         const user_total = received - spent;
 
-        if (spent > received) {
-            return 0;
-        }
-
         if (user_total + share_per_user < 0) {
             return 0;
         }
@@ -150,34 +146,34 @@ export default async function UserOverview({
             <Table variant="simple">
                 <Thead>
                     <Tr>
-                        <Th>User</Th>
-                        <Th>Spent</Th>
-                        <Th>Received</Th>
-                        <Th>Due</Th>
-                        <Th>Outstanding</Th>
-                        <Th></Th>
+                        <Th paddingX={4}>User</Th>
+                        <Th paddingX={4}>Spent</Th>
+                        <Th paddingX={4}>Received</Th>
+                        <Th paddingX={4}>Due</Th>
+                        <Th paddingX={4}>Outstanding</Th>
+                        <Th paddingX={0}></Th>
                     </Tr>
                 </Thead>
                 <Tbody>
                     {users.map((user) => (
                         <Tr key={user.id}>
-                            <Td>{user.name}</Td>
-                            <Td isNumeric>
+                            <Td paddingX={2}>{user.name}</Td>
+                            <Td paddingX={2} isNumeric>
                                 {CurrencyFormat.format(
                                     getAmountSpent(transactions, user.id)
                                 )}
                             </Td>
-                            <Td isNumeric>
+                            <Td paddingX={2} isNumeric>
                                 {CurrencyFormat.format(
                                     getAmountReceived(transactions, user.id)
                                 )}
                             </Td>
-                            <Td isNumeric>
+                            <Td paddingX={2} isNumeric>
                                 {CurrencyFormat.format(
                                     getAmountDue(transactions, users, user.id)
                                 )}
                             </Td>
-                            <Td isNumeric>
+                            <Td paddingX={2} isNumeric>
                                 {CurrencyFormat.format(
                                     getAmountOutstanding(
                                         transactions,
@@ -227,9 +223,40 @@ export default async function UserOverview({
                             {user.name}
                             <AccordionIcon />
                             <Spacer />
-                            {CurrencyFormat.format(
-                                getAmountDue(transactions, users, user.id)
-                            )}
+                            {getAmountDue(transactions, users, user.id) <= 0 &&
+                            getAmountOutstanding(
+                                transactions,
+                                users,
+                                user.id
+                            ) <= 0 ? (
+                                <Text>{CurrencyFormat.format(0)}</Text>
+                            ) : null}
+                            {getAmountDue(transactions, users, user.id) > 0 ? (
+                                <Text textColor={"red.300"}>
+                                    {CurrencyFormat.format(
+                                        -getAmountDue(
+                                            transactions,
+                                            users,
+                                            user.id
+                                        )
+                                    )}
+                                </Text>
+                            ) : null}
+                            {getAmountOutstanding(
+                                transactions,
+                                users,
+                                user.id
+                            ) > 0 ? (
+                                <Text textColor={"green.300"}>
+                                    {CurrencyFormat.format(
+                                        getAmountOutstanding(
+                                            transactions,
+                                            users,
+                                            user.id
+                                        )
+                                    )}
+                                </Text>
+                            ) : null}
                         </AccordionButton>
 
                         {buttons(user)}

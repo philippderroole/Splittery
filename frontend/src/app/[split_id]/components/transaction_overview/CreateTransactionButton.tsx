@@ -49,7 +49,7 @@ export default function CreateTransactionButton({
             );
 
             revalidateTag("transactions");
-            close();
+            onClose();
         } catch (error) {
             toast({
                 title: "Unexpected error occurred while creating transaction",
@@ -85,7 +85,7 @@ export default function CreateTransactionButton({
             );
 
             revalidateTag("transactions");
-            close();
+            onClose();
         } catch (error) {
             toast({
                 title: "Unexpected error occurred while creating transaction",
@@ -193,6 +193,7 @@ export default function CreateTransactionButton({
                 onClose={onClose}
                 onOpen={onOpen}
                 onSubmit={handleCreateTransaction}
+                allowTransfer={true}
             />
         </>
     );
