@@ -128,6 +128,12 @@ export default function TransactionModal({
 
         setNameTouched(false);
         setAmountTouched(false);
+
+        setName("");
+        setAmount(0);
+        setPayerId(users[0]?.id);
+        setReceiverId(users[1]?.id || users[0]?.id);
+
         onSubmit(tabIndex, amount, title, payerId, receiverId);
     }
 
