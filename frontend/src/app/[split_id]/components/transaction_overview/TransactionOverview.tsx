@@ -1,6 +1,6 @@
 "use server";
 
-import { Transaction } from "@/app/types/transaction";
+import { Transaction } from "@/types/transaction";
 import {
     Flex,
     Hide,

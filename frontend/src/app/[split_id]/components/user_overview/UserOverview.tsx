@@ -1,7 +1,7 @@
 "use server";
 
-import { Transaction } from "@/app/types/transaction";
 import { CurrencyFormat } from "@/services/CurrencyFormat";
+import { Transaction } from "@/types/transaction";
 import {
     Accordion,
     AccordionButton,
