@@ -12,7 +12,7 @@ export default function Navbar() {
                 alignItems="center"
                 justifyContent={{ sm: "center", md: "space-between" }}
                 padding={{ sm: 21, md: 30, lg: 50 }}>
-                <Logo boxSize={{ sm: 60, md: 90 }} />
+                <Logo />
                 <DarkModeSwitch scale={1.3} />
             </Flex>
         </>
