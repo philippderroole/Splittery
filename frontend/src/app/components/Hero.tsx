@@ -4,7 +4,9 @@ import { HttpService } from "@/services/HttpService";
 import { Button, Stack, Text } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 
-export default function Hero() {
+export default function Hero(props) {
+    const { padding, ...rest } = props;
+
     const router = useRouter();
 
     const heading = (
@@ -14,7 +16,7 @@ export default function Hero() {
             <Text
                 as="span"
                 backgroundColor={"green.500"}
-                //bgGradient="linear(to-l, #4F6F52, #9AE6B4)"
+                bgGradient="linear(to-r, green.200, green.500)"
                 bgClip="text">
                 Split{" "}
             </Text>
@@ -74,7 +76,7 @@ export default function Hero() {
     };
 
     return (
-        <Stack padding={10}>
+        <Stack __css={props}>
             {heading}
             {subHeading}
             {buttonGroup()}

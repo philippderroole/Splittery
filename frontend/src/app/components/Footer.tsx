@@ -24,7 +24,7 @@ export default function Footer() {
                 spacing={4}
                 justify={{ base: "center", md: "space-between" }}
                 align={{ base: "center", md: "center" }}>
-                <Logo />
+                <Logo height={35} />
                 <Text>© 2023 Splittery. All rights reserved</Text>
                 <IconBar />
             </Container>
