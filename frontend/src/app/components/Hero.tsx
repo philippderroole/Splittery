@@ -4,9 +4,7 @@ import { HttpService } from "@/services/HttpService";
 import { Button, Stack, Text } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 
-export default function Hero(props) {
-    const { padding, ...rest } = props;
-
+export default function Hero() {
     const router = useRouter();
 
     const heading = (
@@ -15,8 +13,7 @@ export default function Hero(props) {
             fontSize={["3xl", "4xl", "5xl", null, "6xl", "7xl"]}>
             <Text
                 as="span"
-                backgroundColor={"green.500"}
-                bgGradient="linear(to-r, green.200, green.500)"
+                bgGradient="linear(to-r, primary.main, accent.main)"
                 bgClip="text">
                 Split{" "}
             </Text>
@@ -26,7 +23,7 @@ export default function Hero(props) {
     );
 
     const subHeading = (
-        <Text fontSize={["lg", "xl", "2xl", null, "3xl", "4xl"]} opacity="0.7">
+        <Text fontSize={["md", "xl", "2xl", null, "3xl", "4xl"]} opacity="0.7">
             Easily track shared expenses, split bills, and settle up together.
         </Text>
     );
@@ -50,7 +47,7 @@ export default function Hero(props) {
                     fontSize={fontSize}
                     width={width}
                     height={height}
-                    colorScheme="green"
+                    colorScheme="primary"
                     variant="solid"
                     onClick={() => {
                         HttpService.POST("/splits", {
@@ -67,7 +64,7 @@ export default function Hero(props) {
                     fontSize={fontSize}
                     width={width}
                     height={height}
-                    colorScheme="white"
+                    colorScheme="secondary"
                     variant="outline">
                     Browse my splits
                 </Button>
@@ -76,7 +73,10 @@ export default function Hero(props) {
     };
 
     return (
-        <Stack __css={props}>
+        <Stack
+            paddingBottom={20}
+            paddingX={5}
+            textAlign={{ base: "center", sm: "left" }}>
             {heading}
             {subHeading}
             {buttonGroup()}

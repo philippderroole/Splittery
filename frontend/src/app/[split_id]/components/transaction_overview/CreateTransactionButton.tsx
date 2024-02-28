@@ -163,7 +163,7 @@ export default function CreateTransactionButton({
 
     const createTransactionButton = (
         <IconButton
-            colorScheme="green"
+            colorScheme="primary"
             borderRadius="full"
             icon={<AddIcon />}
             aria-label={"add transaction"}

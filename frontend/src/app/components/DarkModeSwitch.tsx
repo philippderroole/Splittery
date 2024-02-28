@@ -12,7 +12,7 @@ export const DarkModeSwitch = (props?: CSSProperties) => {
             style={props}
             icon={isDark ? <SunIcon /> : <MoonIcon />}
             aria-label="Toggle Theme"
-            colorScheme="green"
+            colorScheme="primary"
             onClick={toggleColorMode}
         />
     );

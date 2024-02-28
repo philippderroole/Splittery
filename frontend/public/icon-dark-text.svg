@@ -6,7 +6,7 @@
    viewBox="0 0 890 170"
    xml:space="preserve"
    id="svg4"
-   sodipodi:docname="LogoDarkMitText.svg"
+   sodipodi:docname="icon-dark-text.svg"
    inkscape:version="1.3.2 (091e20ef0f, 2023-11-25, custom)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -23,8 +23,8 @@
    showgrid="false"
    showguides="true"
    inkscape:zoom="1.2948893"
-   inkscape:cx="367.59899"
-   inkscape:cy="181.4827"
+   inkscape:cx="367.98512"
+   inkscape:cy="181.09656"
    inkscape:window-width="2560"
    inkscape:window-height="1376"
    inkscape:window-x="2560"
@@ -115,22 +115,22 @@
 
 
 <path
-   style="fill:#9ae6b4;fill-opacity:1;fill-rule:evenodd;stroke-width:1.17052"
+   style="fill:#98e6b5;fill-opacity:1;fill-rule:evenodd;stroke-width:1.17052"
    d="M 79.421563,89.296972 29.877791,141.07044 c -0.327149,0.34188 -0.296748,0.8635 0.07147,1.16068 14.16947,11.43617 31.824925,17.70192 50.05074,17.7459 25.181352,-0.005 48.868182,-11.86339 63.961112,-31.96789 0.35905,-0.47827 0.23225,-1.12589 -0.27598,-1.44111 L 82.885447,88.857785 a 2.7720418,2.7720418 172.77401 0 0 -3.463884,0.439187 z"
    id="path25"
    inkscape:path-effect="#path-effect25"
    inkscape:original-d="M 80.975461,87.673141 29.285435,141.68946 a 79.999465,79.999465 0 0 0 50.714563,18.28756 79.999465,79.999465 0 0 0 64.605362,-32.83824 z" /><path
-   style="fill:#599a76;fill-opacity:1;fill-rule:evenodd;stroke-width:1.17052"
+   style="fill:#4020c5;fill-opacity:1;fill-rule:evenodd;stroke-width:1.17052"
    d="M 9.2101836,43.282985 C 3.252255,54.598743 0.09219612,67.181598 0,79.977018 c 0.03269202,19.402056 7.1148347,38.119422 19.908651,52.676402 0.354024,0.40282 0.945995,0.41137 1.316764,0.0239 L 68.888044,82.869878 A 1.9641611,1.9641611 83.008584 0 0 68.517863,79.851259 L 10.205324,43.01928 C 9.8521045,42.796176 9.4048199,42.913317 9.2101836,43.282985 Z"
    id="path24"
    inkscape:path-effect="#path-effect28"
    inkscape:original-d="M 9.5657638,42.615315 A 79.999465,79.999465 0 0 0 0,79.977018 79.999465,79.999465 0 0 0 20.554078,133.37888 L 70.548995,81.134184 Z" /><path
-   style="fill:#9ae6b4;fill-opacity:1;fill-rule:evenodd;stroke-width:1.17052"
+   style="fill:#98e6b5;fill-opacity:1;fill-rule:evenodd;stroke-width:1.17052"
    d="M 72.748668,0.51532665 C 50.479747,2.6079921 30.094636,13.93194 16.551394,31.746284 c -0.29103,0.382812 -0.193602,0.904165 0.212958,1.160957 l 55.445729,35.020763 a 1.1490084,1.1490084 151.13871 0 0 1.762601,-0.971455 l 0,-65.3182164 c 0,-0.67852035 -0.548477,-1.18648787 -1.224014,-1.12300595 z"
    id="path23"
    inkscape:path-effect="#path-effect26"
    inkscape:original-d="M 73.972682,0.40976286 A 79.999465,79.999465 0 0 0 16.028211,32.442278 l 57.944471,36.599024 z" /><path
-   style="fill:#9445ff;fill-opacity:1;fill-rule:evenodd;stroke-width:1.17052"
+   style="fill:#9f9fdc;fill-opacity:1;fill-rule:evenodd;stroke-width:1.17052"
    d="M 86.027312,1.3487476 V 74.030803 a 4.6576143,4.6576143 60.905 0 0 2.202567,3.958044 l 62.005641,38.460113 c 0.39628,0.2458 0.89258,0.10998 1.10361,-0.30585 C 157.02515,104.93903 159.99406,92.549249 160,79.977018 159.98799,38.515423 128.31826,4.0020455 87.1442,0.3201779 86.527725,0.26505147 86.027312,0.72980792 86.027312,1.3487476 Z"
    id="path7"
    inkscape:path-effect="#path-effect27"
@@ -142,12 +142,12 @@
    id="text29"
    style="white-space:pre;shape-inside:url(#rect29);display:inline;fill:#52876a;fill-opacity:1;fill-rule:evenodd;stroke-width:0.956;stroke-dasharray:none" /><text
    xml:space="preserve"
-   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:160px;font-family:'Noto Sans Thaana';-inkscape-font-specification:'Noto Sans Thaana, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;opacity:1;mix-blend-mode:normal;fill:#9ae6b4;fill-opacity:1;fill-rule:evenodd;stroke-width:89.1555;stroke-dasharray:none;paint-order:stroke fill markers"
-   x="195.49127"
-   y="130.04146"
+   style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:160px;font-family:'Noto Sans Thaana';-inkscape-font-specification:'Noto Sans Thaana, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;opacity:1;mix-blend-mode:normal;fill:#98e6b5;fill-opacity:1;fill-rule:evenodd;stroke-width:89.1555;stroke-dasharray:none;paint-order:stroke fill markers"
+   x="205.83989"
+   y="131.60001"
    id="text30"><tspan
      sodipodi:role="line"
      id="tspan30"
-     x="195.49127"
-     y="130.04146"
-     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:160px;font-family:'Noto Sans Thaana';-inkscape-font-specification:'Noto Sans Thaana, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#9ae6b4;fill-opacity:1;stroke-width:89.1555;stroke-dasharray:none;paint-order:stroke fill markers">Splittery</tspan></text></svg>
+     x="205.83989"
+     y="131.60001"
+     style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:160px;font-family:'Noto Sans Thaana';-inkscape-font-specification:'Noto Sans Thaana, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#98e6b5;fill-opacity:1;stroke-width:89.1555;stroke-dasharray:none;paint-order:stroke fill markers">Splittery</tspan></text></svg>

@@ -77,7 +77,7 @@ export default function CreateUserButton({
 
     const button = (
         <IconButton
-            colorScheme="green"
+            colorScheme="primary"
             borderRadius="full"
             icon={<AddIcon />}
             aria-label={"add user"}
@@ -110,7 +110,7 @@ export default function CreateUserButton({
                 <ModalBody pb={6}>{name_form}</ModalBody>
                 <ModalFooter>
                     <Button
-                        colorScheme="green"
+                        colorScheme="primary"
                         mr={3}
                         onClick={handleCreateUser}>
                         Save

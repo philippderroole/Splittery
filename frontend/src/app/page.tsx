@@ -7,7 +7,7 @@ export default async function LandingPage() {
     return (
         <>
             <Center flexGrow={1}>
-                <Hero paddingBottom={20} />
+                <Hero />
             </Center>
         </>
     );

@@ -96,7 +96,7 @@ export default function EditUserButton({
                 <ModalBody>{name_form}</ModalBody>
                 <ModalFooter>
                     <Button
-                        colorScheme="green"
+                        colorScheme="primary"
                         mr={3}
                         onClick={handleRenameUser}>
                         Save
