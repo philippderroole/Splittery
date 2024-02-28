@@ -107,7 +107,7 @@ export default async function Layout({
     return (
         <html lang="en" className={inter.className}>
             <head>
-                <link rel="icon" href="/favicon.ico" />
+                <link rel="icon" href="/icon.svg" type="image/svg" />
             </head>
             <body>
                 <ChakraProvider>

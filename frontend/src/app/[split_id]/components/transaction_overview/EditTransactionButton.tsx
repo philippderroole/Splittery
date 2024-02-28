@@ -1,8 +1,8 @@
 "use client";
 
 import { revalidateTag } from "@/app/server_actions";
-import { Transaction } from "@/app/types/transaction";
 import { HttpService } from "@/services/HttpService";
+import { Transaction } from "@/types/transaction";
 import { EditIcon } from "@chakra-ui/icons";
 import { IconButton, useDisclosure, useToast } from "@chakra-ui/react";
 import TransactionModal from "./TransactionModal";

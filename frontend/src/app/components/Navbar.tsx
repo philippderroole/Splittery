@@ -6,13 +6,15 @@ export default function Navbar() {
     return (
         <>
             <Flex
+                height={{ md: 100 }}
+                //bgGradient="linear(to-r, green.100, green.100, green.100)"
                 direction="row"
                 alignItems="center"
-                justifyContent={["center", null, "left"]}
-                marginLeft={["0", null, "39"]}>
-                <Logo></Logo>
+                justifyContent={{ sm: "center", md: "space-between" }}
+                padding={{ sm: 21, md: 30, lg: 50 }}>
+                <Logo />
+                <DarkModeSwitch scale={1.3} />
             </Flex>
-            <DarkModeSwitch position="absolute" right={3} top={3} scale={0.9} />
         </>
     );
 }
