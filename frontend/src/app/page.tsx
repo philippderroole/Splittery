@@ -1,3 +1,5 @@
+"use server";
+
 import { Center } from "@chakra-ui/react";
 import Hero from "./components/Hero";
 
