@@ -279,7 +279,7 @@ export default function TransactionModal({
                     </Tabs>
                 </ModalBody>
                 <ModalFooter>
-                    <Button colorScheme="green" mr={3} onClick={handleSubmit}>
+                    <Button colorScheme="primary" mr={3} onClick={handleSubmit}>
                         Save
                     </Button>
                     <Button onClick={close}>Cancel</Button>
