@@ -9,6 +9,7 @@ import {
     Hide,
     Show,
 } from "@chakra-ui/react";
+import { redirect } from "next/navigation";
 import SplitName from "./components/split_name";
 import TransactionOverview from "./components/transaction_overview/TransactionOverview";
 import UserOverview from "./components/user_overview/UserOverview";
@@ -19,7 +20,11 @@ export default async function Page({
     params: { split_id: string };
 }) {
     const split_id = params.split_id;
-    const split = await HttpService.GET(`/splits/${split_id}`, ["split"]);
+    const split = await HttpService.GET(`/splits/${split_id}`, ["split"]).catch(
+        () => {
+            redirect("/404");
+        }
+    );
 
     const users = await HttpService.GET(`/splits/${split_id}/users`, ["users"]);
 
