@@ -1,4 +1,4 @@
-name: Build frontend image
+name: Build frontend docker image
 
 on:
     push:
