@@ -11,17 +11,15 @@ export default function LayoutBox({
     children?: React.ReactNode;
     size?: string[];
 }) {
-    const backgroundColor = useColorModeValue(
-        "blackAlpha.100",
-        "whiteAlpha.200"
-    );
-
     return (
         <>
             <Box
                 backdropBlur={10}
                 backdropFilter="blur(10px)"
-                backgroundColor={backgroundColor}
+                backgroundColor={useColorModeValue(
+                    "light.background.300",
+                    "dark.background.400"
+                )}
                 paddingX={5}
                 paddingY={3}
                 margin={5}
