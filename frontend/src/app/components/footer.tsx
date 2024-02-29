@@ -16,7 +16,7 @@ export default function Footer() {
         <Box
             backgroundColor={useColorModeValue(
                 "light.background.100",
-                "dark.background.100"
+                "dark.background.600"
             )}
             width="100%">
             <Container
