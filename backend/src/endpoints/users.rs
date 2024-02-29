@@ -15,7 +15,7 @@ pub async fn get(
 ) -> impl Responder {
     let (split_id, user_id) = path.into_inner();
 
-    let rows = sqlx::query!(
+    let query = sqlx::query!(
         "
         SELECT *
         FROM \"user\"
@@ -24,16 +24,19 @@ pub async fn get(
         user_id,
         split_id
     )
-    .fetch_one(pool.get_ref())
-    .await
-    .unwrap();
+    .fetch_one(pool.get_ref());
+
+    let rows = match query.await {
+        Ok(rows) => rows,
+        Err(_) => return HttpResponse::InternalServerError().finish(),
+    };
 
     let user = User {
         id: rows.id,
         name: rows.name.clone(),
     };
 
-    let body = serde_json::to_string(&user).unwrap();
+    let body = serde_json::to_string(&user).expect("Failed to serialize user");
 
     HttpResponse::Ok()
         .content_type(ContentType::json())
@@ -47,7 +50,7 @@ pub async fn get_multiple(
 ) -> impl Responder {
     let split_id = path.into_inner();
 
-    let rows = sqlx::query!(
+    let query = sqlx::query!(
         "
         SELECT *
         FROM \"user\"
@@ -55,9 +58,12 @@ pub async fn get_multiple(
         ",
         split_id
     )
-    .fetch_all(pool.get_ref())
-    .await
-    .unwrap();
+    .fetch_all(pool.get_ref());
+
+    let rows = match query.await {
+        Ok(rows) => rows,
+        Err(_) => return HttpResponse::InternalServerError().finish(),
+    };
 
     let users: Vec<User> = rows
         .iter()
@@ -67,7 +73,7 @@ pub async fn get_multiple(
         })
         .collect();
 
-    let body = serde_json::to_string(&users).unwrap();
+    let body = serde_json::to_string(&users).expect("Failed to serialize users");
 
     HttpResponse::Ok()
         .content_type(ContentType::json())
@@ -87,7 +93,7 @@ pub async fn post(
 ) -> impl Responder {
     let split_id = path.into_inner();
 
-    let rows = sqlx::query!(
+    let query = sqlx::query!(
         "
         INSERT INTO \"user\" (split_id, name)
         VALUES ($1, $2)
@@ -96,16 +102,19 @@ pub async fn post(
         split_id,
         user.name
     )
-    .fetch_one(pool.get_ref())
-    .await
-    .unwrap();
+    .fetch_one(pool.get_ref());
+
+    let rows = match query.await {
+        Ok(rows) => rows,
+        Err(_) => return HttpResponse::InternalServerError().finish(),
+    };
 
     let user = User {
         id: rows.id,
         name: rows.name.clone(),
     };
 
-    let body = serde_json::to_string(&user).unwrap();
+    let body = serde_json::to_string(&user).expect("Failed to serialize user");
 
     HttpResponse::Ok()
         .content_type(ContentType::json())
@@ -120,7 +129,7 @@ pub async fn put(
 ) -> impl Responder {
     let (split_id, user_id) = path.into_inner();
 
-    let rows = sqlx::query!(
+    let query = sqlx::query!(
         "
         UPDATE \"user\"
         SET name = $1
@@ -131,16 +140,19 @@ pub async fn put(
         user_id,
         split_id
     )
-    .fetch_one(pool.get_ref())
-    .await
-    .unwrap();
+    .fetch_one(pool.get_ref());
+
+    let rows = match query.await {
+        Ok(rows) => rows,
+        Err(_) => return HttpResponse::InternalServerError().finish(),
+    };
 
     let user = User {
         id: rows.id,
         name: rows.name.clone(),
     };
 
-    let body = serde_json::to_string(&user).unwrap();
+    let body = serde_json::to_string(&user).expect("Failed to serialize user");
 
     HttpResponse::Ok()
         .content_type(ContentType::json())
@@ -154,7 +166,7 @@ pub async fn delete(
 ) -> impl Responder {
     let (split_id, user_id) = path.into_inner();
 
-    sqlx::query!(
+    let query = sqlx::query!(
         "
         DELETE FROM \"user\"
         WHERE id = $1 AND split_id = $2
@@ -162,9 +174,12 @@ pub async fn delete(
         user_id,
         split_id
     )
-    .execute(pool.get_ref())
-    .await
-    .unwrap();
+    .execute(pool.get_ref());
 
-    HttpResponse::Ok()
+    match query.await {
+        Ok(_) => (),
+        Err(_) => return HttpResponse::InternalServerError().finish(),
+    };
+
+    HttpResponse::Ok().finish()
 }

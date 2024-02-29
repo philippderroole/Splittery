@@ -7,8 +7,11 @@ mod transactions;
 mod users;
 
 pub async fn start_web_server(pool: Pool<Postgres>) -> std::io::Result<()> {
-    let listen_url = dotenvy::var("LISTEN_URL").unwrap();
-    let listen_port: u16 = dotenvy::var("LISTEN_PORT").unwrap().parse().unwrap();
+    let listen_url = dotenvy::var("LISTEN_URL").expect("Missing listen url");
+    let listen_port: u16 = dotenvy::var("LISTEN_PORT")
+        .expect("Missing listen port")
+        .parse()
+        .expect("Invalid listen port");
 
     HttpServer::new(move || {
         let cors = Cors::default()
