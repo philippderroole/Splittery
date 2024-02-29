@@ -1,7 +1,7 @@
 "use client";
 
 import { HttpService } from "@/services/HttpService";
-import { Button, Stack, Text } from "@chakra-ui/react";
+import { Button, Stack, Text, useColorModeValue } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 
 export default function Hero() {
@@ -13,7 +13,10 @@ export default function Hero() {
             fontSize={["3xl", "4xl", "5xl", null, "6xl", "7xl"]}>
             <Text
                 as="span"
-                bgGradient="linear(to-r, primary.main, accent.main)"
+                bgGradient={useColorModeValue(
+                    "linear(to-r, light.primary.main, light.accent.main)",
+                    "linear(to-r, dark.primary.main, dark.accent.main)"
+                )}
                 bgClip="text">
                 Split{" "}
             </Text>
@@ -47,7 +50,10 @@ export default function Hero() {
                     fontSize={fontSize}
                     width={width}
                     height={height}
-                    colorScheme="primary"
+                    colorScheme={useColorModeValue(
+                        "light.primary",
+                        "dark.primary"
+                    )}
                     variant="solid"
                     onClick={() => {
                         HttpService.POST("/splits", {
@@ -64,7 +70,10 @@ export default function Hero() {
                     fontSize={fontSize}
                     width={width}
                     height={height}
-                    colorScheme="secondary"
+                    colorScheme={useColorModeValue(
+                        "light.secondary",
+                        "dark.secondary"
+                    )}
                     variant="outline">
                     Browse my splits
                 </Button>

@@ -22,6 +22,7 @@ import {
     TabPanel,
     TabPanels,
     Tabs,
+    useColorModeValue,
 } from "@chakra-ui/react";
 import React, { useEffect } from "react";
 import {
@@ -279,7 +280,13 @@ export default function TransactionModal({
                     </Tabs>
                 </ModalBody>
                 <ModalFooter>
-                    <Button colorScheme="primary" mr={3} onClick={handleSubmit}>
+                    <Button
+                        colorScheme={useColorModeValue(
+                            "light.primary",
+                            "dark.primary"
+                        )}
+                        mr={3}
+                        onClick={handleSubmit}>
                         Save
                     </Button>
                     <Button onClick={close}>Cancel</Button>

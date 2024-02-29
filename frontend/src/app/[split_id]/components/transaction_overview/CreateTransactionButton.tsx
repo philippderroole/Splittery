@@ -5,7 +5,12 @@ import { HttpService } from "@/services/HttpService";
 import { validate_payer, validate_receiver } from "@/services/Validation";
 import { Transaction } from "@/types/transaction";
 import { AddIcon } from "@chakra-ui/icons";
-import { IconButton, useDisclosure, useToast } from "@chakra-ui/react";
+import {
+    IconButton,
+    useColorModeValue,
+    useDisclosure,
+    useToast,
+} from "@chakra-ui/react";
 import TransactionModal from "./TransactionModal";
 
 export default function CreateTransactionButton({
@@ -163,7 +168,7 @@ export default function CreateTransactionButton({
 
     const createTransactionButton = (
         <IconButton
-            colorScheme="primary"
+            colorScheme={useColorModeValue("light.primary", "dark.primary")}
             borderRadius="full"
             icon={<AddIcon />}
             aria-label={"add transaction"}

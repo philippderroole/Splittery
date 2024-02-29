@@ -1,7 +1,7 @@
 "use client";
 
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
-import { IconButton, useColorMode } from "@chakra-ui/react";
+import { IconButton, useColorMode, useColorModeValue } from "@chakra-ui/react";
 import { CSSProperties } from "react";
 
 export const DarkModeSwitch = (props?: CSSProperties) => {
@@ -12,7 +12,7 @@ export const DarkModeSwitch = (props?: CSSProperties) => {
             style={props}
             icon={isDark ? <SunIcon /> : <MoonIcon />}
             aria-label="Toggle Theme"
-            colorScheme="primary"
+            colorScheme={useColorModeValue("light.primary", "dark.primary")}
             onClick={toggleColorMode}
         />
     );
