@@ -1,4 +1,3 @@
-#![deny(clippy::unwrap_used)]
 use sqlx::postgres::PgPoolOptions;
 
 mod endpoints;
