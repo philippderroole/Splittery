@@ -18,6 +18,7 @@ import {
     ModalFooter,
     ModalHeader,
     ModalOverlay,
+    useColorModeValue,
     useDisclosure,
     useToast,
 } from "@chakra-ui/react";
@@ -96,7 +97,10 @@ export default function EditUserButton({
                 <ModalBody>{name_form}</ModalBody>
                 <ModalFooter>
                     <Button
-                        colorScheme="primary"
+                        colorScheme={useColorModeValue(
+                            "light.primary",
+                            "dark.primary"
+                        )}
                         mr={3}
                         onClick={handleRenameUser}>
                         Save

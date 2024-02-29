@@ -18,6 +18,7 @@ import {
     ModalFooter,
     ModalHeader,
     ModalOverlay,
+    useColorModeValue,
     useDisclosure,
     useToast,
 } from "@chakra-ui/react";
@@ -77,7 +78,7 @@ export default function CreateUserButton({
 
     const button = (
         <IconButton
-            colorScheme="primary"
+            colorScheme={useColorModeValue("light.primary", "dark.primary")}
             borderRadius="full"
             icon={<AddIcon />}
             aria-label={"add user"}
@@ -110,7 +111,10 @@ export default function CreateUserButton({
                 <ModalBody pb={6}>{name_form}</ModalBody>
                 <ModalFooter>
                     <Button
-                        colorScheme="primary"
+                        colorScheme={useColorModeValue(
+                            "light.primary",
+                            "dark.primary"
+                        )}
                         mr={3}
                         onClick={handleCreateUser}>
                         Save

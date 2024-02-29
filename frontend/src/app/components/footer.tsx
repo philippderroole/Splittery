@@ -14,8 +14,10 @@ import IconText from "./icon-text";
 export default function Footer() {
     return (
         <Box
-            bg={useColorModeValue("gray.50", "gray.900")}
-            color={useColorModeValue("gray.700", "gray.200")}
+            backgroundColor={useColorModeValue(
+                "light.background.100",
+                "dark.background.100"
+            )}
             width="100%">
             <Container
                 as={Stack}

@@ -1,6 +1,13 @@
 "use client";
 
-import { Button, Center, Flex, Heading, Stack } from "@chakra-ui/react";
+import {
+    Button,
+    Center,
+    Flex,
+    Heading,
+    Stack,
+    useColorModeValue,
+} from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 
 export default function NotFoundPage() {
@@ -14,7 +21,10 @@ export default function NotFoundPage() {
                 </Heading>
                 <Flex direction="row" justifyContent="center">
                     <Button
-                        colorScheme="primary"
+                        colorScheme={useColorModeValue(
+                            "light.primary",
+                            "dark.primary"
+                        )}
                         width="fit-content"
                         onClick={() => {
                             router.push("/");
