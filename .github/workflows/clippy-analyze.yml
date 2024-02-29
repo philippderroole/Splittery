@@ -17,7 +17,7 @@ on:
 
 jobs:
     rust-clippy-analyze:
-        name: Run rust-clippy analyzing
+        name: Run rust-clippy
         runs-on: ubuntu-latest
         permissions:
             contents: read
@@ -36,12 +36,6 @@ jobs:
 
             - name: Install required cargo
               run: cargo install clippy-sarif sarif-fmt
-
-            - name: Run cargo check
-              uses: actions-rs/cargo@v1
-              with:
-                  command: check
-                  working-directory: ./backend
 
             - name: Run rust-clippy
               run: cargo clippy
