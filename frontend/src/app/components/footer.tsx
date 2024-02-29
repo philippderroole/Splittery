@@ -3,12 +3,13 @@
 import {
     Box,
     Container,
+    Flex,
     Stack,
     Text,
     useColorModeValue,
 } from "@chakra-ui/react";
-import IconBar from "./IconBar";
-import Logo from "./Logo";
+import IconBar from "./icon-bar";
+import IconText from "./icon-text";
 
 export default function Footer() {
     return (
@@ -19,14 +20,20 @@ export default function Footer() {
             <Container
                 as={Stack}
                 maxW={"6xl"}
-                py={4}
+                paddingY={4}
                 direction={{ base: "column", md: "row" }}
                 spacing={4}
                 justify={{ base: "center", md: "space-between" }}
-                align={{ base: "center", md: "center" }}>
-                <Logo />
-                <Text>© 2023 Splittery. All rights reserved</Text>
-                <IconBar />
+                alignItems="center">
+                <IconText width={130} height={30} />
+                <Text>© 2024 Splittery. All rights reserved</Text>
+                <Flex
+                    width={130}
+                    height={30}
+                    marginRight={-2}
+                    justifyContent={{ base: "center", md: "right" }}>
+                    <IconBar />
+                </Flex>
             </Container>
         </Box>
     );
