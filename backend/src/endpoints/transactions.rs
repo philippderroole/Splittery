@@ -18,7 +18,7 @@ pub async fn get(
 ) -> impl Responder {
     let (split_id, transaction_id) = path.into_inner();
 
-    let row = sqlx::query!(
+    let query = sqlx::query!(
         "
         SELECT *
         FROM transaction
@@ -27,9 +27,12 @@ pub async fn get(
         transaction_id,
         split_id
     )
-    .fetch_one(pool.get_ref())
-    .await
-    .unwrap();
+    .fetch_one(pool.get_ref());
+
+    let row = match query.await {
+        Ok(row) => row,
+        Err(_) => return HttpResponse::InternalServerError().finish(),
+    };
 
     let transaction = Transaction {
         id: row.id,
@@ -39,7 +42,7 @@ pub async fn get(
         user_id: row.user_id,
     };
 
-    let body = serde_json::to_string(&transaction).unwrap();
+    let body = serde_json::to_string(&transaction).expect("Failed to serialize transaction");
 
     HttpResponse::Ok()
         .content_type(ContentType::json())
@@ -62,7 +65,7 @@ pub async fn get_multiple(
 
     let transactions = match user_id {
         Some(user_id) => {
-            let rows = sqlx::query!(
+            let query = sqlx::query!(
                 "
                 SELECT *
                 FROM transaction
@@ -71,9 +74,12 @@ pub async fn get_multiple(
                 user_id,
                 split_id
             )
-            .fetch_all(pool.get_ref())
-            .await
-            .unwrap();
+            .fetch_all(pool.get_ref());
+
+            let rows = match query.await {
+                Ok(rows) => rows,
+                Err(_) => return HttpResponse::InternalServerError().finish(),
+            };
 
             rows.iter()
                 .map(|row| Transaction {
@@ -86,7 +92,7 @@ pub async fn get_multiple(
                 .collect::<Vec<Transaction>>()
         }
         None => {
-            let rows = sqlx::query!(
+            let query = sqlx::query!(
                 "
                 SELECT *
                 FROM transaction
@@ -94,9 +100,12 @@ pub async fn get_multiple(
                 ",
                 split_id
             )
-            .fetch_all(pool.get_ref())
-            .await
-            .unwrap();
+            .fetch_all(pool.get_ref());
+
+            let rows = match query.await {
+                Ok(rows) => rows,
+                Err(_) => return HttpResponse::InternalServerError().finish(),
+            };
 
             rows.iter()
                 .map(|row| Transaction {
@@ -110,7 +119,7 @@ pub async fn get_multiple(
         }
     };
 
-    let body = serde_json::to_string(&transactions).unwrap();
+    let body = serde_json::to_string(&transactions).expect("Failed to serialize transactions");
 
     HttpResponse::Ok()
         .content_type(ContentType::json())
@@ -134,7 +143,7 @@ pub async fn post(
     let split_id = path.into_inner();
     let transaction = body.into_inner();
 
-    let row = sqlx::query!(
+    let query = sqlx::query!(
         "
         INSERT INTO transaction (title, description, amount, user_id, split_id)
         VALUES ($1, $2, $3, $4, $5)
@@ -146,9 +155,12 @@ pub async fn post(
         transaction.user_id,
         split_id
     )
-    .fetch_one(pool.get_ref())
-    .await
-    .unwrap();
+    .fetch_one(pool.get_ref());
+
+    let row = match query.await {
+        Ok(row) => row,
+        Err(_) => return HttpResponse::InternalServerError().finish(),
+    };
 
     let transaction = Transaction {
         id: row.id,
@@ -158,7 +170,7 @@ pub async fn post(
         user_id: row.user_id,
     };
 
-    let body = serde_json::to_string(&transaction).unwrap();
+    let body = serde_json::to_string(&transaction).expect("Failed to serialize transaction");
 
     HttpResponse::Ok()
         .content_type(ContentType::json())
@@ -174,7 +186,7 @@ pub async fn put(
     let (split_id, transaction_id) = path.into_inner();
     let transaction = body.into_inner();
 
-    let row = sqlx::query!(
+    let query = sqlx::query!(
         "
         UPDATE transaction
         SET title = $1, description = $2,
@@ -189,9 +201,12 @@ pub async fn put(
         transaction_id,
         split_id
     )
-    .fetch_one(pool.get_ref())
-    .await
-    .unwrap();
+    .fetch_one(pool.get_ref());
+
+    let row = match query.await {
+        Ok(row) => row,
+        Err(_) => return HttpResponse::InternalServerError().finish(),
+    };
 
     let transaction = Transaction {
         id: row.id,
@@ -201,7 +216,7 @@ pub async fn put(
         user_id: row.user_id,
     };
 
-    let body = serde_json::to_string(&transaction).unwrap();
+    let body = serde_json::to_string(&transaction).expect("Failed to serialize transaction");
 
     HttpResponse::Ok()
         .content_type(ContentType::json())
@@ -215,7 +230,7 @@ pub async fn delete(
 ) -> impl Responder {
     let (split_id, transaction_id) = path.into_inner();
 
-    sqlx::query!(
+    let query = sqlx::query!(
         "
         DELETE FROM transaction
         WHERE id = $1 AND split_id = $2
@@ -223,9 +238,12 @@ pub async fn delete(
         transaction_id,
         split_id
     )
-    .execute(pool.get_ref())
-    .await
-    .unwrap();
+    .execute(pool.get_ref());
 
-    HttpResponse::Ok()
+    match query.await {
+        Ok(_) => (),
+        Err(_) => return HttpResponse::InternalServerError().finish(),
+    }
+
+    HttpResponse::Ok().finish()
 }

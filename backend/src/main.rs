@@ -1,3 +1,4 @@
+#![deny(clippy::unwrap_used)]
 use sqlx::postgres::PgPoolOptions;
 
 mod endpoints;
@@ -6,11 +7,20 @@ mod endpoints;
 async fn main() {
     let pool = PgPoolOptions::new()
         .max_connections(1)
-        .connect(dotenvy::var("DATABASE_URL").unwrap().as_str())
+        .connect(
+            dotenvy::var("DATABASE_URL")
+                .expect("Missing database url")
+                .as_str(),
+        )
         .await
-        .unwrap();
+        .expect("Failed to connect to database");
 
-    sqlx::migrate!("./migrations").run(&pool).await.unwrap();
+    sqlx::migrate!("./migrations")
+        .run(&pool)
+        .await
+        .expect("Failed to run migrations");
 
-    endpoints::start_web_server(pool).await.unwrap();
+    endpoints::start_web_server(pool)
+        .await
+        .expect("Failed to start web server");
 }
