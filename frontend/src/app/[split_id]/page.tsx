@@ -1,6 +1,7 @@
 "use server";
 
 import { HttpService } from "@/services/HttpService";
+import { AppEnvironment } from "@/types/app-environment";
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -12,7 +13,7 @@ import {
 import { redirect } from "next/navigation";
 import SplitName from "./components/split_name";
 import TransactionOverview from "./components/transaction_overview/TransactionOverview";
-import UserOverview from "./components/user_overview/UserOverview";
+import UserOverview from "./components/user_overview/user-overview";
 
 export default async function Page({
     params,
@@ -32,6 +33,12 @@ export default async function Page({
         `/splits/${split_id}/transactions`,
         ["transactions"]
     );
+
+    const app = {
+        split: split,
+        users: users,
+        transactions: transactions,
+    } as AppEnvironment;
 
     const breadcrumps = (
         <Breadcrumb>
@@ -56,12 +63,7 @@ export default async function Page({
             <SplitName split={split}></SplitName>
             <Show above="md">
                 <Flex direction="column" justify={"start"} align={"left"}>
-                    <UserOverview
-                        split={split}
-                        users={users}
-                        transactions={transactions}
-                        size={["sm", "md", "xl"]}
-                    />
+                    <UserOverview app={app} size={["sm", "md", "xl"]} />
                     <TransactionOverview
                         split={split}
                         users={users}
@@ -72,12 +74,7 @@ export default async function Page({
             </Show>
             <Hide above="md">
                 <Flex direction="column" justify={"start"} align={"center"}>
-                    <UserOverview
-                        split={split}
-                        users={users}
-                        transactions={transactions}
-                        size={["sm", "md", "xl"]}
-                    />
+                    <UserOverview app={app} size={["sm", "md", "xl"]} />
                     <TransactionOverview
                         split={split}
                         users={users}
