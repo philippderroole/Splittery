@@ -24,7 +24,7 @@ import {
     Tabs,
     useColorModeValue,
 } from "@chakra-ui/react";
-import React, { useEffect } from "react";
+import React from "react";
 import {
     validate_amount,
     validate_name,
@@ -59,34 +59,38 @@ export default function TransactionModal({
     transaction?: Transaction;
     allowTransfer?: boolean;
 }) {
-    const [tabIndex, setTabIndex] = React.useState(
-        transaction ? (transaction.amount < 0 ? 0 : 1) : 0
-    );
+    const [tabIndex, setTabIndex] = React.useState(0);
 
-    const [title, setName] = React.useState(transaction?.title || "");
+    const [title, setName] = React.useState("");
     const [nameTouched, setNameTouched] = React.useState(false);
 
-    const [amount, setAmount] = React.useState(
-        transaction ? Math.abs(transaction.amount) : 0
-    );
+    const [amount, setAmount] = React.useState(0);
     const [amountTouched, setAmountTouched] = React.useState(false);
 
-    const [payerId, setPayerId] = React.useState(
-        transaction?.user_id || users[0]?.id
-    );
+    const [payerId, setPayerId] = React.useState(users[0]?.id);
     const [receiverId, setReceiverId] = React.useState(
-        transaction?.user_id || users[1]?.id || users[0]?.id
+        users[1]?.id || users[0]?.id
     );
 
-    useEffect(() => {
-        setPayerId(users[0]?.id);
-        setReceiverId(users[1]?.id || users[0]?.id);
+    React.useEffect(() => {
+        setup();
+    }, [transaction]);
+
+    React.useEffect(() => {
+        // If a new Split is created users is empty.
+        // After the first user is created, the payerId and receiverId are set to the first user.
+        if (payerId === undefined || receiverId === undefined) {
+            setPayerId(users[0]?.id);
+            setReceiverId(users[1]?.id || users[0]?.id);
+        }
     }, [users]);
 
-    function close() {
-        setNameTouched(false);
-        setAmountTouched(false);
-        onClose();
+    function setup() {
+        setTabIndex(transaction ? (transaction.amount < 0 ? 0 : 1) : 0);
+        setName(transaction?.title || "");
+        setAmount(transaction ? Math.abs(transaction.amount) : 0);
+        setPayerId(transaction?.user_id || users[0]?.id);
+        setReceiverId(transaction?.user_id || users[1]?.id || users[0]?.id);
     }
 
     function handleSubmit() {
@@ -254,7 +258,7 @@ export default function TransactionModal({
     );
 
     const transaction_modal = (
-        <Modal isOpen={isOpen} onClose={close} size={["sm", "md"]}>
+        <Modal isOpen={isOpen} onClose={onClose} size={["sm", "md"]}>
             <ModalOverlay />
             <ModalContent>
                 <ModalHeader>{header}</ModalHeader>
@@ -289,7 +293,7 @@ export default function TransactionModal({
                         onClick={handleSubmit}>
                         Save
                     </Button>
-                    <Button onClick={close}>Cancel</Button>
+                    <Button onClick={onClose}>Cancel</Button>
                 </ModalFooter>
             </ModalContent>
         </Modal>
