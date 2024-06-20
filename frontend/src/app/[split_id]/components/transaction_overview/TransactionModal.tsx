@@ -1,5 +1,6 @@
 "use client";
 
+import { CurrencyFormat } from "@/services/CurrencyFormat";
 import { Transaction } from "@/types/transaction";
 import {
     Button,
@@ -88,7 +89,11 @@ export default function TransactionModal({
     function setup() {
         setTabIndex(transaction ? (transaction.amount < 0 ? 0 : 1) : 0);
         setName(transaction?.title || "");
-        setAmount(transaction ? Math.abs(transaction.amount) : 0);
+        setAmount(
+            transaction
+                ? CurrencyFormat.round(Math.abs(transaction.amount), 2)
+                : 0
+        );
         setPayerId(transaction?.user_id || users[0]?.id);
         setReceiverId(transaction?.user_id || users[1]?.id || users[0]?.id);
     }
