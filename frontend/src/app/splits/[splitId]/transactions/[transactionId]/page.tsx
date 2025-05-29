@@ -10,9 +10,11 @@ export default async function TransactionGroupPage({
 }) {
     const { splitId, transactionId } = await params;
 
-    const transactionGroup = fetch(
-        process.env.API_URL + `/splits/${splitId}/transactions/${transactionId}`
-    );
+    const transactionGroup = await fetch(
+        `${process.env.API_URL}/splits/${splitId}/transactions/${transactionId}`
+    ).then((res) => res.json());
+
+    console.log(transactionGroup);
 
     return (
         <>
