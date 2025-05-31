@@ -1,4 +1,11 @@
+import "server-only";
+
 import TransactionList from "@/components/transaction-list";
+import { getSplit } from "@/service/split-service";
+import { getTransactionGroup } from "@/service/transaction-service";
+import { Currencies } from "@/utils/currencies";
+import { getFormattedDateLong } from "@/utils/date-formatter";
+import { Money } from "@/utils/money";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { Avatar, Box, IconButton, Typography } from "@mui/material";
 import Link from "next/link";
@@ -6,19 +13,29 @@ import Link from "next/link";
 export default async function TransactionGroupPage({
     params,
 }: {
-    params: Promise<{ splitId: string; transactionId: string }>;
+    params: Promise<{
+        splitUrl: string | undefined;
+        transactionUrl: string | undefined;
+    }>;
 }) {
-    const { splitId, transactionId } = await params;
+    const { splitUrl, transactionUrl } = await params;
 
-    const transactionGroup = await fetch(
-        `${process.env.API_URL}/splits/${splitId}/transactions/${transactionId}`
-    ).then((res) => res.json());
+    if (!splitUrl || !transactionUrl) {
+        throw new Error("Split URL or Transaction URL is missing");
+    }
 
-    console.log(transactionGroup);
+    const split = await getSplit(splitUrl);
+    const transactionGroup = await getTransactionGroup(
+        split.id,
+        transactionUrl
+    );
+
+    const amount = new Money(transactionGroup.amount, Currencies.EUR);
+    const date = getFormattedDateLong(transactionGroup.date);
 
     return (
         <>
-            <Link href={`/splits/${splitId}/transactions`}>
+            <Link href={`/splits/${split.url}/transactions`}>
                 <IconButton>
                     <ArrowBackIosIcon />
                 </IconButton>
@@ -40,11 +57,11 @@ export default async function TransactionGroupPage({
                         justifyContent: "start",
                     }}
                 >
-                    <Typography variant="h4">-18.20€</Typography>
+                    <Typography variant="h4">{amount.toString()}</Typography>
                     <Typography variant="body1">
-                        Netto Marken-Discount
+                        {transactionGroup.name}
                     </Typography>
-                    <Typography variant="caption">Yesterday, 18:43</Typography>
+                    <Typography variant="caption">{date}</Typography>
                 </Box>
                 <Avatar />
             </Box>

@@ -26,6 +26,10 @@ public class Split {
     @OneToMany
     private Collection<TransactionGroup> transactionGroups;
 
+    public void addTransactionGroup(TransactionGroup transactionGroup) {
+        transactionGroups.add(transactionGroup);
+    }
+
     public String getId() {
         return id;
     }
@@ -56,5 +60,13 @@ public class Split {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public Collection<TransactionGroup> getTransactionGroups() {
+        return transactionGroups;
+    }
+
+    public void setTransactionGroups(Collection<TransactionGroup> transactionGroups) {
+        this.transactionGroups = transactionGroups;
     }
 }

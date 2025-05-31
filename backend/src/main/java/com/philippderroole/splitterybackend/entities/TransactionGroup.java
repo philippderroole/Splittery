@@ -7,15 +7,26 @@ import jakarta.persistence.OneToMany;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.Collection;
+import java.util.Date;
 
 @Entity
 public class TransactionGroup {
+    public static final int URL_LENGTH = 8;
+
     @Id
     @UuidGenerator
     private String id;
 
     @ManyToOne
     private Split split;
+
+    private double amount;
+
+    private String url;
+
+    private String name;
+
+    private Date date;
 
     @OneToMany
     private Collection<Transaction> transactions;
@@ -32,6 +43,10 @@ public class TransactionGroup {
         return transactions;
     }
 
+    public void setTransactions(Collection<Transaction> transactions) {
+        this.transactions = transactions;
+    }
+
     public Split getSplit() {
         return split;
     }
@@ -40,7 +55,35 @@ public class TransactionGroup {
         this.split = split;
     }
 
-    public void setTransactions(Collection<Transaction> transactions) {
-        this.transactions = transactions;
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

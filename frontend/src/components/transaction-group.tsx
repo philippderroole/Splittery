@@ -4,18 +4,19 @@ import { Avatar, Box, Typography } from "@mui/material";
 import Link from "next/link";
 
 interface TransactionGroupProps {
-    splitId: string;
     name: string;
     time: string;
     amount: string;
+    splitUrl: string;
+    url: string;
 }
 
 export default async function TransactionGroup(props: TransactionGroupProps) {
-    const { splitId, name, time, amount } = props;
+    const { name, time, amount, splitUrl, url } = props;
 
     return (
         <>
-            <Link href="/splits/1/transactions/1">
+            <Link href={`/splits/${splitUrl}/transactions/${url}`}>
                 <Box
                     sx={{
                         display: "flex",

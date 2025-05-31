@@ -25,5 +25,7 @@ services:
         build:
             context: frontend/.
             dockerfile: Dockerfile
+        environment:
+            - API_URL=http://172.17.0.1:8080/api
         ports:
             - "3000:3000"

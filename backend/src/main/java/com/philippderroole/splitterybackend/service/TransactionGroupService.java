@@ -9,6 +9,10 @@ import com.philippderroole.splitterybackend.repositories.TransactionGroupReposit
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+
+import static com.philippderroole.splitterybackend.entities.TransactionGroup.URL_LENGTH;
+
 @Service
 public class TransactionGroupService {
 
@@ -18,11 +22,20 @@ public class TransactionGroupService {
     @Autowired
     private SplitRepository splitRepository;
 
-    public TransactionGroupDto getTransactionGroup(String splitId, String transactionId) {
+    public Collection<TransactionGroupDto> getTransactionGroups(String splitId) {
         Split split = splitRepository.findById(splitId)
                 .orElseThrow(() -> new IllegalArgumentException("Split not found"));
 
-        TransactionGroup transactionGroup = transactionGroupRepository.findById(transactionId)
+        return split.getTransactionGroups().stream()
+                .map(TransactionGroupDto::from)
+                .toList();
+    }
+
+    public TransactionGroupDto getTransactionGroup(String splitId, String transactionUrl) {
+        Split split = splitRepository.findById(splitId)
+                .orElseThrow(() -> new IllegalArgumentException("Split not found"));
+
+        TransactionGroup transactionGroup = transactionGroupRepository.findByUrl(transactionUrl)
                 .orElseThrow(() -> new IllegalArgumentException("Transaction group not found"));
 
         if (!transactionGroup.getSplit().getId().equals(split.getId())) {
@@ -37,9 +50,16 @@ public class TransactionGroupService {
                 .orElseThrow(() -> new IllegalArgumentException("Split not found"));
 
         TransactionGroup transactionGroup = new TransactionGroup();
+        transactionGroup.setUrl(UrlUtils.generateUrl(URL_LENGTH));
+        transactionGroup.setName(createTransactionGroupDto.getName());
+        transactionGroup.setAmount(createTransactionGroupDto.getAmount());
         transactionGroup.setSplit(split);
+        transactionGroup.setDate(createTransactionGroupDto.getDate());
 
         transactionGroup = transactionGroupRepository.save(transactionGroup);
+
+        split.addTransactionGroup(transactionGroup);
+        splitRepository.save(split);
 
         return TransactionGroupDto.from(transactionGroup);
     }

@@ -16,10 +16,10 @@ public class SplitController {
     @Autowired
     private SplitService splitService;
 
-    @GetMapping
-    public ResponseEntity<SplitDto> getSplit(String splitId) {
+    @GetMapping(path = "/{splitUrl}")
+    public ResponseEntity<SplitDto> getSplit(@PathVariable String splitUrl) {
         try {
-            SplitDto split = splitService.getSplit(splitId);
+            SplitDto split = splitService.getSplit(splitUrl);
             return new ResponseEntity<>(split, OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(BAD_REQUEST);
