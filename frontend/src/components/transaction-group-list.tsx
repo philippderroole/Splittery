@@ -1,9 +1,9 @@
+import "server-only";
+
 import { getSplit } from "@/service/split-service";
-import { getTransactionGroups } from "@/service/transaction-service";
-import { Currencies } from "@/utils/currencies";
+import { getTransactionGroups as getTransactions } from "@/service/transaction-service";
 import { getFormattedDay, getFormattedTime } from "@/utils/date-formatter";
-import { Money } from "@/utils/money";
-import { TransactionGroup as TransactionGroupType } from "@/utils/transaction-group";
+import { SerializedTransaction } from "@/utils/transaction";
 import { Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { default as TransactionGroup } from "./transaction-group";
@@ -18,38 +18,36 @@ export default async function TransactionGroupList(
     const { splitUrl } = props;
 
     const split = await getSplit(splitUrl);
-    const transactionGroups = await getTransactionGroups(split.id);
+    const transactions: SerializedTransaction[] = await getTransactions(
+        split.id
+    );
 
-    const transactionGroupsByDay = transactionGroups
+    const transactionsPerDay = transactions
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .reduce<Map<string, TransactionGroupType[]>>((acc, group) => {
-            const date = dayjs(group.date).toISOString();
+        .reduce<Map<string, SerializedTransaction[]>>((acc, group) => {
+            const date = dayjs(group.date).format("MM-DD-YYYY");
 
             acc.set(date, acc.get(date)?.concat(group) || [group]);
 
             return acc;
-        }, new Map<string, TransactionGroupType[]>());
+        }, new Map<string, SerializedTransaction[]>());
 
     return (
         <>
-            <Typography variant="h4">Transactions</Typography>
-            {Array.from(transactionGroupsByDay.entries()).map(
-                ([day, transactionGroups]) => (
+            {Array.from(transactionsPerDay.entries()).map(
+                ([day, transactions]) => (
                     <div key={day}>
                         <Typography variant="h6">
                             {getFormattedDay(dayjs(day))}
                         </Typography>
-                        {transactionGroups.map((transactionGroup) => (
+                        {transactions.map((transaction) => (
                             <TransactionGroup
-                                key={transactionGroup.id}
-                                name={transactionGroup.name}
-                                time={getFormattedTime(transactionGroup.date)}
-                                amount={new Money(
-                                    transactionGroup.amount,
-                                    Currencies.EUR
-                                ).toString()}
+                                key={transaction.id}
+                                name={transaction.name}
+                                time={getFormattedTime(transaction.date)}
+                                amount={transaction.amount}
                                 splitUrl={split.url}
-                                url={transactionGroup.url}
+                                url={transaction.url}
                             />
                         ))}
                     </div>

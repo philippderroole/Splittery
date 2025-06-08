@@ -1,17 +1,20 @@
 package com.philippderroole.splitterybackend.service;
 
+import static com.philippderroole.splitterybackend.entities.TransactionGroup.URL_LENGTH;
+
+import java.time.Instant;
+import java.util.Collection;
+import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.philippderroole.splitterybackend.dtos.CreateTransactionGroupDto;
 import com.philippderroole.splitterybackend.dtos.TransactionGroupDto;
 import com.philippderroole.splitterybackend.entities.Split;
 import com.philippderroole.splitterybackend.entities.TransactionGroup;
 import com.philippderroole.splitterybackend.repositories.SplitRepository;
 import com.philippderroole.splitterybackend.repositories.TransactionGroupRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.Collection;
-
-import static com.philippderroole.splitterybackend.entities.TransactionGroup.URL_LENGTH;
 
 @Service
 public class TransactionGroupService {
@@ -54,7 +57,7 @@ public class TransactionGroupService {
         transactionGroup.setName(createTransactionGroupDto.getName());
         transactionGroup.setAmount(createTransactionGroupDto.getAmount());
         transactionGroup.setSplit(split);
-        transactionGroup.setDate(createTransactionGroupDto.getDate());
+        transactionGroup.setDate(Date.from(Instant.now()));
 
         transactionGroup = transactionGroupRepository.save(transactionGroup);
 

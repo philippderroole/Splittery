@@ -1,10 +1,9 @@
-import CreateTransactionGroupButton from "@/components/create-transaction-button";
-import TransactionGroupList from "@/components/transaction-group-list";
+import CreateUserButton from "@/components/create-user-button";
 import { getSplit } from "@/service/split-service";
 import { Typography } from "@mui/material";
 import { notFound } from "next/navigation";
 
-export default async function TransactionGroupListPage({
+export default async function SplitPage({
     params,
 }: {
     params: Promise<{ splitUrl: string }>;
@@ -12,6 +11,7 @@ export default async function TransactionGroupListPage({
     const { splitUrl } = await params;
 
     let split;
+
     try {
         split = await getSplit(splitUrl);
     } catch {
@@ -19,9 +19,13 @@ export default async function TransactionGroupListPage({
     }
 
     return (
-        <>
-            <Typography variant="h4">Transactions</Typography>
-            <TransactionGroupList splitUrl={splitUrl} />
+        <div
+            style={{
+                display: "flex",
+                flexDirection: "column",
+            }}
+        >
+            <Typography variant="h4">Balances</Typography>
             <div
                 style={{
                     position: "fixed",
@@ -30,8 +34,8 @@ export default async function TransactionGroupListPage({
                     zIndex: 1200,
                 }}
             >
-                <CreateTransactionGroupButton split={split} />
+                <CreateUserButton split={split} />
             </div>
-        </>
+        </div>
     );
 }

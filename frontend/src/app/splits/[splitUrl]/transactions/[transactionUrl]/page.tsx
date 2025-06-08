@@ -1,11 +1,13 @@
 import "server-only";
 
-import TransactionList from "@/components/transaction-list";
+import TransactionList from "@/components/transaction-item-list";
+import UserSelectionList from "@/components/user-selection-list";
 import { getSplit } from "@/service/split-service";
-import { getTransactionGroup } from "@/service/transaction-service";
+import { getTransaction } from "@/service/transaction-service";
 import { Currencies } from "@/utils/currencies";
 import { getFormattedDateLong } from "@/utils/date-formatter";
 import { Money } from "@/utils/money";
+import { SerializedTransaction } from "@/utils/transaction";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { Avatar, Box, IconButton, Typography } from "@mui/material";
 import Link from "next/link";
@@ -25,13 +27,13 @@ export default async function TransactionGroupPage({
     }
 
     const split = await getSplit(splitUrl);
-    const transactionGroup = await getTransactionGroup(
+    const transaction: SerializedTransaction = await getTransaction(
         split.id,
         transactionUrl
     );
 
-    const amount = new Money(transactionGroup.amount, Currencies.EUR);
-    const date = getFormattedDateLong(transactionGroup.date);
+    const amount = new Money(transaction.amount, Currencies.EUR);
+    const date = getFormattedDateLong(transaction.date);
 
     return (
         <>
@@ -58,14 +60,16 @@ export default async function TransactionGroupPage({
                     }}
                 >
                     <Typography variant="h4">{amount.toString()}</Typography>
-                    <Typography variant="body1">
-                        {transactionGroup.name}
-                    </Typography>
+                    <Typography variant="body1">{transaction.name}</Typography>
                     <Typography variant="caption">{date}</Typography>
                 </Box>
                 <Avatar />
             </Box>
-            <TransactionList></TransactionList>
+            <TransactionList
+                split={split}
+                transaction={transaction}
+            ></TransactionList>
+            <UserSelectionList></UserSelectionList>
         </>
     );
 }

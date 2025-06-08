@@ -1,13 +1,11 @@
-import { TransactionGroup } from "@/utils/transaction-group";
+import { SerializedTransaction } from "@/utils/transaction";
+import "server-only";
 
 export async function getTransactionGroups(
     splitId: string
-): Promise<TransactionGroup[]> {
+): Promise<SerializedTransaction[]> {
     return await fetch(
-        `${process.env.API_URL}/splits/${splitId}/transactions`,
-        {
-            cache: "force-cache",
-        }
+        `${process.env.API_URL}/splits/${splitId}/transactions`
     ).then((res) => {
         console.log("Fetching transaction groups for split:", splitId);
         console.log(res);
@@ -19,21 +17,20 @@ export async function getTransactionGroups(
     });
 }
 
-export async function getTransactionGroup(
+export async function getTransaction(
     splitId: string,
     transactionUrl: string
-): Promise<TransactionGroup> {
-    return await fetch(
+): Promise<SerializedTransaction> {
+    const res = await fetch(
         `${process.env.API_URL}/splits/${splitId}/transactions/${transactionUrl}`,
         {
             cache: "force-cache",
         }
-    ).then((res) => {
-        console.log(res);
+    );
 
-        if (!res.ok) {
-            throw new Error("Failed to fetch transaction group");
-        }
-        return res.json();
-    });
+    if (!res.ok) {
+        throw new Error("Failed to fetch transaction group");
+    }
+
+    return await res.json();
 }
