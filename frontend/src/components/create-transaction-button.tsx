@@ -29,7 +29,7 @@ import {
     Typography,
 } from "@mui/material";
 import React, { useState } from "react";
-import UserSelectionList from "./user-selection-list";
+import UserSelectionList from "./user-list";
 
 interface TransactionGroupProps {
     split: Split;

@@ -1,7 +1,7 @@
 import "server-only";
 
 import TransactionList from "@/components/transaction-item-list";
-import UserSelectionList from "@/components/user-selection-list";
+import UserSelectionList from "@/components/user-list";
 import { getSplit } from "@/service/split-service";
 import { getTransaction } from "@/service/transaction-service";
 import { Currencies } from "@/utils/currencies";

@@ -1,22 +1,14 @@
+"use client";
+
 import CreateUserButton from "@/components/create-user-button";
-import { getSplit } from "@/service/split-service";
+import UserList from "@/components/user-list";
 import { Typography } from "@mui/material";
-import { notFound } from "next/navigation";
+import { useSplit } from "../../../../providers/split-provider";
 
-export default async function SplitPage({
-    params,
-}: {
-    params: Promise<{ splitUrl: string }>;
-}) {
-    const { splitUrl } = await params;
+export default function SplitPage() {
+    const split = useSplit();
 
-    let split;
-
-    try {
-        split = await getSplit(splitUrl);
-    } catch {
-        notFound();
-    }
+    console.log("SplitPage split:", split);
 
     return (
         <div
@@ -26,6 +18,9 @@ export default async function SplitPage({
             }}
         >
             <Typography variant="h4">Balances</Typography>
+            <UserList
+                users={split.users.map((user) => user.username)}
+            ></UserList>
             <div
                 style={{
                     position: "fixed",

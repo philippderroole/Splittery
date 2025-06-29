@@ -1,7 +1,10 @@
+import "server-only";
+
 import NavTabs from "@/components/nav-tabs";
+import SplitHeader from "@/components/split-header";
 import { getSplit } from "@/service/split-service";
-import { Typography } from "@mui/material";
 import { notFound } from "next/navigation";
+import { SplitProvider } from "../../../providers/split-provider";
 
 export default async function SplitLayout({
     children,
@@ -22,8 +25,10 @@ export default async function SplitLayout({
 
     return (
         <div>
-            <Typography variant="h2">Split {split.name}</Typography>
-            {children}
+            <SplitProvider split={split}>
+                <SplitHeader />
+                {children}
+            </SplitProvider>
             <div
                 style={{
                     position: "fixed",

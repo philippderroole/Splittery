@@ -115,11 +115,10 @@ function CreateTransactionGroupDialog(
         }
 
         const user: CreateUser = {
-            splitId: split.id,
-            name: newName,
+            username: newName,
         };
 
-        createUser(user, split.id)
+        createUser(user, split.url)
             .then(() => {
                 onClose?.();
             })

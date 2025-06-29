@@ -26,6 +26,5 @@ export interface CreateTransaction {
 }
 
 export interface CreateUser {
-    name: string;
-    splitId: string;
+    username: string;
 }

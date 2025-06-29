@@ -4,17 +4,17 @@ import { CreateUser, SerializedTransaction } from "@/utils/transaction";
 import { revalidatePath } from "next/cache";
 
 export async function createUser(
-    transactionGroup: CreateUser,
-    splitId: string
+    user: CreateUser,
+    splitUrl: string
 ): Promise<SerializedTransaction> {
     const res = await fetch(
-        `${process.env.API_URL}/splits/${splitId}/transactions`,
+        `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitUrl}/users`,
         {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(transactionGroup),
+            body: JSON.stringify(user),
         }
     );
 
@@ -33,7 +33,9 @@ export async function createUser(
         throw new Error(errorMsg);
     }
 
-    revalidatePath(`${process.env.API_URL}/splits/${splitId}/transactions`);
+    revalidatePath(
+        `${process.env.APINEXT_PUBLIC_API_URL_URL}/splits/${splitUrl}/users`
+    );
 
     return res.json();
 }

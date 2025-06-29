@@ -1,27 +1,17 @@
+"use client";
+
 import CreateTransactionGroupButton from "@/components/create-transaction-button";
 import TransactionGroupList from "@/components/transaction-group-list";
-import { getSplit } from "@/service/split-service";
+import { useSplit } from "@/providers/split-provider";
 import { Typography } from "@mui/material";
-import { notFound } from "next/navigation";
 
-export default async function TransactionGroupListPage({
-    params,
-}: {
-    params: Promise<{ splitUrl: string }>;
-}) {
-    const { splitUrl } = await params;
-
-    let split;
-    try {
-        split = await getSplit(splitUrl);
-    } catch {
-        notFound();
-    }
+export default function TransactionGroupListPage() {
+    const split = useSplit();
 
     return (
         <>
             <Typography variant="h4">Transactions</Typography>
-            <TransactionGroupList splitUrl={splitUrl} />
+            <TransactionGroupList />
             <div
                 style={{
                     position: "fixed",

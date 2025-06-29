@@ -1,7 +1,7 @@
 "use server";
 
 export async function registerAnonymous(): Promise<string> {
-    return await fetch(`${process.env.API_URL}/auth/anonymous`, {
+    return await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/anonymous`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

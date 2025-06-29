@@ -15,7 +15,7 @@ public class User implements UserDetails, CredentialsContainer {
     @UuidGenerator
     private String id;
 
-    private String name;
+    private String username;
 
     private String password;
 
@@ -37,8 +37,8 @@ public class User implements UserDetails, CredentialsContainer {
     public User() {
     }
 
-    public User(String name) {
-        this.name = name;
+    public User(String username) {
+        this.username = username;
     }
 
     @Override
@@ -62,12 +62,12 @@ public class User implements UserDetails, CredentialsContainer {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getUsername() {
+        return username;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUsername(String name) {
+        this.username = name;
     }
 
     public boolean isAnonymous() {
@@ -89,11 +89,6 @@ public class User implements UserDetails, CredentialsContainer {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    @Override
-    public String getUsername() {
-        return "";
     }
 
     public String getEmail() {

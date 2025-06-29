@@ -53,7 +53,7 @@ public class AuthService {
      */
     public String register(AnonymousDto anonymousDto) {
         User user = new User();
-        user.setName(anonymousDto.getName());
+        user.setUsername(anonymousDto.getName());
         user.setAnonymous(true);
         user = userRepository.save(user);
 

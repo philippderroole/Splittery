@@ -1,5 +1,3 @@
-import "server-only";
-
 import { Avatar, Box, Typography } from "@mui/material";
 import Link from "next/link";
 
@@ -11,7 +9,7 @@ interface TransactionGroupProps {
     url: string;
 }
 
-export default async function TransactionGroup(props: TransactionGroupProps) {
+export default function TransactionGroup(props: TransactionGroupProps) {
     const { name, time, amount, splitUrl, url } = props;
 
     return (

@@ -9,7 +9,7 @@ export async function createTransactionItem(
     splitId: string
 ): Promise<Transaction> {
     const res = await fetch(
-        `${process.env.API_URL}/splits/${splitId}/transactions/${transaction.transactionId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitId}/transactions/${transaction.transactionId}`,
         {
             method: "POST",
             headers: {
@@ -35,7 +35,7 @@ export async function createTransactionItem(
     }
 
     revalidatePath(
-        `${process.env.API_URL}/splits/${splitId}/transactions/${transaction.transactionId}`
+        `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitId}/transactions/${transaction.transactionId}`
     );
 
     return res.json();

@@ -1,26 +1,14 @@
-import "server-only";
-
-import { getSplit } from "@/service/split-service";
-import { getTransactionGroups as getTransactions } from "@/service/transaction-service";
+import { useSplit } from "@/providers/split-provider";
 import { getFormattedDay, getFormattedTime } from "@/utils/date-formatter";
 import { SerializedTransaction } from "@/utils/transaction";
 import { Typography } from "@mui/material";
 import dayjs from "dayjs";
 import { default as TransactionGroup } from "./transaction-group";
 
-interface TransactionGroupListProps {
-    splitUrl: string;
-}
+export default function TransactionGroupList() {
+    const split = useSplit();
 
-export default async function TransactionGroupList(
-    props: TransactionGroupListProps
-) {
-    const { splitUrl } = props;
-
-    const split = await getSplit(splitUrl);
-    const transactions: SerializedTransaction[] = await getTransactions(
-        split.id
-    );
+    const transactions = [] as SerializedTransaction[];
 
     const transactionsPerDay = transactions
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())

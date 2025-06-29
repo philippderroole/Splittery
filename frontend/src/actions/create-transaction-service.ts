@@ -8,7 +8,7 @@ export async function createTransactionGroup(
     splitId: string
 ): Promise<SerializedTransaction> {
     const res = await fetch(
-        `${process.env.API_URL}/splits/${splitId}/transactions`,
+        `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitId}/transactions`,
         {
             method: "POST",
             headers: {
@@ -33,7 +33,9 @@ export async function createTransactionGroup(
         throw new Error(errorMsg);
     }
 
-    revalidatePath(`${process.env.API_URL}/splits/${splitId}/transactions`);
+    revalidatePath(
+        `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitId}/transactions`
+    );
 
     return res.json();
 }

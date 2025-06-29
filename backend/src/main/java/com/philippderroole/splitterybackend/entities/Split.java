@@ -25,8 +25,15 @@ public class Split {
     @OneToMany(mappedBy = "split")
     private Collection<Transaction> transactions = new ArrayList<>();
 
-    public void addTransaction(Transaction transactions) {
-        this.transactions.add(transactions);
+    @ManyToMany
+    private Collection<User> users = new ArrayList<>();
+
+    public void addTransaction(Transaction transaction) {
+        transactions.add(transaction);
+    }
+
+    public void addUser(User user) {
+        users.add(user);
     }
 
     public String getId() {
@@ -67,5 +74,9 @@ public class Split {
 
     public void setTransactions(Collection<Transaction> transactions) {
         this.transactions = transactions;
+    }
+
+    public Collection<User> getUsers() {
+        return users;
     }
 }
