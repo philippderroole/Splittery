@@ -1,8 +1,8 @@
 "use client";
 
-import { createTransactionGroup } from "@/app/actions/create-transaction-service";
+import { createUser } from "@/actions/create-user-service";
 import { Split } from "@/utils/split";
-import { CreateTransaction } from "@/utils/transaction";
+import { CreateUser } from "@/utils/transaction";
 import CloseIcon from "@mui/icons-material/Close";
 import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
 import {
@@ -14,15 +14,10 @@ import {
     DialogContentText,
     DialogTitle,
     Fab,
-    FormControl,
     IconButton,
-    InputAdornment,
-    InputLabel,
-    OutlinedInput,
     Portal,
     Snackbar,
     TextField,
-    Typography,
 } from "@mui/material";
 import { useState } from "react";
 
@@ -97,7 +92,6 @@ function CreateTransactionGroupDialog(
     const { split, open = false, onClose, onError } = props;
 
     const [name, setName] = useState("");
-    const [amount, setAmount] = useState("");
     const [errors, setErrors] = useState<{ name?: string; amount?: string }>(
         {}
     );
@@ -114,29 +108,18 @@ function CreateTransactionGroupDialog(
         if (newName.length < 3)
             newErrors.name = "Transaction name must be at least 3 characters";
 
-        if (amount.trim() === "") newErrors.amount = "Amount is required";
-        if (isNaN(Number(amount.trim())))
-            newErrors.amount = "Amount must be a number";
-
-        let newAmount = Number(amount.trim());
-        if (newAmount < 0) newAmount *= -1;
-        if (newAmount < -1000000 || newAmount > 1000000)
-            newErrors.amount =
-                "Amount must be between -1,000,000 and 1,000,000";
-
         setErrors(newErrors);
 
         if (Object.keys(newErrors).length !== 0) {
             return;
         }
 
-        const transactionGroup: CreateTransaction = {
+        const user: CreateUser = {
             splitId: split.id,
             name: newName,
-            amount: newAmount,
         };
 
-        createTransactionGroup(transactionGroup, split.id)
+        createUser(user, split.id)
             .then(() => {
                 onClose?.();
             })
@@ -148,16 +131,16 @@ function CreateTransactionGroupDialog(
     return (
         <Dialog open={open} onClose={onClose}>
             <form noValidate autoComplete="off" onSubmit={handleSubmit}>
-                <DialogTitle>Create a transaction</DialogTitle>
+                <DialogTitle>Create a new user</DialogTitle>
                 <DialogContent sx={{ paddingBottom: 0 }}>
                     <DialogContentText></DialogContentText>
                     <TextField
                         autoFocus
                         required
                         margin="dense"
-                        id="transaction-name"
-                        name="transaction-name"
-                        label="Transaction name"
+                        id="user-name"
+                        name="name"
+                        label="User Name"
                         type="text"
                         fullWidth
                         value={name}
@@ -165,38 +148,6 @@ function CreateTransactionGroupDialog(
                         error={!!errors.name}
                         helperText={errors.name}
                     />
-                    <FormControl
-                        required
-                        margin="dense"
-                        fullWidth
-                        sx={{ marginTop: 1 }}
-                        id="amount"
-                        error={!!errors.amount}
-                    >
-                        <InputLabel htmlFor="amount">Amount</InputLabel>
-                        <OutlinedInput
-                            id="amount"
-                            name="amount"
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
-                            startAdornment={
-                                <InputAdornment position="start">
-                                    -
-                                </InputAdornment>
-                            }
-                            endAdornment={
-                                <InputAdornment position="end">
-                                    €
-                                </InputAdornment>
-                            }
-                            label="Amount"
-                        />
-                        {errors.amount && (
-                            <Typography color="error" variant="caption">
-                                {errors.amount}
-                            </Typography>
-                        )}
-                    </FormControl>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={onClose}>Cancel</Button>

@@ -1,11 +1,9 @@
 package com.philippderroole.splitterybackend.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 @Entity
@@ -21,13 +19,14 @@ public class Split {
     private String url;
 
     @ManyToOne
+    @JoinColumn(name = "owner_id")
     private User owner;
 
-    @OneToMany
-    private Collection<TransactionGroup> transactionGroups;
+    @OneToMany(mappedBy = "split")
+    private Collection<Transaction> transactions = new ArrayList<>();
 
-    public void addTransactionGroup(TransactionGroup transactionGroup) {
-        transactionGroups.add(transactionGroup);
+    public void addTransaction(Transaction transactions) {
+        this.transactions.add(transactions);
     }
 
     public String getId() {
@@ -62,11 +61,11 @@ public class Split {
         this.url = url;
     }
 
-    public Collection<TransactionGroup> getTransactionGroups() {
-        return transactionGroups;
+    public Collection<Transaction> getTransactions() {
+        return transactions;
     }
 
-    public void setTransactionGroups(Collection<TransactionGroup> transactionGroups) {
-        this.transactionGroups = transactionGroups;
+    public void setTransactions(Collection<Transaction> transactions) {
+        this.transactions = transactions;
     }
 }

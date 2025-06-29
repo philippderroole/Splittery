@@ -1,6 +1,6 @@
 "use client";
 
-import { createSplit } from "@/app/actions/create-split-service";
+import { createSplit } from "@/actions/create-split-service";
 import { Button } from "@mui/material";
 
 export default function CreateSplitButton() {

@@ -35,6 +35,9 @@ export default async function TransactionGroupPage({
     const amount = new Money(transaction.amount, Currencies.EUR);
     const date = getFormattedDateLong(transaction.date);
 
+    console.log("Split:", split);
+    console.log("Transaction:", transaction);
+
     return (
         <>
             <Link href={`/splits/${split.url}/transactions`}>
@@ -69,7 +72,9 @@ export default async function TransactionGroupPage({
                 split={split}
                 transaction={transaction}
             ></TransactionList>
-            <UserSelectionList></UserSelectionList>
+            <UserSelectionList
+                users={["Philipp", "Corny", "Sophia"]}
+            ></UserSelectionList>
         </>
     );
 }

@@ -1,20 +1,16 @@
 package com.philippderroole.splitterybackend.entities;
 
-import java.util.*;
-
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
-
 import org.springframework.security.core.CredentialsContainer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.*;
+
 @Entity
 @Table(name = "splittery_user")
 public class User implements UserDetails, CredentialsContainer {
-    @OneToMany
-    Collection<TransactionGroup> transactionGroups = new ArrayList<>();
-
     @Id
     @UuidGenerator
     private String id;
@@ -32,22 +28,10 @@ public class User implements UserDetails, CredentialsContainer {
     @Column
     private Date lastLogout = new GregorianCalendar(0, Calendar.JANUARY, 1).getTime();
 
-    public Date getLastLogout() {
-        return lastLogout;
-    }
-
-    public void setLastLogout(Date lastLogout) {
-        this.lastLogout = lastLogout;
-    }
-
     @ManyToMany
     private Set<Role> roles = new HashSet<>();
 
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
-    }
-
-    @OneToMany
+    @OneToMany(mappedBy = "owner")
     private Collection<Split> ownedSplits = new ArrayList<>();
 
     public User() {
@@ -57,21 +41,17 @@ public class User implements UserDetails, CredentialsContainer {
         this.name = name;
     }
 
-    public void addVote(TransactionGroup transactionGroup) {
-        transactionGroups.add(transactionGroup);
-    }
-
     @Override
     public void eraseCredentials() {
         this.password = null;
     }
 
-    public Collection<TransactionGroup> getVotes() {
-        return transactionGroups;
+    public Date getLastLogout() {
+        return lastLogout;
     }
 
-    public void setVotes(Collection<TransactionGroup> transactionGroups) {
-        this.transactionGroups = transactionGroups;
+    public void setLastLogout(Date lastLogout) {
+        this.lastLogout = lastLogout;
     }
 
     public String getId() {
@@ -107,13 +87,13 @@ public class User implements UserDetails, CredentialsContainer {
         return password;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     @Override
     public String getUsername() {
         return "";
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getEmail() {
@@ -136,16 +116,20 @@ public class User implements UserDetails, CredentialsContainer {
         return roles;
     }
 
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+
     @Override
     public boolean isEnabled() {
         return enabled;
     }
 
-    public boolean isDisabled() {
-        return !enabled;
-    }
-
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
+    }
+
+    public boolean isDisabled() {
+        return !enabled;
     }
 }

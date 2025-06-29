@@ -1,14 +1,9 @@
 package com.philippderroole.splitterybackend.dtos;
 
-import java.util.Date;
-
-public class CreateTransactionGroupDto {
-
-    private double amount;
-
+public class CreateTransactionItemDto implements CreateOrUpdateTransactionItemDto {
     private String name;
 
-    private Date date;
+    private double amount;
 
     public double getAmount() {
         return amount;
@@ -24,13 +19,5 @@ public class CreateTransactionGroupDto {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
     }
 }

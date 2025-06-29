@@ -1,10 +1,9 @@
 package com.philippderroole.splitterybackend.dtos;
 
-import com.philippderroole.splitterybackend.entities.TransactionGroup;
-
+import java.util.Collection;
 import java.util.Date;
 
-public class TransactionGroupDto {
+public class UpdateTransactionDto {
 
     private String id;
 
@@ -18,16 +17,7 @@ public class TransactionGroupDto {
 
     private Date date;
 
-    public static TransactionGroupDto from(TransactionGroup transactionGroup) {
-        TransactionGroupDto transactionGroupDto = new TransactionGroupDto();
-        transactionGroupDto.setId(transactionGroup.getId());
-        transactionGroupDto.setName(transactionGroup.getName());
-        transactionGroupDto.setAmount(transactionGroup.getAmount());
-        transactionGroupDto.setSplitId(transactionGroup.getSplit().getId());
-        transactionGroupDto.setUrl(transactionGroup.getUrl());
-        transactionGroupDto.setDate(transactionGroup.getDate());
-        return transactionGroupDto;
-    }
+    private Collection<CreateOrUpdateTransactionItemDto> items;
 
     public String getId() {
         return id;
@@ -75,5 +65,13 @@ public class TransactionGroupDto {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public Collection<CreateOrUpdateTransactionItemDto> getItems() {
+        return items;
+    }
+
+    public void setItems(Collection<CreateOrUpdateTransactionItemDto> items) {
+        this.items = items;
     }
 }

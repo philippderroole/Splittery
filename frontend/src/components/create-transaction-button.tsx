@@ -1,6 +1,6 @@
 "use client";
 
-import { createTransactionGroup } from "@/app/actions/create-transaction-service";
+import { createTransactionGroup } from "@/actions/create-transaction-service";
 import { Split } from "@/utils/split";
 import { CreateTransaction } from "@/utils/transaction";
 import CloseIcon from "@mui/icons-material/Close";

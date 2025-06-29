@@ -24,3 +24,8 @@ export interface CreateTransaction {
     amount: number;
     splitId: string;
 }
+
+export interface CreateUser {
+    name: string;
+    splitId: string;
+}

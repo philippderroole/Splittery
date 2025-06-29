@@ -1,6 +1,6 @@
 "use client";
 
-import { createTransactionItem } from "@/app/actions/create-transaction-item-service";
+import { createTransactionItem } from "@/actions/create-transaction-item-service";
 import { Money } from "@/utils/money";
 import { Split } from "@/utils/split";
 import { CreateTransactionItem } from "@/utils/transaction-item";
@@ -221,7 +221,9 @@ function CreateTransactionItemDialog(props: CreateTransactionItemDialogProps) {
                         )}
                     </FormControl>
                     <AdvancedSettings>
-                        <UserSelectionList />
+                        <UserSelectionList
+                            users={["Philipp", "Corny", "Sophia"]}
+                        />
                     </AdvancedSettings>
                 </DialogContent>
                 <DialogActions>

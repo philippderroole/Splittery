@@ -2,11 +2,14 @@ package com.philippderroole.splitterybackend.dtos;
 
 import com.philippderroole.splitterybackend.entities.Split;
 
+import java.util.Collection;
+
 public class SplitDto {
 
     private String id;
     private String name;
     private String url;
+    private Collection<String> users;
 
     public static SplitDto from(Split split) {
         SplitDto splitDto = new SplitDto();
@@ -38,5 +41,13 @@ public class SplitDto {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    public Collection<String> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Collection<String> users) {
+        this.users = users;
     }
 }

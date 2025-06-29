@@ -11,7 +11,13 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-export default function UserSelectionList() {
+export type UserSelectionListProps = {
+    users: string[];
+};
+
+export default function UserSelectionList(props: UserSelectionListProps) {
+    const { users } = props;
+
     const [checked, setChecked] = useState<string[]>([]);
 
     const handleToggle = (value: string) => () => {
@@ -29,7 +35,7 @@ export default function UserSelectionList() {
 
     return (
         <List sx={{ width: "100%", padding: 0 }}>
-            {["Philipp", "Corny", "Sophia"].map((value) => {
+            {users.map((value) => {
                 const labelId = `checkbox-list-label-${value}`;
 
                 return (
