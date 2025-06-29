@@ -6,6 +6,10 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.philippderroole.splitterybackend.entities.Transaction;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
 public final class TransactionResponseBuilder {
 
     private final ObjectMapper objectMapper;
@@ -21,6 +25,10 @@ public final class TransactionResponseBuilder {
 
 
     public ObjectNode build(Transaction transaction) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+        LocalDateTime localDateTime = transaction.getDate().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
 
         return objectMapper.createObjectNode()
                 .put("id", transaction.getId())
@@ -28,7 +36,7 @@ public final class TransactionResponseBuilder {
                 .put("amount", transaction.getAmount())
                 .put("splitId", transaction.getSplit().getId())
                 .put("url", transaction.getUrl())
-                .put("date", transaction.getDate().toString())
+                .put("date", formatter.format(localDateTime))
                 .set("items", buildItems(transaction));
     }
 

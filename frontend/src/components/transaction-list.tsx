@@ -4,13 +4,11 @@ import { getFormattedDay, getFormattedTime } from "@/utils/date-formatter";
 import { Transaction } from "@/utils/transaction";
 import { Typography } from "@mui/material";
 import dayjs from "dayjs";
-import { default as TransactionGroup } from "./transaction-group";
+import { default as TransactionGroup } from "./transaction";
 
 export default function TransactionList() {
     const split = useSplit();
     const transactions = useTransactions();
-
-    console.log("Transactions:", transactions);
 
     const transactionsPerDay = transactions
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -35,7 +33,7 @@ export default function TransactionList() {
                                 key={transaction.id}
                                 name={transaction.name}
                                 time={getFormattedTime(transaction.date)}
-                                amount={transaction.amount.getAmount()}
+                                amount={transaction.amount}
                                 splitUrl={split.url}
                                 url={transaction.url}
                             />

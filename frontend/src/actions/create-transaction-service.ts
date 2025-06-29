@@ -3,7 +3,7 @@
 import { CreateTransaction, SerializedTransaction } from "@/utils/transaction";
 import { revalidatePath } from "next/cache";
 
-export async function createTransactionGroup(
+export async function createTransaction(
     transaction: CreateTransaction,
     splitUrl: string
 ): Promise<SerializedTransaction> {

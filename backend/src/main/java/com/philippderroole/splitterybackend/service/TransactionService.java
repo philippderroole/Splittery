@@ -2,10 +2,10 @@ package com.philippderroole.splitterybackend.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.philippderroole.splitterybackend.dtos.CreateTransactionDto;
 import com.philippderroole.splitterybackend.dtos.TransactionDto;
 import com.philippderroole.splitterybackend.dtos.UpdateTransactionDto;
-import com.philippderroole.splitterybackend.dtos.UpdateTransactionItemDto;
 import com.philippderroole.splitterybackend.entities.Split;
 import com.philippderroole.splitterybackend.entities.Transaction;
 import com.philippderroole.splitterybackend.entities.TransactionItem;
@@ -38,13 +38,16 @@ public class TransactionService {
         this.objectMapper = objectMapper;
     }
 
-    public Collection<TransactionDto> getTransactions(String splitUrl) {
+    public JsonNode getTransactions(String splitUrl) {
         Split split = splitRepository.findByUrl(splitUrl)
                 .orElseThrow(() -> new IllegalArgumentException("Split not found"));
 
-        return split.getTransactions().stream()
-                .map(TransactionDto::from)
-                .toList();
+        ArrayNode transactions = objectMapper.createArrayNode();
+        split.getTransactions().forEach(transaction -> transactions.add(
+                TransactionResponseBuilder.create(objectMapper)
+                        .build(transaction)));
+
+        return transactions;
     }
 
     public JsonNode getTransaction(String splitUrl, String transactionUrl) {
@@ -99,16 +102,10 @@ public class TransactionService {
 
         transaction = transactionRepository.save(transaction);
 
-        Collection<TransactionItem> updatedItems = updateTransactionItems(transaction, transactionDto.getItems());
+        Collection<TransactionItem> updatedItems = transactionItemService.updateTransactionItems(transaction, transactionDto.getItems());
         transaction.setItems(updatedItems);
 
         return TransactionResponseBuilder.create(objectMapper)
                 .build(transaction);
-    }
-
-    private Collection<TransactionItem> updateTransactionItems(Transaction transaction, Collection<UpdateTransactionItemDto> itemDtos) {
-        return itemDtos.stream()
-                .map(itemDto -> transactionItemService.createOrUpdateTransactionItem(transaction, itemDto))
-                .toList();
     }
 }

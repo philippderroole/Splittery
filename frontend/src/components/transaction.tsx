@@ -1,15 +1,18 @@
+"use client";
+
+import { Money } from "@/utils/money";
 import { Avatar, Box, Typography } from "@mui/material";
 import Link from "next/link";
 
-interface TransactionGroupProps {
+interface TransactionProps {
     name: string;
     time: string;
-    amount: number;
+    amount: Money;
     splitUrl: string;
     url: string;
 }
 
-export default function TransactionGroup(props: TransactionGroupProps) {
+export default function Transaction(props: TransactionProps) {
     const { name, time, amount, splitUrl, url } = props;
 
     return (

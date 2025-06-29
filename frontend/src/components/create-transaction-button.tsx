@@ -1,6 +1,6 @@
 "use client";
 
-import { createTransactionGroup } from "@/actions/create-transaction-service";
+import { createTransaction } from "@/actions/create-transaction-service";
 import { Split } from "@/utils/split";
 import { CreateTransaction } from "@/utils/transaction";
 import CloseIcon from "@mui/icons-material/Close";
@@ -134,13 +134,13 @@ function CreateTransactionGroupDialog(
             return;
         }
 
-        const transactionGroup: CreateTransaction = {
+        const transaction: CreateTransaction = {
             splitId: split.id,
             name: newName,
             amount: newAmount,
         };
 
-        createTransactionGroup(transactionGroup, split.url)
+        createTransaction(transaction, split.url)
             .then(() => {
                 onClose?.();
             })

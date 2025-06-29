@@ -3,6 +3,7 @@ import {
     CreateTransactionItem,
     SerializedTransactionItem,
     TransactionItem,
+    UpdateTransactionItem,
 } from "./transaction-item";
 
 export interface Transaction {
@@ -38,7 +39,7 @@ export interface UpdateTransaction {
     amount: number;
     splitId: string;
     url: string;
-    items: CreateTransactionItem[];
+    items: (CreateTransactionItem | UpdateTransactionItem)[];
 }
 
 export interface CreateUser {

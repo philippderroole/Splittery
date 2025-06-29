@@ -1,7 +1,7 @@
 "use client";
 
 import CreateTransactionButton from "@/components/create-transaction-button";
-import TransactionList from "@/components/transaction-group-list";
+import TransactionList from "@/components/transaction-list";
 import { useSplit } from "@/providers/split-provider";
 import { Typography } from "@mui/material";
 

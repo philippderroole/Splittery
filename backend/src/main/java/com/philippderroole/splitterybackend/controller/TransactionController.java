@@ -9,8 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collection;
-
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 
@@ -27,9 +25,9 @@ public class TransactionController {
     }
 
     @GetMapping(path = "/transactions")
-    public ResponseEntity<Collection<TransactionDto>> getTransactions(@PathVariable String splitUrl) {
+    public ResponseEntity<JsonNode> getTransactions(@PathVariable String splitUrl) {
         try {
-            Collection<TransactionDto> transactionGroups = transactionService.getTransactions(splitUrl);
+            JsonNode transactionGroups = transactionService.getTransactions(splitUrl);
 
             return new ResponseEntity<>(transactionGroups, OK);
         } catch (Exception e) {
@@ -53,6 +51,7 @@ public class TransactionController {
         try {
             TransactionDto createdTransactionGroup = transactionService.createTransaction(splitUrl, createTransactionDto);
 
+            notifyTransactionUpdate(splitUrl);
             return new ResponseEntity<>(createdTransactionGroup, OK);
         } catch (Exception e) {
             return new ResponseEntity<>(BAD_REQUEST);
@@ -62,18 +61,16 @@ public class TransactionController {
     @PutMapping(path = "/transactions/{transactionUrl}")
     public ResponseEntity<JsonNode> updateTransaction(@PathVariable String splitUrl, @PathVariable String transactionUrl, @RequestBody UpdateTransactionDto transactionDto) {
         try {
-            JsonNode updatedTransactionGroup = transactionService.updateTransaction(splitUrl, transactionUrl, transactionDto);
+            JsonNode updatedTransaction = transactionService.updateTransaction(splitUrl, transactionUrl, transactionDto);
 
-            notifyTransactionUpdate(updatedTransactionGroup);
-            return new ResponseEntity<>(updatedTransactionGroup, OK);
+            notifyTransactionUpdate(splitUrl);
+            return new ResponseEntity<>(updatedTransaction, OK);
         } catch (Exception e) {
             return new ResponseEntity<>(BAD_REQUEST);
         }
     }
 
-    private void notifyTransactionUpdate(JsonNode updatedTransaction) {
-        String splitUrl = updatedTransaction.get("url").asText();
-
-        messagingTemplate.convertAndSend("/topic/splits/" + splitUrl + "/transactions", updatedTransaction);
+    private void notifyTransactionUpdate(String splitUrl) {
+        messagingTemplate.convertAndSend("/topic/splits/" + splitUrl + "/transactions", transactionService.getTransactions(splitUrl));
     }
 }

@@ -10,9 +10,6 @@ export async function getTransactions(
             //cache: "force-cache",
         }
     ).then((res) => {
-        console.log("Fetching transaction groups for split:", splitUrl);
-        console.log(res);
-
         if (!res.ok) {
             throw new Error("Failed to fetch transaction groups");
         }

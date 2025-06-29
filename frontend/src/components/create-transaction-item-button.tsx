@@ -160,7 +160,14 @@ function CreateTransactionItemDialog(props: CreateTransactionItemDialogProps) {
             amount: transaction.amount.getAmount(),
             splitId: transaction.splitId,
             url: transaction.url,
-            items: [],
+            items: transaction.items.map(
+                (item) =>
+                    ({
+                        id: item.id,
+                        name: item.name,
+                        amount: item.amount.getAmount(),
+                    } as CreateTransactionItem)
+            ),
         };
 
         updateTransactionDto.items.push({

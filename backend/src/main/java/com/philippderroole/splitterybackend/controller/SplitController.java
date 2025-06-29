@@ -55,7 +55,7 @@ public class SplitController {
     private void notifySplitUpdate(ObjectNode updatedSplit) {
         String splitUrl = updatedSplit.get("url").asText();
 
-        messagingTemplate.convertAndSend("/topic/split/" + splitUrl, updatedSplit);
+        messagingTemplate.convertAndSend("/topic/splits/" + splitUrl, updatedSplit);
     }
 
     @PostMapping(path = "/{splitUrl}/users")

@@ -15,6 +15,18 @@ public class TransactionItemService {
     @Autowired
     private TransactionItemRepository transactionItemRepository;
 
+    public Collection<TransactionItem> updateTransactionItems(Transaction transaction, Collection<UpdateTransactionItemDto> itemDtos) {
+        transaction.getItems().stream()
+                .filter(item -> itemDtos.stream()
+                        .map(UpdateTransactionItemDto::getId)
+                        .noneMatch(id -> item.getId().equals(id)))
+                .forEach(this::deleteTransactionItem);
+
+        return itemDtos.stream()
+                .map(itemDto -> createOrUpdateTransactionItem(transaction, itemDto))
+                .toList();
+    }
+
     public void deleteTransactionItem(TransactionItem transactionItem) {
         transactionItemRepository.delete(transactionItem);
     }

@@ -1,29 +1,23 @@
 import { Split } from "@/utils/split";
-import { Client } from "@stomp/stompjs";
-import { useEffect } from "react";
-import SockJS from "sockjs-client";
+import { subscribeToTopic, unsubscribeFromTopic } from "@/utils/stompClient";
+import { useEffect, useRef } from "react";
 
 export function useSplitSocket(
     splitUrl: string,
     onUpdate: (split: Split) => void
 ) {
+    const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
+
     useEffect(() => {
-        const socket = new SockJS(`${process.env.NEXT_PUBLIC_API_URL}/ws`);
-        const client = new Client({
-            webSocketFactory: () => socket,
-            onConnect: () => {
-                client.subscribe(`/topic/split/${splitUrl}`, (message) => {
-                    console.log(
-                        "Received split update:",
-                        JSON.parse(message.body)
-                    );
-                    onUpdate(JSON.parse(message.body));
-                });
-            },
+        const topic = `/topic/splits/${splitUrl}`;
+        subscriptionRef.current = subscribeToTopic(topic, (message) => {
+            onUpdate(JSON.parse(message.body));
         });
-        client.activate();
+
         return () => {
-            client.deactivate();
+            if (subscriptionRef.current) {
+                unsubscribeFromTopic(subscriptionRef.current, topic);
+            }
         };
     }, [splitUrl, onUpdate]);
 }
