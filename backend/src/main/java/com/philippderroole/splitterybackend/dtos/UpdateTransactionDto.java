@@ -13,11 +13,9 @@ public class UpdateTransactionDto {
 
     private String splitId;
 
-    private String url;
-
     private Date date;
 
-    private Collection<CreateOrUpdateTransactionItemDto> items;
+    private Collection<UpdateTransactionItemDto> items;
 
     public String getId() {
         return id;
@@ -51,14 +49,6 @@ public class UpdateTransactionDto {
         this.splitId = splitId;
     }
 
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
     public Date getDate() {
         return date;
     }
@@ -67,11 +57,12 @@ public class UpdateTransactionDto {
         this.date = date;
     }
 
-    public Collection<CreateOrUpdateTransactionItemDto> getItems() {
+    public Collection<UpdateTransactionItemDto> getItems() {
         return items;
     }
 
-    public void setItems(Collection<CreateOrUpdateTransactionItemDto> items) {
+    public UpdateTransactionDto setItems(Collection<UpdateTransactionItemDto> items) {
         this.items = items;
+        return this;
     }
 }

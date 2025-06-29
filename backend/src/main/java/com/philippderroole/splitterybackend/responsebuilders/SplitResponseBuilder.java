@@ -44,7 +44,8 @@ public final class SplitResponseBuilder {
         split.getUsers().forEach(user -> {
             ObjectNode userNode = objectMapper.createObjectNode()
                     .put("id", user.getId())
-                    .put("username", user.getUsername());
+                    .put("username", user.getUsername())
+                    .put("balance", split.getBalance(user));
             arrayNode.add(userNode);
         });
         return arrayNode;

@@ -5,6 +5,8 @@ import org.hibernate.annotations.UuidGenerator;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
 public class Split {
@@ -28,12 +30,21 @@ public class Split {
     @ManyToMany
     private Collection<User> users = new ArrayList<>();
 
+    @ElementCollection
+    @CollectionTable(name = "split_balances", joinColumns = @JoinColumn(name = "split_id"))
+    @MapKeyJoinColumn(name = "user_id")
+    private Map<User, Double> balances = new HashMap<>();
+
     public void addTransaction(Transaction transaction) {
         transactions.add(transaction);
     }
 
     public void addUser(User user) {
         users.add(user);
+    }
+
+    public Double getBalance(User user) {
+        return balances.getOrDefault(user, 0.0);
     }
 
     public String getId() {

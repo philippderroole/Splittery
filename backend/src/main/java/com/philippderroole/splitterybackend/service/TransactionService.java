@@ -1,15 +1,17 @@
 package com.philippderroole.splitterybackend.service;
 
-import com.philippderroole.splitterybackend.dtos.CreateOrUpdateTransactionItemDto;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.philippderroole.splitterybackend.dtos.CreateTransactionDto;
 import com.philippderroole.splitterybackend.dtos.TransactionDto;
 import com.philippderroole.splitterybackend.dtos.UpdateTransactionDto;
+import com.philippderroole.splitterybackend.dtos.UpdateTransactionItemDto;
 import com.philippderroole.splitterybackend.entities.Split;
 import com.philippderroole.splitterybackend.entities.Transaction;
 import com.philippderroole.splitterybackend.entities.TransactionItem;
 import com.philippderroole.splitterybackend.repositories.SplitRepository;
 import com.philippderroole.splitterybackend.repositories.TransactionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.philippderroole.splitterybackend.responsebuilders.TransactionResponseBuilder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -21,17 +23,23 @@ import static com.philippderroole.splitterybackend.entities.Transaction.URL_LENG
 @Service
 public class TransactionService {
 
-    @Autowired
-    private TransactionRepository transactionRepository;
+    private final TransactionRepository transactionRepository;
 
-    @Autowired
-    private SplitRepository splitRepository;
+    private final SplitRepository splitRepository;
 
-    @Autowired
-    private TransactionItemService transactionItemService;
+    private final TransactionItemService transactionItemService;
 
-    public Collection<TransactionDto> getTransactions(String splitId) {
-        Split split = splitRepository.findById(splitId)
+    private final ObjectMapper objectMapper;
+
+    public TransactionService(TransactionRepository transactionRepository, SplitRepository splitRepository, TransactionItemService transactionItemService, ObjectMapper objectMapper) {
+        this.transactionRepository = transactionRepository;
+        this.splitRepository = splitRepository;
+        this.transactionItemService = transactionItemService;
+        this.objectMapper = objectMapper;
+    }
+
+    public Collection<TransactionDto> getTransactions(String splitUrl) {
+        Split split = splitRepository.findByUrl(splitUrl)
                 .orElseThrow(() -> new IllegalArgumentException("Split not found"));
 
         return split.getTransactions().stream()
@@ -39,8 +47,8 @@ public class TransactionService {
                 .toList();
     }
 
-    public TransactionDto getTransaction(String splitId, String transactionUrl) {
-        Split split = splitRepository.findById(splitId)
+    public JsonNode getTransaction(String splitUrl, String transactionUrl) {
+        Split split = splitRepository.findByUrl(splitUrl)
                 .orElseThrow(() -> new IllegalArgumentException("Split not found"));
 
         Transaction transaction = transactionRepository.findByUrl(transactionUrl)
@@ -50,11 +58,12 @@ public class TransactionService {
             throw new IllegalArgumentException("TransactionItem group does not belong to the specified split");
         }
 
-        return TransactionDto.from(transaction);
+        return TransactionResponseBuilder.create(objectMapper)
+                .build(transaction);
     }
 
-    public TransactionDto createTransaction(String splitId, CreateTransactionDto createTransactionDto) {
-        Split split = splitRepository.findById(splitId)
+    public TransactionDto createTransaction(String splitUrl, CreateTransactionDto createTransactionDto) {
+        Split split = splitRepository.findByUrl(splitUrl)
                 .orElseThrow(() -> new IllegalArgumentException("Split not found"));
 
         Transaction transaction = new Transaction();
@@ -73,8 +82,8 @@ public class TransactionService {
         return TransactionDto.from(transaction);
     }
 
-    public TransactionDto updateTransaction(String splitId, String transactionUrl, UpdateTransactionDto transactionDto) {
-        Split split = splitRepository.findById(splitId)
+    public JsonNode updateTransaction(String splitUrl, String transactionUrl, UpdateTransactionDto transactionDto) {
+        Split split = splitRepository.findByUrl(splitUrl)
                 .orElseThrow(() -> new IllegalArgumentException("Split not found"));
 
         Transaction transaction = transactionRepository.findByUrl(transactionUrl)
@@ -87,17 +96,17 @@ public class TransactionService {
         transaction.setName(transactionDto.getName());
         transaction.setAmount(transactionDto.getAmount());
         transaction.setDate(transactionDto.getDate());
-        transaction.setUrl(transactionDto.getUrl());
 
         transaction = transactionRepository.save(transaction);
 
         Collection<TransactionItem> updatedItems = updateTransactionItems(transaction, transactionDto.getItems());
         transaction.setItems(updatedItems);
 
-        return TransactionDto.from(transaction);
+        return TransactionResponseBuilder.create(objectMapper)
+                .build(transaction);
     }
 
-    private Collection<TransactionItem> updateTransactionItems(Transaction transaction, Collection<CreateOrUpdateTransactionItemDto> itemDtos) {
+    private Collection<TransactionItem> updateTransactionItems(Transaction transaction, Collection<UpdateTransactionItemDto> itemDtos) {
         return itemDtos.stream()
                 .map(itemDto -> transactionItemService.createOrUpdateTransactionItem(transaction, itemDto))
                 .toList();

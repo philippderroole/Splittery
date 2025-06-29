@@ -1,13 +1,16 @@
 import { SerializedTransaction } from "@/utils/transaction";
 import "server-only";
 
-export async function getTransactionGroups(
-    splitId: string
+export async function getTransactions(
+    splitUrl: string
 ): Promise<SerializedTransaction[]> {
     return await fetch(
-        `${process.env.API_NEXT_PUBLIC_API_URLURL}/splits/${splitId}/transactions`
+        `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitUrl}/transactions`,
+        {
+            //cache: "force-cache",
+        }
     ).then((res) => {
-        console.log("Fetching transaction groups for split:", splitId);
+        console.log("Fetching transaction groups for split:", splitUrl);
         console.log(res);
 
         if (!res.ok) {
@@ -18,13 +21,13 @@ export async function getTransactionGroups(
 }
 
 export async function getTransaction(
-    splitId: string,
+    splitUrl: string,
     transactionUrl: string
 ): Promise<SerializedTransaction> {
     const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitId}/transactions/${transactionUrl}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitUrl}/transactions/${transactionUrl}`,
         {
-            cache: "force-cache",
+            //cache: "force-cache",
         }
     );
 

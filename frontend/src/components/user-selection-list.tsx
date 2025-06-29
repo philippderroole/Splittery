@@ -1,5 +1,8 @@
 "use client";
 
+import { useSplit } from "@/providers/split-provider";
+import { Currencies } from "@/utils/currencies";
+import { Money } from "@/utils/money";
 import {
     Avatar,
     Checkbox,
@@ -11,12 +14,13 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 
-export type UserSelectionListProps = {
-    users: string[];
-};
+export interface UserSelectionListProps {
+    totalAmount?: number;
+}
 
 export default function UserSelectionList(props: UserSelectionListProps) {
-    const { users } = props;
+    const { totalAmount } = props;
+    const split = useSplit();
 
     const [checked, setChecked] = useState<string[]>([]);
 
@@ -33,15 +37,19 @@ export default function UserSelectionList(props: UserSelectionListProps) {
         setChecked(newChecked);
     };
 
+    const amountPerCheckedUser = totalAmount
+        ? new Money(totalAmount / checked.length, Currencies.EUR).toString()
+        : undefined;
+
     return (
         <List sx={{ width: "100%", padding: 0 }}>
-            {users.map((value) => {
-                const labelId = `checkbox-list-label-${value}`;
+            {split.users.map((user) => {
+                const labelId = `checkbox-list-label-${user}`;
 
                 return (
-                    <ListItem key={value} disablePadding>
+                    <ListItem key={user.id} disablePadding>
                         <ListItemButton
-                            onClick={handleToggle(value)}
+                            onClick={handleToggle(user.id)}
                             sx={{
                                 paddingX: 0,
                                 paddingY: 0.5,
@@ -49,16 +57,21 @@ export default function UserSelectionList(props: UserSelectionListProps) {
                         >
                             <ListItemAvatar>
                                 <Avatar
-                                    alt={`Avatar n°${value + 1}`}
-                                    src={`/static/images/avatar/${
-                                        value + 1
-                                    }.jpg`}
+                                    alt={`Avatar n°${user.id}`}
+                                    src={`/static/images/avatar/${user.id}.jpg`}
                                 />
                             </ListItemAvatar>
-                            <ListItemText id={labelId} primary={value} />
                             <ListItemText
                                 id={labelId}
-                                primary="-10.00 €"
+                                primary={user.username}
+                            />
+                            <ListItemText
+                                id={labelId}
+                                primary={
+                                    checked.includes(user.id)
+                                        ? amountPerCheckedUser
+                                        : undefined
+                                }
                                 sx={{
                                     textAlign: "right",
                                     paddingRight: 4,
@@ -66,7 +79,7 @@ export default function UserSelectionList(props: UserSelectionListProps) {
                             />
                             <Checkbox
                                 edge="end"
-                                checked={checked.includes(value)}
+                                checked={checked.includes(user.id)}
                                 tabIndex={-1}
                                 disableRipple
                                 sx={{

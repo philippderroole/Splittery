@@ -1,17 +1,16 @@
 "use server";
 
-import { Transaction } from "@/utils/transaction";
-import { CreateTransactionItem } from "@/utils/transaction-item";
+import { Transaction, UpdateTransaction } from "@/utils/transaction";
 import { revalidatePath } from "next/cache";
 
-export async function createTransactionItem(
-    transaction: CreateTransactionItem,
-    splitId: string
+export async function updateTransaction(
+    transaction: UpdateTransaction,
+    splitUrl: string
 ): Promise<Transaction> {
     const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitId}/transactions/${transaction.transactionId}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitUrl}/transactions/${transaction.url}`,
         {
-            method: "POST",
+            method: "PUT",
             headers: {
                 "Content-Type": "application/json",
             },
@@ -35,7 +34,7 @@ export async function createTransactionItem(
     }
 
     revalidatePath(
-        `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitId}/transactions/${transaction.transactionId}`
+        `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitUrl}/transactions/${transaction.url}`
     );
 
     return res.json();

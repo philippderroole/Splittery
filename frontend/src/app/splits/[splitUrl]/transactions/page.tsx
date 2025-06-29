@@ -1,7 +1,7 @@
 "use client";
 
-import CreateTransactionGroupButton from "@/components/create-transaction-button";
-import TransactionGroupList from "@/components/transaction-group-list";
+import CreateTransactionButton from "@/components/create-transaction-button";
+import TransactionList from "@/components/transaction-group-list";
 import { useSplit } from "@/providers/split-provider";
 import { Typography } from "@mui/material";
 
@@ -11,7 +11,7 @@ export default function TransactionGroupListPage() {
     return (
         <>
             <Typography variant="h4">Transactions</Typography>
-            <TransactionGroupList />
+            <TransactionList />
             <div
                 style={{
                     position: "fixed",
@@ -20,7 +20,7 @@ export default function TransactionGroupListPage() {
                     zIndex: 1200,
                 }}
             >
-                <CreateTransactionGroupButton split={split} />
+                <CreateTransactionButton split={split} />
             </div>
         </>
     );

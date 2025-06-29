@@ -1,42 +1,19 @@
-import "server-only";
+"use client";
 
-import TransactionList from "@/components/transaction-item-list";
-import UserSelectionList from "@/components/user-list";
-import { getSplit } from "@/service/split-service";
-import { getTransaction } from "@/service/transaction-service";
-import { Currencies } from "@/utils/currencies";
+import TransactionItemList from "@/components/transaction-item-list";
+import UserSelectionList from "@/components/user-selection-list";
+import { useSplit } from "@/providers/split-provider";
+import { useTransaction } from "@/providers/transaction-provider";
 import { getFormattedDateLong } from "@/utils/date-formatter";
-import { Money } from "@/utils/money";
-import { SerializedTransaction } from "@/utils/transaction";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { Avatar, Box, IconButton, Typography } from "@mui/material";
 import Link from "next/link";
 
-export default async function TransactionGroupPage({
-    params,
-}: {
-    params: Promise<{
-        splitUrl: string | undefined;
-        transactionUrl: string | undefined;
-    }>;
-}) {
-    const { splitUrl, transactionUrl } = await params;
+export default function TransactionPage() {
+    const split = useSplit();
+    const transaction = useTransaction();
 
-    if (!splitUrl || !transactionUrl) {
-        throw new Error("Split URL or Transaction URL is missing");
-    }
-
-    const split = await getSplit(splitUrl);
-    const transaction: SerializedTransaction = await getTransaction(
-        split.id,
-        transactionUrl
-    );
-
-    const amount = new Money(transaction.amount, Currencies.EUR);
     const date = getFormattedDateLong(transaction.date);
-
-    console.log("Split:", split);
-    console.log("Transaction:", transaction);
 
     return (
         <>
@@ -62,19 +39,16 @@ export default async function TransactionGroupPage({
                         justifyContent: "start",
                     }}
                 >
-                    <Typography variant="h4">{amount.toString()}</Typography>
+                    <Typography variant="h4">
+                        {transaction.amount.toString()}
+                    </Typography>
                     <Typography variant="body1">{transaction.name}</Typography>
                     <Typography variant="caption">{date}</Typography>
                 </Box>
                 <Avatar />
             </Box>
-            <TransactionList
-                split={split}
-                transaction={transaction}
-            ></TransactionList>
-            <UserSelectionList
-                users={["Philipp", "Corny", "Sophia"]}
-            ></UserSelectionList>
+            <TransactionItemList></TransactionItemList>
+            <UserSelectionList></UserSelectionList>
         </>
     );
 }

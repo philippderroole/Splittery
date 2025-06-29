@@ -1,6 +1,5 @@
 package com.philippderroole.splitterybackend.service;
 
-import com.philippderroole.splitterybackend.dtos.CreateOrUpdateTransactionItemDto;
 import com.philippderroole.splitterybackend.dtos.CreateTransactionItemDto;
 import com.philippderroole.splitterybackend.dtos.UpdateTransactionItemDto;
 import com.philippderroole.splitterybackend.entities.Transaction;
@@ -20,14 +19,12 @@ public class TransactionItemService {
         transactionItemRepository.delete(transactionItem);
     }
 
-    public TransactionItem createOrUpdateTransactionItem(Transaction transaction, CreateOrUpdateTransactionItemDto itemDto) {
-        if (itemDto instanceof UpdateTransactionItemDto updateItemDto) {
-            return updateTransactionItem(transaction, updateItemDto);
-        } else if (itemDto instanceof CreateTransactionItemDto createItemDto) {
-            return createTransactionItem(transaction, createItemDto);
+    public TransactionItem createOrUpdateTransactionItem(Transaction transaction, UpdateTransactionItemDto itemDto) {
+        if (itemDto.getId() == null) {
+            return createTransactionItem(transaction, itemDto);
+        } else {
+            return updateTransactionItem(transaction, itemDto);
         }
-
-        throw new IllegalArgumentException("Unsupported item DTO type: " + itemDto.getClass().getName());
     }
 
     public Collection<TransactionItem> createTransactionItems(Transaction transaction, Collection<CreateTransactionItemDto> itemDtos) {
@@ -37,6 +34,16 @@ public class TransactionItemService {
     }
 
     public TransactionItem createTransactionItem(Transaction transaction, CreateTransactionItemDto itemDto) {
+        TransactionItem item = new TransactionItem();
+
+        item.setName(itemDto.getName());
+        item.setAmount(itemDto.getAmount());
+        item.setTransaction(transaction);
+
+        return transactionItemRepository.save(item);
+    }
+
+    public TransactionItem createTransactionItem(Transaction transaction, UpdateTransactionItemDto itemDto) {
         TransactionItem item = new TransactionItem();
 
         item.setName(itemDto.getName());

@@ -4,17 +4,17 @@ import { CreateTransaction, SerializedTransaction } from "@/utils/transaction";
 import { revalidatePath } from "next/cache";
 
 export async function createTransactionGroup(
-    transactionGroup: CreateTransaction,
-    splitId: string
+    transaction: CreateTransaction,
+    splitUrl: string
 ): Promise<SerializedTransaction> {
     const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitId}/transactions`,
+        `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitUrl}/transactions`,
         {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify(transactionGroup),
+            body: JSON.stringify(transaction),
         }
     );
 
@@ -34,7 +34,7 @@ export async function createTransactionGroup(
     }
 
     revalidatePath(
-        `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitId}/transactions`
+        `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitUrl}/transactions`
     );
 
     return res.json();

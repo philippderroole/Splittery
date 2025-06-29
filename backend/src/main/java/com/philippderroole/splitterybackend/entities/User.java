@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.*;
 
 @Entity
-@Table(name = "splittery_user")
+@Table(name = "`user`")
 public class User implements UserDetails, CredentialsContainer {
     @Id
     @UuidGenerator

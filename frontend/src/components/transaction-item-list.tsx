@@ -1,30 +1,21 @@
 "use client";
 
+import { useTransaction } from "@/providers/transaction-provider";
 import { Currencies } from "@/utils/currencies";
 import { Money } from "@/utils/money";
-import { Split } from "@/utils/split";
-import { SerializedTransaction, Transaction } from "@/utils/transaction";
 import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
-import React from "react";
 import CreateTransactionItemButton from "./create-transaction-item-button";
 
-interface TransactionListProps {
-    split: Split;
-    transaction: SerializedTransaction;
-}
+export default function TransactionItemList() {
+    const transaction = useTransaction();
 
-export default function TransactionList(props: TransactionListProps) {
-    const { split, transaction } = props;
-
-    const [transactions, setTransactions] = React.useState<Transaction[]>([]);
-
-    const remainingAmount = transactions.reduce(
+    const remainingAmount: Money = transaction.items.reduce(
         (acc, transaction) =>
             new Money(
                 acc.getAmount() - transaction.amount.getAmount(),
                 Currencies.EUR
             ),
-        new Money(transaction.amount, Currencies.EUR)
+        transaction.amount
     );
 
     return (
@@ -40,17 +31,16 @@ export default function TransactionList(props: TransactionListProps) {
                         {remainingAmount.toString()}
                     </ListItemText>
                 </ListItem>
-                {transactions.map((transaction) => (
+                {transaction.items.map((transactionItem) => (
                     <TransactionItem
-                        key={transaction.id}
-                        name={transaction.name}
-                        amount={transaction.amount}
+                        key={transactionItem.id}
+                        name={transactionItem.name}
+                        amount={transactionItem.amount}
                     ></TransactionItem>
                 ))}
 
                 <ListItem disablePadding>
                     <CreateTransactionItemButton
-                        split={split}
                         remainingAmount={remainingAmount}
                     ></CreateTransactionItemButton>
                 </ListItem>

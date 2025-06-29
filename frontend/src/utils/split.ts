@@ -1,8 +1,12 @@
-import { User } from "./user";
-
 export interface Split {
     id: string;
     name: string;
     url: string;
-    users: User[];
+    users: UserBalance[];
+}
+
+export interface UserBalance {
+    id: string;
+    username: string;
+    balance: number;
 }

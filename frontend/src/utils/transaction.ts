@@ -1,4 +1,9 @@
 import { Money } from "./money";
+import {
+    CreateTransactionItem,
+    SerializedTransactionItem,
+    TransactionItem,
+} from "./transaction-item";
 
 export interface Transaction {
     id: string;
@@ -7,6 +12,7 @@ export interface Transaction {
     amount: Money;
     splitId: string;
     url: string;
+    items: TransactionItem[];
 }
 
 export interface SerializedTransaction {
@@ -16,13 +22,23 @@ export interface SerializedTransaction {
     amount: number;
     splitId: string;
     url: string;
+    items: SerializedTransactionItem[];
 }
 
 export interface CreateTransaction {
     name: string;
+    amount: number;
+    splitId: string;
+}
+
+export interface UpdateTransaction {
+    id: string;
+    name: string;
     date: Date;
     amount: number;
     splitId: string;
+    url: string;
+    items: CreateTransactionItem[];
 }
 
 export interface CreateUser {

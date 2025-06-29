@@ -1,8 +1,10 @@
 "use client";
 
-import { createTransactionItem } from "@/actions/create-transaction-item-service";
+import { updateTransaction } from "@/actions/update-transaction-service";
+import { useSplit } from "@/providers/split-provider";
+import { useTransaction } from "@/providers/transaction-provider";
 import { Money } from "@/utils/money";
-import { Split } from "@/utils/split";
+import { UpdateTransaction } from "@/utils/transaction";
 import { CreateTransactionItem } from "@/utils/transaction-item";
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -30,17 +32,16 @@ import {
     Typography,
 } from "@mui/material";
 import React, { useState } from "react";
-import UserSelectionList from "./user-list";
+import UserSelectionList from "./user-selection-list";
 
 interface CreateTransactionItemProps {
-    split: Split;
     remainingAmount: Money;
 }
 
 export default function CreateTransactionItemButton(
     props: CreateTransactionItemProps
 ) {
-    const { split, remainingAmount } = props;
+    const { remainingAmount } = props;
 
     const [openDialog, setOpenDialog] = useState(false);
     const [openSnackbar, setOpenSnackbar] = useState(false);
@@ -62,7 +63,6 @@ export default function CreateTransactionItemButton(
                 </ListItemText>
             </ListItemButton>
             <CreateTransactionItemDialog
-                split={split}
                 remainingAmount={remainingAmount}
                 open={openDialog}
                 onClose={() => setOpenDialog(false)}
@@ -105,7 +105,6 @@ export default function CreateTransactionItemButton(
 }
 
 interface CreateTransactionItemDialogProps {
-    split: Split;
     remainingAmount: Money;
     open?: boolean;
     onClose?: () => void;
@@ -113,7 +112,9 @@ interface CreateTransactionItemDialogProps {
 }
 
 function CreateTransactionItemDialog(props: CreateTransactionItemDialogProps) {
-    const { split, remainingAmount, open = false, onClose, onError } = props;
+    const { remainingAmount, open = false, onClose, onError } = props;
+    const split = useSplit();
+    const transaction = useTransaction();
 
     const [name, setName] = useState("");
     const [amount, setAmount] = useState("");
@@ -152,14 +153,23 @@ function CreateTransactionItemDialog(props: CreateTransactionItemDialogProps) {
             return;
         }
 
-        const transactionItem: CreateTransactionItem = {
+        const updateTransactionDto: UpdateTransaction = {
+            id: transaction.id,
+            name: transaction.name,
+            date: transaction.date,
+            amount: transaction.amount.getAmount(),
+            splitId: transaction.splitId,
+            url: transaction.url,
+            items: [],
+        };
+
+        updateTransactionDto.items.push({
             splitId: split.id,
             name: newName,
             amount: newAmount,
-            transactionId: "",
-        };
+        } as CreateTransactionItem);
 
-        createTransactionItem(transactionItem, split.id)
+        updateTransaction(updateTransactionDto, split.url)
             .then(() => {
                 onClose?.();
             })
@@ -200,6 +210,7 @@ function CreateTransactionItemDialog(props: CreateTransactionItemDialogProps) {
                         <OutlinedInput
                             id="amount"
                             name="amount"
+                            type="number"
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
                             startAdornment={
@@ -221,9 +232,7 @@ function CreateTransactionItemDialog(props: CreateTransactionItemDialogProps) {
                         )}
                     </FormControl>
                     <AdvancedSettings>
-                        <UserSelectionList
-                            users={["Philipp", "Corny", "Sophia"]}
-                        />
+                        <UserSelectionList />
                     </AdvancedSettings>
                 </DialogContent>
                 <DialogActions>

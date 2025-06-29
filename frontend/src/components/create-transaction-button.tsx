@@ -29,15 +29,13 @@ import {
     Typography,
 } from "@mui/material";
 import React, { useState } from "react";
-import UserSelectionList from "./user-list";
+import UserSelectionList from "./user-selection-list";
 
 interface TransactionGroupProps {
     split: Split;
 }
 
-export default function CreateTransactionGroupButton(
-    props: TransactionGroupProps
-) {
+export default function CreateTransactionButton(props: TransactionGroupProps) {
     const { split } = props;
 
     const [openDialog, setOpenDialog] = useState(false);
@@ -104,7 +102,7 @@ function CreateTransactionGroupDialog(
     const { split, open = false, onClose, onError } = props;
 
     const [name, setName] = useState("");
-    const [amount, setAmount] = useState("");
+    const [amount, setAmount] = useState<number | undefined>(undefined);
     const [errors, setErrors] = useState<{ name?: string; amount?: string }>(
         {}
     );
@@ -121,11 +119,10 @@ function CreateTransactionGroupDialog(
         if (newName.length < 3)
             newErrors.name = "Transaction name must be at least 3 characters";
 
-        if (amount.trim() === "") newErrors.amount = "Amount is required";
-        if (isNaN(Number(amount.trim())))
-            newErrors.amount = "Amount must be a number";
-
-        let newAmount = Number(amount.trim());
+        if (amount === undefined || amount === null) {
+            newErrors.amount = "Amount is required";
+        }
+        let newAmount = Number(amount);
         if (newAmount < 0) newAmount *= -1;
         if (newAmount < -1000000 || newAmount > 1000000)
             newErrors.amount =
@@ -143,7 +140,7 @@ function CreateTransactionGroupDialog(
             amount: newAmount,
         };
 
-        createTransactionGroup(transactionGroup, split.id)
+        createTransactionGroup(transactionGroup, split.url)
             .then(() => {
                 onClose?.();
             })
@@ -184,8 +181,15 @@ function CreateTransactionGroupDialog(
                         <OutlinedInput
                             id="amount"
                             name="amount"
+                            type="number"
                             value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
+                            onChange={(e) =>
+                                setAmount(
+                                    e.target.value === ""
+                                        ? undefined
+                                        : Number(e.target.value)
+                                )
+                            }
                             startAdornment={
                                 <InputAdornment position="start">
                                     -
@@ -205,7 +209,7 @@ function CreateTransactionGroupDialog(
                         )}
                     </FormControl>
                     <AdvancedSettings>
-                        <UserSelectionList />
+                        <UserSelectionList totalAmount={amount} />
                     </AdvancedSettings>
                 </DialogContent>
                 <DialogActions>

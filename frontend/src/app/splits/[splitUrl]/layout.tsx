@@ -2,7 +2,9 @@ import "server-only";
 
 import NavTabs from "@/components/nav-tabs";
 import SplitHeader from "@/components/split-header";
+import { TransactionsProvider } from "@/providers/transactions-provider";
 import { getSplit } from "@/service/split-service";
+import { getTransactions } from "@/service/transaction-service";
 import { notFound } from "next/navigation";
 import { SplitProvider } from "../../../providers/split-provider";
 
@@ -23,11 +25,18 @@ export default async function SplitLayout({
         notFound();
     }
 
+    const serializedTransactions = await getTransactions(split.url);
+
     return (
         <div>
             <SplitProvider split={split}>
-                <SplitHeader />
-                {children}
+                <TransactionsProvider
+                    serializedTransactions={serializedTransactions}
+                    splitUrl={splitUrl}
+                >
+                    <SplitHeader />
+                    {children}
+                </TransactionsProvider>
             </SplitProvider>
             <div
                 style={{

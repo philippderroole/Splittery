@@ -1,6 +1,6 @@
 package com.philippderroole.splitterybackend.dtos;
 
-public class CreateTransactionItemDto implements CreateOrUpdateTransactionItemDto {
+public class CreateTransactionItemDto {
     private String name;
 
     private double amount;
