@@ -1,17 +1,11 @@
 package com.philippderroole.splitterybackend.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.philippderroole.splitterybackend.dtos.CreateTransactionDto;
-import com.philippderroole.splitterybackend.dtos.TransactionDto;
-import com.philippderroole.splitterybackend.dtos.UpdateTransactionDto;
+import com.philippderroole.splitterybackend.dtos.transaction.CreateTransactionDto;
+import com.philippderroole.splitterybackend.dtos.transaction.UpdateTransactionDto;
 import com.philippderroole.splitterybackend.entities.Split;
 import com.philippderroole.splitterybackend.entities.Transaction;
 import com.philippderroole.splitterybackend.entities.TransactionItem;
-import com.philippderroole.splitterybackend.repositories.SplitRepository;
 import com.philippderroole.splitterybackend.repositories.TransactionRepository;
-import com.philippderroole.splitterybackend.responsebuilders.TransactionResponseBuilder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -21,91 +15,60 @@ import java.util.Date;
 import static com.philippderroole.splitterybackend.entities.Transaction.URL_LENGTH;
 
 @Service
-public class TransactionService {
-
+public final class TransactionService {
     private final TransactionRepository transactionRepository;
+    private final ValidationService validationService;
+    private final RemainingAmountItemService remainingAmountItemService;
 
-    private final SplitRepository splitRepository;
-
-    private final TransactionItemService transactionItemService;
-
-    private final ObjectMapper objectMapper;
-
-    public TransactionService(TransactionRepository transactionRepository, SplitRepository splitRepository, TransactionItemService transactionItemService, ObjectMapper objectMapper) {
+    public TransactionService(TransactionRepository transactionRepository, ValidationService validationService, RemainingAmountItemService remainingAmountItemService) {
         this.transactionRepository = transactionRepository;
-        this.splitRepository = splitRepository;
-        this.transactionItemService = transactionItemService;
-        this.objectMapper = objectMapper;
+        this.validationService = validationService;
+        this.remainingAmountItemService = remainingAmountItemService;
     }
 
-    public JsonNode getTransactions(String splitUrl) {
-        Split split = splitRepository.findByUrl(splitUrl)
-                .orElseThrow(() -> new IllegalArgumentException("Split not found"));
-
-        ArrayNode transactions = objectMapper.createArrayNode();
-        split.getTransactions().forEach(transaction -> transactions.add(
-                TransactionResponseBuilder.create(objectMapper)
-                        .build(transaction)));
-
-        return transactions;
+    public Collection<Transaction> getTransactions(String splitUrl) {
+        Split split = validationService.findSplitByUrl(splitUrl);
+        return split.getTransactions();
     }
 
-    public JsonNode getTransaction(String splitUrl, String transactionUrl) {
-        Split split = splitRepository.findByUrl(splitUrl)
-                .orElseThrow(() -> new IllegalArgumentException("Split not found"));
+    public Transaction getTransaction(String splitUrl, String transactionUrl) {
+        Split split = validationService.findSplitByUrl(splitUrl);
+        Transaction transaction = validationService.findTransactionByUrl(transactionUrl);
 
-        Transaction transaction = transactionRepository.findByUrl(transactionUrl)
-                .orElseThrow(() -> new IllegalArgumentException("TransactionItem group not found"));
+        validationService.validateTransactionBelongsToSplit(transaction, split);
 
-        if (!transaction.getSplit().getId().equals(split.getId())) {
-            throw new IllegalArgumentException("TransactionItem group does not belong to the specified split");
-        }
-
-        return TransactionResponseBuilder.create(objectMapper)
-                .build(transaction);
+        return transaction;
     }
 
-    public TransactionDto createTransaction(String splitUrl, CreateTransactionDto createTransactionDto) {
-        Split split = splitRepository.findByUrl(splitUrl)
-                .orElseThrow(() -> new IllegalArgumentException("Split not found"));
+    public Transaction createTransaction(String splitUrl, CreateTransactionDto transactionDto) {
+        Split split = validationService.findSplitByUrl(splitUrl);
 
         Transaction transaction = new Transaction();
-
         transaction.setUrl(UrlUtils.generateUrl(URL_LENGTH));
-        transaction.setName(createTransactionDto.getName());
-        transaction.setAmount(createTransactionDto.getAmount());
+        transaction.setName(transactionDto.getName());
+        transaction.setAmount(transactionDto.getAmount());
         transaction.setSplit(split);
         transaction.setDate(Date.from(Instant.now()));
-
         transaction = transactionRepository.save(transaction);
 
-        Collection<TransactionItem> transactionItems = transactionItemService.createTransactionItems(transaction, createTransactionDto.getItems());
-        transaction.setItems(transactionItems);
+        TransactionItem remainingAmountItem = remainingAmountItemService.createRemainingAmountItem(transaction, transactionDto.getAmount());
+        transaction.addItem(remainingAmountItem);
 
-        return TransactionDto.from(transaction);
+        return transactionRepository.save(transaction);
     }
 
-    public JsonNode updateTransaction(String splitUrl, String transactionUrl, UpdateTransactionDto transactionDto) {
-        Split split = splitRepository.findByUrl(splitUrl)
-                .orElseThrow(() -> new IllegalArgumentException("Split not found"));
+    public Transaction updateTransaction(String splitUrl, String transactionUrl, UpdateTransactionDto transactionDto) {
+        Split split = validationService.findSplitByUrl(splitUrl);
+        Transaction transaction = validationService.findTransactionByUrl(transactionUrl);
 
-        Transaction transaction = transactionRepository.findByUrl(transactionUrl)
-                .orElseThrow(() -> new IllegalArgumentException("Transaction not found"));
-
-        if (!transaction.getSplit().getId().equals(split.getId())) {
-            throw new IllegalArgumentException("Transaction does not belong to the specified split");
-        }
+        validationService.validateTransactionBelongsToSplit(transaction, split);
 
         transaction.setName(transactionDto.getName());
         transaction.setAmount(transactionDto.getAmount());
         transaction.setDate(transactionDto.getDate());
 
-        transaction = transactionRepository.save(transaction);
-
-        Collection<TransactionItem> updatedItems = transactionItemService.updateTransactionItems(transaction, transactionDto.getItems());
-        transaction.setItems(updatedItems);
-
-        return TransactionResponseBuilder.create(objectMapper)
-                .build(transaction);
+        return transactionRepository.save(transaction);
     }
+
+
 }

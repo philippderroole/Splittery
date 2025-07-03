@@ -1,38 +1,19 @@
 "use client";
 
-import { updateTransaction } from "@/actions/update-transaction-service";
-import { useSplit } from "@/providers/split-provider";
-import { useTransaction } from "@/providers/transaction-provider";
+import { createTransactionItem } from "@/actions/create-transaction-item-service";
 import { Money } from "@/utils/money";
-import { UpdateTransaction } from "@/utils/transaction";
 import { CreateTransactionItem } from "@/utils/transaction-item";
 import CloseIcon from "@mui/icons-material/Close";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
-    Accordion,
-    AccordionDetails,
-    AccordionSummary,
     Alert,
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    FormControl,
     IconButton,
-    InputAdornment,
-    InputLabel,
     ListItemButton,
     ListItemText,
-    OutlinedInput,
     Portal,
     Snackbar,
-    TextField,
-    Typography,
 } from "@mui/material";
-import React, { useState } from "react";
-import UserSelectionList from "./user-selection-list";
+import { useState } from "react";
+import { TransactionItemDialog } from "./transaction-item-dialog";
 
 interface CreateTransactionItemProps {
     remainingAmount: Money;
@@ -62,7 +43,9 @@ export default function CreateTransactionItemButton(
                     Add
                 </ListItemText>
             </ListItemButton>
-            <CreateTransactionItemDialog
+            <TransactionItemDialog
+                title="Create an item"
+                initialName=""
                 remainingAmount={remainingAmount}
                 open={openDialog}
                 onClose={() => setOpenDialog(false)}
@@ -73,6 +56,7 @@ export default function CreateTransactionItemButton(
                             "An error occurred while creating the transaction."
                     );
                 }}
+                submitTransactionItem={submitTransactionItem}
             />
             <Portal>
                 <Snackbar
@@ -104,192 +88,25 @@ export default function CreateTransactionItemButton(
     );
 }
 
-interface CreateTransactionItemDialogProps {
-    remainingAmount: Money;
-    open?: boolean;
-    onClose?: () => void;
-    onError?: (error?: string) => void;
-}
-
-function CreateTransactionItemDialog(props: CreateTransactionItemDialogProps) {
-    const { remainingAmount, open = false, onClose, onError } = props;
-    const split = useSplit();
-    const transaction = useTransaction();
-
-    const [name, setName] = useState("");
-    const [amount, setAmount] = useState("");
-    const [errors, setErrors] = useState<{ name?: string; amount?: string }>(
-        {}
-    );
-
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        const newErrors: typeof errors = {};
-
-        const newName = name.trim();
-
-        if (newName === "") newErrors.name = "Transaction name is required";
-        if (newName.length > 50)
-            newErrors.name = "Transaction name must be less than 50 characters";
-        if (newName.length < 3)
-            newErrors.name = "Transaction name must be at least 3 characters";
-
-        if (amount.trim() === "") newErrors.amount = "Amount is required";
-        if (isNaN(Number(amount.trim())))
-            newErrors.amount = "Amount must be a number";
-
-        let newAmount = Number(amount.trim());
-        if (newAmount < 0) newAmount *= -1;
-        if (newAmount === 0) newErrors.amount = "Amount must be greater than 0";
-        if (newAmount > remainingAmount.getAmount())
-            newErrors.amount = `Amount must be less than or equal to ${remainingAmount.toString()}`;
-        if (newAmount < -1000000 || newAmount > 1000000)
-            newErrors.amount =
-                "Amount must be between -1,000,000 and 1,000,000";
-
-        setErrors(newErrors);
-
-        if (Object.keys(newErrors).length !== 0) {
-            return;
-        }
-
-        const updateTransactionDto: UpdateTransaction = {
-            id: transaction.id,
-            name: transaction.name,
-            date: transaction.date,
-            amount: transaction.amount.getAmount(),
-            splitId: transaction.splitId,
-            url: transaction.url,
-            items: transaction.items.map(
-                (item) =>
-                    ({
-                        id: item.id,
-                        name: item.name,
-                        amount: item.amount.getAmount(),
-                    } as CreateTransactionItem)
-            ),
-        };
-
-        updateTransactionDto.items.push({
-            splitId: split.id,
-            name: newName,
-            amount: newAmount,
-        } as CreateTransactionItem);
-
-        updateTransaction(updateTransactionDto, split.url)
-            .then(() => {
-                onClose?.();
-            })
-            .catch((error) => {
-                onError?.(error.message);
-            });
+function submitTransactionItem(
+    name: string,
+    amount: number,
+    transactionUrl: string,
+    splitUrl: string,
+    url?: string,
+    onClose?: (() => void) | undefined,
+    onError?: ((error?: string) => void) | undefined
+) {
+    const createTransactionItemDto: CreateTransactionItem = {
+        name: name,
+        amount: amount,
     };
 
-    return (
-        <Dialog open={open} onClose={onClose}>
-            <form noValidate autoComplete="off" onSubmit={handleSubmit}>
-                <DialogTitle>Create an item</DialogTitle>
-                <DialogContent sx={{ paddingBottom: 0 }}>
-                    <DialogContentText></DialogContentText>
-                    <TextField
-                        autoFocus
-                        required
-                        margin="dense"
-                        id="transaction-name"
-                        name="transaction-name"
-                        label="Item name"
-                        type="text"
-                        fullWidth
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        error={!!errors.name}
-                        helperText={errors.name}
-                    />
-                    <FormControl
-                        required
-                        margin="dense"
-                        fullWidth
-                        sx={{ marginTop: 1 }}
-                        id="amount"
-                        error={!!errors.amount}
-                    >
-                        <InputLabel htmlFor="amount">Amount</InputLabel>
-                        <OutlinedInput
-                            id="amount"
-                            name="amount"
-                            type="number"
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
-                            startAdornment={
-                                <InputAdornment position="start">
-                                    -
-                                </InputAdornment>
-                            }
-                            endAdornment={
-                                <InputAdornment position="end">
-                                    €
-                                </InputAdornment>
-                            }
-                            label="Amount"
-                        />
-                        {errors.amount && (
-                            <Typography color="error" variant="caption">
-                                {errors.amount}
-                            </Typography>
-                        )}
-                    </FormControl>
-                    <AdvancedSettings>
-                        <UserSelectionList />
-                    </AdvancedSettings>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={onClose}>Cancel</Button>
-                    <Button type="submit" variant="contained">
-                        Create
-                    </Button>
-                </DialogActions>
-            </form>
-        </Dialog>
-    );
-}
-
-interface AdvancedSettingsProps {
-    children?: React.ReactNode;
-}
-
-function AdvancedSettings(pops: AdvancedSettingsProps) {
-    const { children } = pops;
-
-    const [expanded, setExpanded] = useState(false);
-
-    return (
-        <Accordion
-            disableGutters
-            elevation={0}
-            expanded={expanded}
-            onChange={() => setExpanded(!expanded)}
-            sx={{
-                "&::before": {
-                    display: "none",
-                },
-            }}
-        >
-            <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                id="advanced-settings-header"
-                sx={{
-                    paddingY: 1,
-                }}
-            >
-                <Typography component="span">Advanced settings</Typography>
-            </AccordionSummary>
-            <AccordionDetails
-                sx={{
-                    padding: 0,
-                }}
-            >
-                {children}
-            </AccordionDetails>
-        </Accordion>
-    );
+    createTransactionItem(createTransactionItemDto, splitUrl, transactionUrl)
+        .then(() => {
+            onClose?.();
+        })
+        .catch((error) => {
+            onError?.(error.message);
+        });
 }

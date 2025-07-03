@@ -27,8 +27,17 @@ public class Transaction {
 
     private Date date;
 
-    @OneToMany(mappedBy = "transaction", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(
+            mappedBy = "transaction",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY
+    )
     private Collection<TransactionItem> items = new ArrayList<>();
+
+    public void addItem(TransactionItem item) {
+        this.items.add(item);
+    }
 
     public String getId() {
         return id;

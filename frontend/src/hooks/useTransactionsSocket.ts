@@ -17,6 +17,11 @@ export function useTransactionsSocket(
                 message.body
             );
 
+            console.debug(
+                `Received transactions for split ${splitUrl}:`,
+                transactions
+            );
+
             onUpdate(
                 transactions.map((transaction) => ({
                     ...transaction,

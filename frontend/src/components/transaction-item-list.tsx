@@ -1,43 +1,40 @@
 "use client";
 
+import { updateTransactionItem } from "@/actions/update-transaction-item-service";
 import { useTransaction } from "@/providers/transaction-provider";
 import { Currencies } from "@/utils/currencies";
 import { Money } from "@/utils/money";
+import { UpdateTransactionItem } from "@/utils/transaction-item";
 import { List, ListItem, ListItemButton, ListItemText } from "@mui/material";
+import { useState } from "react";
 import CreateTransactionItemButton from "./create-transaction-item-button";
+import { TransactionItemDialog } from "./transaction-item-dialog";
 
 export default function TransactionItemList() {
     const transaction = useTransaction();
 
-    const remainingAmount: Money = transaction.items.reduce(
-        (acc, transaction) =>
-            new Money(
-                acc.getAmount() - transaction.amount.getAmount(),
-                Currencies.EUR
-            ),
-        transaction.amount
-    );
+    const remainingAmount: Money =
+        transaction.items.find((item) => item.name === "Remaining")?.amount ??
+        new Money(0, Currencies.EUR);
 
     return (
         <>
             <List>
-                <ListItem>
-                    <ListItemText>Remaining</ListItemText>
-                    <ListItemText
-                        sx={{
-                            textAlign: "right",
-                        }}
-                    >
-                        {remainingAmount.toString()}
-                    </ListItemText>
-                </ListItem>
-                {transaction.items.map((transactionItem) => (
-                    <TransactionItem
-                        key={transactionItem.id}
-                        name={transactionItem.name}
-                        amount={transactionItem.amount}
-                    ></TransactionItem>
-                ))}
+                <TransactionItem
+                    name="Remaining"
+                    amount={remainingAmount}
+                    remainingAmount={remainingAmount}
+                ></TransactionItem>
+                {transaction.items
+                    .filter((item) => item.name !== "Remaining")
+                    .map((transactionItem) => (
+                        <TransactionItem
+                            key={transactionItem.id}
+                            name={transactionItem.name}
+                            amount={transactionItem.amount}
+                            remainingAmount={remainingAmount}
+                        ></TransactionItem>
+                    ))}
 
                 <ListItem disablePadding>
                     <CreateTransactionItemButton
@@ -52,15 +49,30 @@ export default function TransactionItemList() {
 interface TransactionItemProps {
     name: string;
     amount: Money;
+    remainingAmount: Money;
 }
 
 function TransactionItem(props: TransactionItemProps) {
-    const { name, amount } = props;
+    const { name, amount, remainingAmount } = props;
+
+    const [openDialog, setOpenDialog] = useState(false);
 
     return (
         <>
+            <TransactionItemDialog
+                title={`Edit item: ${name}`}
+                initialName={name}
+                initialAmount={amount}
+                remainingAmount={remainingAmount}
+                open={openDialog}
+                onClose={() => setOpenDialog(false)}
+                onError={(error) => {
+                    console.error("Error creating transaction item:", error);
+                }}
+                submitTransactionItem={submitTransactionItem}
+            ></TransactionItemDialog>
             <ListItem disablePadding>
-                <ListItemButton>
+                <ListItemButton onClick={() => setOpenDialog(true)}>
                     <ListItemText>{name}</ListItemText>
                     <ListItemText
                         sx={{
@@ -74,3 +86,27 @@ function TransactionItem(props: TransactionItemProps) {
         </>
     );
 }
+
+const submitTransactionItem = (
+    name: string,
+    amount: number,
+    transactionUrl: string,
+    splitUrl: string,
+    url?: string,
+    onClose?: () => void,
+    onError?: (error?: string) => void
+) => {
+    const transactionItem: UpdateTransactionItem = {
+        name: name,
+        amount: amount,
+        url: url!,
+    };
+
+    updateTransactionItem(transactionItem, splitUrl, transactionUrl)
+        .then(() => {
+            onClose?.();
+        })
+        .catch((error) => {
+            onError?.(error.message);
+        });
+};

@@ -1,11 +1,15 @@
 package com.philippderroole.splitterybackend.controller;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.philippderroole.splitterybackend.dtos.CreateSplitDto;
-import com.philippderroole.splitterybackend.dtos.user.AddUserDto;
+import com.philippderroole.splitterybackend.entities.Split;
+import com.philippderroole.splitterybackend.responsebuilders.SplitResponseBuilder;
+import com.philippderroole.splitterybackend.service.SocketHandler;
 import com.philippderroole.splitterybackend.service.SplitService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import static org.springframework.http.HttpStatus.*;
@@ -13,57 +17,53 @@ import static org.springframework.http.HttpStatus.*;
 @RestController
 @RequestMapping("/api/splits")
 public class SplitController {
-    private final SimpMessagingTemplate messagingTemplate;
+    private static final Logger LOGGER = LoggerFactory.getLogger(SplitController.class);
     private final SplitService splitService;
+    private final SocketHandler socketHandler;
+    private final ObjectMapper objectMapper;
 
-    public SplitController(SimpMessagingTemplate messagingTemplate, SplitService splitService) {
-        this.messagingTemplate = messagingTemplate;
+    public SplitController(SplitService splitService, SocketHandler socketHandler, ObjectMapper objectMapper) {
         this.splitService = splitService;
+        this.socketHandler = socketHandler;
+        this.objectMapper = objectMapper;
     }
 
-    @GetMapping(path = "/{splitUrl}")
-    public ResponseEntity<ObjectNode> getSplit(@PathVariable String splitUrl) {
+    @PostMapping
+    public ResponseEntity<JsonNode> createSplit(@RequestBody CreateSplitDto createSplitDto) {
         try {
-            ObjectNode split = splitService.getSplit(splitUrl);
-            return new ResponseEntity<>(split, OK);
+            Split split = splitService.createSplit(createSplitDto);
+            JsonNode response = SplitResponseBuilder.create(objectMapper)
+                    .showUsers()
+                    .build(split);
+            return new ResponseEntity<>(response, CREATED);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(BAD_REQUEST);
         }
     }
 
-    @PostMapping
-    public ResponseEntity<ObjectNode> createSplit(@RequestBody CreateSplitDto createSplitDto) {
+    @GetMapping(path = "/{splitUrl}")
+    public ResponseEntity<JsonNode> getSplit(@PathVariable String splitUrl) {
         try {
-            ObjectNode split = splitService.createSplit(createSplitDto);
-            return new ResponseEntity<>(split, CREATED);
+            Split split = splitService.getSplit(splitUrl);
+            JsonNode response = SplitResponseBuilder.create(objectMapper)
+                    .showUsers()
+                    .build(split);
+            return new ResponseEntity<>(response, OK);
         } catch (IllegalArgumentException e) {
+            LOGGER.error("Error retrieving split: {}", e.getMessage(), e);
             return new ResponseEntity<>(BAD_REQUEST);
         }
     }
 
     @PutMapping(path = "/{splitUrl}")
-    public ResponseEntity<ObjectNode> updateSplit(@PathVariable String splitUrl, @RequestBody CreateSplitDto createSplitDto) {
+    public ResponseEntity<JsonNode> updateSplit(@PathVariable String splitUrl, @RequestBody CreateSplitDto createSplitDto) {
         try {
-            ObjectNode updatedSplit = splitService.updateSplit(splitUrl, createSplitDto);
-            notifySplitUpdate(updatedSplit);
-            return new ResponseEntity<>(updatedSplit, OK);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(BAD_REQUEST);
-        }
-    }
-
-    private void notifySplitUpdate(ObjectNode updatedSplit) {
-        String splitUrl = updatedSplit.get("url").asText();
-
-        messagingTemplate.convertAndSend("/topic/splits/" + splitUrl, updatedSplit);
-    }
-
-    @PostMapping(path = "/{splitUrl}/users")
-    ResponseEntity<ObjectNode> addUser(@PathVariable String splitUrl, @RequestBody AddUserDto addUserDto) {
-        try {
-            ObjectNode updatedSplit = splitService.addUser(splitUrl, addUserDto);
-            notifySplitUpdate(updatedSplit);
-            return new ResponseEntity<>(updatedSplit, OK);
+            Split split = splitService.updateSplit(splitUrl, createSplitDto);
+            JsonNode response = SplitResponseBuilder.create(objectMapper)
+                    .showUsers()
+                    .build(split);
+            socketHandler.notifySplitUpdate(splitUrl);
+            return new ResponseEntity<>(response, OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(BAD_REQUEST);
         }

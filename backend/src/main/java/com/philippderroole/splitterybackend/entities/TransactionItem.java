@@ -1,8 +1,8 @@
 package com.philippderroole.splitterybackend.entities;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -17,8 +17,9 @@ public class TransactionItem {
 
     private double amount;
 
-    @ManyToOne
-    @JoinColumn(name = "transaction_id", nullable = false)
+    private String url;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Transaction transaction;
 
     public String getId() {
@@ -49,7 +50,8 @@ public class TransactionItem {
         return transaction;
     }
 
-    public void setTransaction(Transaction transaction) {
+    public TransactionItem setTransaction(Transaction transaction) {
         this.transaction = transaction;
+        return this;
     }
 }

@@ -1,78 +1,80 @@
 package com.philippderroole.splitterybackend.service;
 
-import com.philippderroole.splitterybackend.dtos.CreateTransactionItemDto;
-import com.philippderroole.splitterybackend.dtos.UpdateTransactionItemDto;
+import com.philippderroole.splitterybackend.dtos.transaction_item.CreateTransactionItemDto;
+import com.philippderroole.splitterybackend.dtos.transaction_item.UpdateTransactionItemDto;
+import com.philippderroole.splitterybackend.entities.Split;
 import com.philippderroole.splitterybackend.entities.Transaction;
 import com.philippderroole.splitterybackend.entities.TransactionItem;
 import com.philippderroole.splitterybackend.repositories.TransactionItemRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-
 @Service
-public class TransactionItemService {
-    @Autowired
-    private TransactionItemRepository transactionItemRepository;
+public final class TransactionItemService {
+    private final TransactionItemRepository transactionItemRepository;
+    private final RemainingAmountItemService remainingAmountItemService;
+    private final ValidationService validationService;
 
-    public Collection<TransactionItem> updateTransactionItems(Transaction transaction, Collection<UpdateTransactionItemDto> itemDtos) {
-        transaction.getItems().stream()
-                .filter(item -> itemDtos.stream()
-                        .map(UpdateTransactionItemDto::getId)
-                        .noneMatch(id -> item.getId().equals(id)))
-                .forEach(this::deleteTransactionItem);
-
-        return itemDtos.stream()
-                .map(itemDto -> createOrUpdateTransactionItem(transaction, itemDto))
-                .toList();
+    public TransactionItemService(TransactionItemRepository transactionItemRepository, RemainingAmountItemService remainingAmountItemService, ValidationService validationService) {
+        this.transactionItemRepository = transactionItemRepository;
+        this.remainingAmountItemService = remainingAmountItemService;
+        this.validationService = validationService;
     }
 
-    public void deleteTransactionItem(TransactionItem transactionItem) {
-        transactionItemRepository.delete(transactionItem);
-    }
 
-    public TransactionItem createOrUpdateTransactionItem(Transaction transaction, UpdateTransactionItemDto itemDto) {
-        if (itemDto.getId() == null) {
-            return createTransactionItem(transaction, itemDto);
-        } else {
-            return updateTransactionItem(transaction, itemDto);
+    public TransactionItem createTransactionItem(String splitUrl, String transactionUrl, CreateTransactionItemDto itemDto) {
+        Split split = validationService.findSplitByUrl(splitUrl);
+        Transaction transaction = validationService.findTransactionByUrl(transactionUrl);
+
+        validationService.validateTransactionBelongsToSplit(transaction, split);
+
+        if (itemDto.getAmount() > transaction.getAmount()) {
+            throw new IllegalArgumentException("Item amount cannot exceed transaction amount");
         }
-    }
 
-    public Collection<TransactionItem> createTransactionItems(Transaction transaction, Collection<CreateTransactionItemDto> itemDtos) {
-        return itemDtos.stream()
-                .map(itemDto -> createTransactionItem(transaction, itemDto))
-                .toList();
-    }
-
-    public TransactionItem createTransactionItem(Transaction transaction, CreateTransactionItemDto itemDto) {
         TransactionItem item = new TransactionItem();
-
         item.setName(itemDto.getName());
         item.setAmount(itemDto.getAmount());
         item.setTransaction(transaction);
+        item = transactionItemRepository.save(item);
+
+        remainingAmountItemService.updateRemainingAmountItem(transaction);
+
+        return item;
+    }
+
+    public TransactionItem getTransactionItem(String splitUrl, String transactionUrl, String itemUrl) {
+        Split split = validationService.findSplitByUrl(splitUrl);
+        Transaction transaction = validationService.findTransactionByUrl(transactionUrl);
+        TransactionItem item = validationService.findTransactionItemByUrl(itemUrl);
+
+        validationService.validateTransactionBelongsToSplit(transaction, split);
+        validationService.validateItemBelongsToTransaction(item, transaction);
+
+        return item;
+    }
+
+    public TransactionItem updateTransactionItem(String splitUrl, String transactionUrl, String itemUrl, UpdateTransactionItemDto itemData) {
+        Split split = validationService.findSplitByUrl(splitUrl);
+        Transaction transaction = validationService.findTransactionByUrl(transactionUrl);
+        TransactionItem item = validationService.findTransactionItemByUrl(itemUrl);
+
+        validationService.validateTransactionBelongsToSplit(transaction, split);
+        validationService.validateItemBelongsToTransaction(item, transaction);
+
+        item.setName(itemData.getName());
+        item.setAmount(itemData.getAmount());
 
         return transactionItemRepository.save(item);
     }
 
-    public TransactionItem createTransactionItem(Transaction transaction, UpdateTransactionItemDto itemDto) {
-        TransactionItem item = new TransactionItem();
+    public void deleteTransactionItem(String splitUrl, String transactionUrl, String itemUrl) {
+        Split split = validationService.findSplitByUrl(splitUrl);
+        Transaction transaction = validationService.findTransactionByUrl(transactionUrl);
+        TransactionItem item = validationService.findTransactionItemByUrl(itemUrl);
 
-        item.setName(itemDto.getName());
-        item.setAmount(itemDto.getAmount());
-        item.setTransaction(transaction);
+        validationService.validateTransactionBelongsToSplit(transaction, split);
+        validationService.validateItemBelongsToTransaction(item, transaction);
 
-        return transactionItemRepository.save(item);
-    }
-
-    private TransactionItem updateTransactionItem(Transaction transaction, UpdateTransactionItemDto itemDto) {
-        TransactionItem item = transactionItemRepository.findById(itemDto.getId())
-                .orElseThrow(() -> new IllegalArgumentException("TransactionItem not found"));
-
-        item.setName(itemDto.getName());
-        item.setAmount(itemDto.getAmount());
-        item.setTransaction(transaction);
-
-        return transactionItemRepository.save(item);
+        transactionItemRepository.delete(item);
     }
 }

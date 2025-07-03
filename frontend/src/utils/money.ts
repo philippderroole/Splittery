@@ -18,6 +18,6 @@ export class Money {
     }
 
     toString() {
-        return this.currency.format(this.amount / 100);
+        return this.currency.format(this.amount);
     }
 }

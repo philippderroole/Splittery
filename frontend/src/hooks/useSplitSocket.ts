@@ -11,6 +11,11 @@ export function useSplitSocket(
     useEffect(() => {
         const topic = `/topic/splits/${splitUrl}`;
         subscriptionRef.current = subscribeToTopic(topic, (message) => {
+            console.debug(
+                `Received split update for ${splitUrl}:`,
+                message.body
+            );
+
             onUpdate(JSON.parse(message.body));
         });
 

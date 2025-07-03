@@ -18,7 +18,7 @@ export interface CreateTransactionItem {
 }
 
 export interface UpdateTransactionItem {
-    id: string;
     name: string;
     amount: number;
+    url: string;
 }

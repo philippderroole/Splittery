@@ -11,9 +11,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 public final class TransactionResponseBuilder {
-
     private final ObjectMapper objectMapper;
-
 
     private TransactionResponseBuilder(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
@@ -43,11 +41,10 @@ public final class TransactionResponseBuilder {
     private JsonNode buildItems(Transaction transaction) {
         ArrayNode items = objectMapper.createArrayNode();
 
-        transaction.getItems().forEach(item -> items.add(
-                objectMapper.createObjectNode()
-                        .put("id", item.getId())
-                        .put("name", item.getName())
-                        .put("amount", item.getAmount()))
+        transaction.getItems().forEach(
+                item -> items.add(
+                        TransactionItemResponseBuilder.create(objectMapper)
+                                .build(item))
         );
 
         return items;
