@@ -6,7 +6,7 @@ export async function createTag(
     splitId: string,
     tag: CreateTagDto
 ): Promise<Tag> {
-    return await fetch(
+    const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitId}/tags`,
         {
             method: "POST",
@@ -15,16 +15,16 @@ export async function createTag(
             },
             body: JSON.stringify(tag),
         }
-    ).then((res) => {
-        if (!res.ok) {
-            console.error("Failed to create tag:", res.status, res.statusText);
-            throw new Error(
-                `Failed to create tag: ${res.status} ${res.statusText}`
-            );
-        }
+    );
 
-        console.debug("Tag created successfully:", res.status, res.statusText);
+    if (!res.ok) {
+        console.error("Failed to create tag:", res.status, res.statusText);
+        throw new Error(
+            `Failed to create tag: ${res.status} ${res.statusText}`
+        );
+    }
 
-        return res.json();
-    });
+    console.debug("Tag created successfully:", res.status, res.statusText);
+
+    return res.json();
 }

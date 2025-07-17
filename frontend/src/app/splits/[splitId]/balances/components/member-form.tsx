@@ -1,10 +1,11 @@
 "use client";
 
+import { useTags } from "@/providers/tag-provider";
 import { CreateMemberDto } from "@/utils/user";
 import { Alert, Button, FormControl, TextField } from "@mui/material";
 import { createContext, ReactNode, useContext, useState } from "react";
 
-type CreateUserContextType = {
+type MemberFormContextType = {
     user: CreateMemberDto;
     onSaveClick: () => void;
     onCancelClick: () => void;
@@ -14,10 +15,10 @@ type CreateUserContextType = {
     validationError: string | null;
 };
 
-const CreateUserContext = createContext<CreateUserContextType | null>(null);
+const MemberFormContext = createContext<MemberFormContextType | null>(null);
 
 const useCreateUserContext = () => {
-    const currentUserContext = useContext(CreateUserContext);
+    const currentUserContext = useContext(MemberFormContext);
 
     if (!currentUserContext) {
         throw new Error(
@@ -28,14 +29,16 @@ const useCreateUserContext = () => {
     return currentUserContext;
 };
 
-interface CreateUserCompoundProps {
+interface MemberFormCompoundProps {
     children?: ReactNode;
     onSubmit: (user: CreateMemberDto) => Promise<Error | void>;
     onCancel: () => void;
 }
 
-function Root(props: CreateUserCompoundProps) {
+function Root(props: MemberFormCompoundProps) {
     const { children, onSubmit, onCancel } = props;
+
+    const tags = useTags();
 
     const [isPending, setPending] = useState(false);
     const [user, setUser] = useState<CreateMemberDto>({ username: "" });
@@ -87,12 +90,15 @@ function Root(props: CreateUserCompoundProps) {
         if (name.length > 50) {
             return "Username name must not exceed 50 characters.";
         }
+        if (tags.some((tag) => tag.name.toLowerCase() === name.toLowerCase())) {
+            return "A tag with this name already exists. Please choose a different name or rename the existing tag.";
+        }
 
         return null;
     };
 
     return (
-        <CreateUserContext.Provider
+        <MemberFormContext.Provider
             value={{
                 user,
                 setUsername,
@@ -104,7 +110,7 @@ function Root(props: CreateUserCompoundProps) {
             }}
         >
             {children}
-        </CreateUserContext.Provider>
+        </MemberFormContext.Provider>
     );
 }
 

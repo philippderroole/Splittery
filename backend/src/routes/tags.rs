@@ -1,6 +1,6 @@
 use axum::{
     Router,
-    routing::{delete, get, post},
+    routing::{delete, get, post, put},
 };
 use sqlx::PgPool;
 
@@ -10,6 +10,7 @@ pub fn tags_routes() -> Router<PgPool> {
     Router::new().nest(
         "/splits/{splitId}",
         Router::new()
+            .route("/members/tags", get(controllers::get_members_with_tags))
             .nest(
                 "/members/{memberId}/tags",
                 Router::new()
@@ -22,6 +23,7 @@ pub fn tags_routes() -> Router<PgPool> {
                 Router::new()
                     .route("/", get(controllers::get_all_split_tags))
                     .route("/", post(controllers::create_tag))
+                    .route("/{tagId}", put(controllers::edit_tag))
                     .route("/{tagId}", delete(controllers::delete_tag)),
             )
             .nest(

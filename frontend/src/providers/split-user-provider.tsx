@@ -1,13 +1,15 @@
 "use client";
 import { useSplitSocket } from "@/hooks/useSplitSocket"; // Your real-time hook
-import { SplitUser } from "@/utils/user";
+import { MemberWithTags } from "@/utils/user";
 import React, { useContext, useState } from "react";
 import { useSplit } from "./split-provider";
 
-const SplitUserContext = React.createContext<SplitUser[]>([] as SplitUser[]);
+const SplitUserContext = React.createContext<MemberWithTags[]>(
+    [] as MemberWithTags[]
+);
 
 export interface SplitProviderProps {
-    splitUsers: SplitUser[];
+    splitUsers: MemberWithTags[];
     children: React.ReactNode;
 }
 
@@ -16,7 +18,7 @@ export function SplitUserProvider({
     children,
 }: SplitProviderProps) {
     const [splitUsers, setSplitUsers] =
-        useState<SplitUser[]>(initialSplitUsers);
+        useState<MemberWithTags[]>(initialSplitUsers);
 
     const split = useSplit();
 
@@ -24,7 +26,7 @@ export function SplitUserProvider({
         split.id,
         ["SplitChanged", "SplitDeleted"],
         (payload: unknown) => {
-            setSplitUsers(payload as SplitUser[]);
+            setSplitUsers(payload as MemberWithTags[]);
         }
     );
 

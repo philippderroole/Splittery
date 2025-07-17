@@ -1,0 +1,88 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT member.id AS member_id, member.public_id AS member_public_id, \n               member.name AS member_name, member.created_at AS member_created_at, member.updated_at AS member_updated_at,\n               tags.id AS tag_id, tags.public_id AS tag_public_id, tags.is_custom AS tag_is_custom,\n               tags.name AS tag_name, tags.color AS tag_color, tags.updated_at AS tag_updated_at, tags.created_at AS tag_created_at\n        FROM split_members AS member\n        LEFT JOIN member_tags ON member.id = member_tags.member_id\n        LEFT JOIN tags ON member_tags.tag_id = tags.id\n        WHERE member.split_id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "member_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "member_public_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "member_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "member_created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "member_updated_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 5,
+        "name": "tag_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 6,
+        "name": "tag_public_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 7,
+        "name": "tag_is_custom",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 8,
+        "name": "tag_name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 9,
+        "name": "tag_color",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 10,
+        "name": "tag_updated_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 11,
+        "name": "tag_created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "b3628b4c3f188221bd54e5e4c67db110b77a0bc5bec0d19db29c97638ed8f4f4"
+}

@@ -3,7 +3,7 @@
 import { useSplitUsers } from "@/providers/split-user-provider";
 import { Currencies } from "@/utils/currencies";
 import { Money } from "@/utils/money";
-import { SplitUser } from "@/utils/user";
+import { MemberWithTags, SplitUser } from "@/utils/user";
 import {
     Avatar,
     Box,
@@ -15,7 +15,7 @@ import {
     ListItemText,
     Typography,
 } from "@mui/material";
-import { CreateUserDialogButton } from "./components/create-split-user-dialog";
+import { CreateMemberDialogButton } from "./components/create-split-user-dialog";
 
 export default function SplitPage() {
     const splitUsers = useSplitUsers();
@@ -32,7 +32,7 @@ export default function SplitPage() {
             <Typography variant="h4">Balances</Typography>
             <List sx={{ width: "100%", padding: 0 }}>
                 {splitUsers.map((user) => {
-                    return <SplitUserItem user={user} key={2} />;
+                    return <SplitUserItem member={user} key={user.id} />;
                 })}
             </List>
             <div
@@ -43,42 +43,48 @@ export default function SplitPage() {
                     zIndex: 1200,
                 }}
             >
-                <CreateUserDialogButton />
+                <CreateMemberDialogButton />
             </div>
         </div>
     );
 }
 
 interface SplitUserItemProps {
-    user: SplitUser;
+    member: MemberWithTags;
 }
 
 function SplitUserItem(props: SplitUserItemProps) {
-    const { user } = props;
+    const { member } = props;
 
     return (
         <ListItemButton>
             <ListItem
                 disablePadding
-                secondaryAction={<SaldoItem user={user} />}
+                secondaryAction={<SaldoItem user={member} />}
             >
                 <ListItemAvatar>
                     <Avatar
                         alt={`Avatar n°${""}}`}
-                        src={`/static/images/avatar/${user.avatarUri}.jpg`}
+                        src={`/static/images/avatar/${member.avatarUri}.jpg`}
                     />
                 </ListItemAvatar>
                 <ListItemText
-                    primary={user.name}
+                    primary={member.name}
                     secondary={
-                        <Chip
-                            label="all"
-                            size="small"
-                            variant="filled"
-                            sx={{
-                                backgroundColor: "#e00b0bff",
-                            }}
-                        />
+                        <Box sx={{ display: "flex", gap: "2px" }}>
+                            {member.tags.map((tag) => (
+                                <Chip
+                                    key={tag.id}
+                                    label={tag.name}
+                                    size="small"
+                                    variant="filled"
+                                    sx={{
+                                        backgroundColor: tag.color,
+                                        mt: 0.5,
+                                    }}
+                                />
+                            ))}
+                        </Box>
                     }
                 />
             </ListItem>

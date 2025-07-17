@@ -1,8 +1,8 @@
 "use client";
 
-import { createTag } from "@/actions/create-tag-service";
+import { deleteTag } from "@/actions/tags/delete-tag-service";
 import { useSplit } from "@/providers/split-provider";
-import { CreateTagDto, Tag } from "@/utils/tag";
+import { Tag } from "@/utils/tag";
 import { Delete as DeleteIcon } from "@mui/icons-material";
 import {
     Box,
@@ -27,9 +27,9 @@ export function DeleteTagDialog(props: DeleteTagDialogProps) {
 
     const split = useSplit();
 
-    const handleSubmit = async (tag: CreateTagDto) => {
+    const handleSubmit = async (tag: Tag) => {
         try {
-            await createTag(split.id, tag);
+            await deleteTag(split.id, tag.id);
         } catch {
             return new Error("Failed to delete tag. Please try again.");
         }

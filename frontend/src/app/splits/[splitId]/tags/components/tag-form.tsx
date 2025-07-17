@@ -1,6 +1,7 @@
 "use client";
 
-import { CreateTagDto } from "@/utils/tag";
+import { useTags } from "@/providers/tag-provider";
+import { CreateTagDto, Tag } from "@/utils/tag";
 import {
     Alert,
     Box,
@@ -8,10 +9,12 @@ import {
     FormControl,
     TextField,
     Typography,
+    useMediaQuery,
+    useTheme,
 } from "@mui/material";
 import { createContext, ReactNode, useContext, useState } from "react";
 
-type CreateTagContextType = {
+type TagFormContextType = {
     tag: CreateTagDto;
     onSaveClick: () => void;
     onCancelClick: () => void;
@@ -23,10 +26,10 @@ type CreateTagContextType = {
     validationError: string | null;
 };
 
-const CreateTagContext = createContext<CreateTagContextType | null>(null);
+const TagFormContext = createContext<TagFormContextType | null>(null);
 
-const useCreateTagContext = () => {
-    const currentTagContext = useContext(CreateTagContext);
+const useTagFormContext = () => {
+    const currentTagContext = useContext(TagFormContext);
 
     if (!currentTagContext) {
         throw new Error(
@@ -37,17 +40,27 @@ const useCreateTagContext = () => {
     return currentTagContext;
 };
 
-interface CreateTagCompoundProps {
+interface TagFormCompoundProps {
+    initalTag?: Tag;
     children?: ReactNode;
     onSubmit: (tag: CreateTagDto) => Promise<Error | void>;
     onCancel: () => void;
 }
 
-function Root(props: CreateTagCompoundProps) {
-    const { children, onSubmit, onCancel } = props;
+function Root(props: TagFormCompoundProps) {
+    const { initalTag, children, onSubmit, onCancel } = props;
+
+    const tags = useTags();
 
     const [isPending, setPending] = useState(false);
-    const [tag, setTag] = useState<CreateTagDto>({ name: "", color: "" });
+    const [tag, setTag] = useState<CreateTagDto>(
+        initalTag
+            ? { ...initalTag }
+            : {
+                  name: "",
+                  color: "#f44336",
+              }
+    );
     const [error, setError] = useState<string | null>(null);
     const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -63,7 +76,7 @@ function Root(props: CreateTagCompoundProps) {
             return;
         }
 
-        console.log("Submitting tag:", newTag);
+        console.debug("Submitting tag:", newTag);
 
         setPending(true);
         setError(null);
@@ -101,12 +114,18 @@ function Root(props: CreateTagCompoundProps) {
         if (name.length > 50) {
             return "Tagname name must not exceed 50 characters.";
         }
+        if (
+            initalTag?.name !== name &&
+            tags.some((tag) => tag.name.toLowerCase() === name.toLowerCase())
+        ) {
+            return "Tagname already exists. Please choose a different name.";
+        }
 
         return null;
     };
 
     return (
-        <CreateTagContext.Provider
+        <TagFormContext.Provider
             value={{
                 tag,
                 setName,
@@ -120,35 +139,37 @@ function Root(props: CreateTagCompoundProps) {
             }}
         >
             {children}
-        </CreateTagContext.Provider>
+        </TagFormContext.Provider>
     );
 }
 
 function FormInputs() {
     const { tag, setName, error, isPending, validationError } =
-        useCreateTagContext();
+        useTagFormContext();
 
     const existsValidationError = validationError !== null;
 
     return (
         <>
-            <FormControl sx={{ paddingTop: "5px" }} fullWidth>
-                <TextField
-                    autoFocus
-                    required
-                    id="tag-name"
-                    name="tag-name"
-                    label="Tagname"
-                    type="text"
-                    value={tag.name}
-                    onChange={(e) => setName(e.target.value)}
-                    aria-label="Tagname"
-                    fullWidth
-                    disabled={isPending}
-                    error={existsValidationError}
-                    helperText={existsValidationError && validationError}
-                />
-            </FormControl>
+            {!tag.isPredefined && (
+                <FormControl sx={{ paddingTop: "5px" }} fullWidth>
+                    <TextField
+                        autoFocus
+                        required
+                        id="tag-name"
+                        name="tag-name"
+                        label="Tagname"
+                        type="text"
+                        value={tag.name}
+                        onChange={(e) => setName(e.target.value)}
+                        aria-label="Tagname"
+                        fullWidth
+                        disabled={isPending}
+                        error={existsValidationError}
+                        helperText={existsValidationError && validationError}
+                    />
+                </FormControl>
+            )}
             <Typography variant="subtitle1" gutterBottom>
                 Selected Color
             </Typography>
@@ -170,8 +191,12 @@ function FormInputs() {
     );
 }
 
-function SubmitButton() {
-    const { onSaveClick, isPending } = useCreateTagContext();
+interface SubmitButtonProps {
+    content: ReactNode | string;
+}
+
+function SubmitButton(props: SubmitButtonProps) {
+    const { onSaveClick, isPending } = useTagFormContext();
 
     return (
         <Button
@@ -180,13 +205,13 @@ function SubmitButton() {
             onClick={onSaveClick}
             loading={isPending}
         >
-            Create
+            {props.content}
         </Button>
     );
 }
 
 function CancelButton() {
-    const { onCancelClick, isPending } = useCreateTagContext();
+    const { onCancelClick, isPending } = useTagFormContext();
 
     return (
         <Button
@@ -200,27 +225,24 @@ function CancelButton() {
     );
 }
 
-function Title() {
-    return "Create a new tag";
+interface TitleProps {
+    content: ReactNode | string;
 }
 
-function Description() {
-    return "Create a new tag with a custom name and color.";
+function Title(props: TitleProps) {
+    return <>{props.content}</>;
 }
 
-const CreateTag = {
-    Root,
-    Title,
-    Description,
-    FormInputs,
-    CancelButton,
-    SubmitButton,
-};
+interface DescriptionProps {
+    content: ReactNode | string;
+}
 
-export default CreateTag;
+function Description(props: DescriptionProps) {
+    return <>{props.content}</>;
+}
 
 function PresetColorPalette() {
-    const { color: selectedColor, setColor } = useCreateTagContext();
+    const { color: selectedColor, setColor } = useTagFormContext();
 
     const DEFAULT_COLORS = [
         "#f44336",
@@ -260,12 +282,14 @@ function PresetColorPalette() {
                         height: 40,
                         borderRadius: "50%",
                         bgcolor: color,
-                        border:
-                            selectedColor === color ? "3px solid" : "1px solid",
+                        color: "primary.main",
+                        border: "2px solid",
                         borderColor:
                             selectedColor === color
                                 ? "primary.main"
                                 : "divider",
+                        boxShadow:
+                            selectedColor === color ? "0 0 0 2px" : "none",
                         cursor: "pointer",
                         "&:hover": {
                             transform: "scale(1.1)",
@@ -280,7 +304,10 @@ function PresetColorPalette() {
 }
 
 function ColorSelector() {
-    const { color, setColor } = useCreateTagContext();
+    const { color, setColor } = useTagFormContext();
+
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
     return (
         <Box
@@ -290,14 +317,16 @@ function ColorSelector() {
                 alignItems: "center",
             }}
         >
-            <TextField
-                type="color"
-                value={color}
-                onChange={(e) => {
-                    setColor(e.target.value);
-                }}
-                sx={{ width: 60 }}
-            />
+            {!isMobile && (
+                <TextField
+                    type="color"
+                    value={color}
+                    onChange={(e) => {
+                        setColor(e.target.value);
+                    }}
+                    sx={{ width: 60 }}
+                />
+            )}
             <TextField
                 label="Hex Color"
                 value={color}
@@ -312,7 +341,7 @@ function ColorSelector() {
 }
 
 function SelectedColor() {
-    const { color: selectedColor } = useCreateTagContext();
+    const { color: selectedColor } = useTagFormContext();
 
     return (
         <Box
@@ -337,3 +366,14 @@ function SelectedColor() {
         </Box>
     );
 }
+
+const TagForm = {
+    Root,
+    Title,
+    Description,
+    FormInputs,
+    CancelButton,
+    SubmitButton,
+};
+
+export default TagForm;

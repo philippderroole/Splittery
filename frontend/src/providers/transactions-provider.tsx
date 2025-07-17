@@ -54,5 +54,12 @@ export function TransactionsProvider({
 }
 
 export function useTransactions() {
-    return useContext(TransactionContext);
+    const context = useContext(TransactionContext);
+
+    if (!context) {
+        throw new Error(
+            "useTransactions must be used within a TransactionsProvider"
+        );
+    }
+    return context;
 }

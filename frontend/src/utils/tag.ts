@@ -10,3 +10,9 @@ export interface CreateTagDto {
     color: string;
     isPredefined?: boolean;
 }
+
+export interface EditTagDto {
+    name: string;
+    color: string;
+    isPredefined?: boolean;
+}

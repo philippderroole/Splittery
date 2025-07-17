@@ -1,9 +1,12 @@
+import { Tag } from "./tag";
+
 export interface User {
     id: string;
     username: string;
 }
 
 export interface SplitUser {
+    id: string;
     name: string;
     avatarUri: string;
     saldo: number;
@@ -22,4 +25,8 @@ export interface CreateUserDto {
 export interface SerializedUser {
     id: string;
     username: string;
+}
+
+export interface MemberWithTags extends SplitUser {
+    tags: Tag[];
 }
