@@ -1,14 +1,13 @@
-"use server";
+import "server-only";
 
-import { Center } from "@chakra-ui/react";
-import Hero from "./components/hero";
+import { CreateSplitDialogButton } from "@/app/components/create-split-dialog";
+import { Typography } from "@mui/material";
 
-export default async function LandingPage() {
+export default async function HomePage() {
     return (
         <>
-            <Center flexGrow={1}>
-                <Hero />
-            </Center>
+            <Typography variant="h1">Splittery</Typography>
+            <CreateSplitDialogButton />
         </>
     );
 }
