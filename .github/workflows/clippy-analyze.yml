@@ -1,13 +1,4 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-# rust-clippy is a tool that runs a bunch of lints to catch common
-# mistakes in your Rust code and help improve your Rust code.
-# More details at https://github.com/rust-lang/rust-clippy
-# and https://rust-lang.github.io/rust-clippy/
-
-name: Analyze backend code with rust-clippy
+name: Rust Clippy Analyze
 
 on:
     push:
@@ -15,31 +6,96 @@ on:
     pull_request:
         branches: ["main"]
 
+env:
+    CARGO_TERM_COLOR: always
+    RUST_BACKTRACE: 1
+    SQLX_OFFLINE: true
+
 jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Install Rust toolchain
+              uses: dtolnay/rust-toolchain@stable
+
+            - name: Cache Rust dependencies
+              uses: Swatinem/rust-cache@v2
+              with:
+                  workspaces: "backend -> target"
+
+            - name: Build backend
+              run: cargo build --verbose
+              working-directory: ./backend
+
+            - name: Run tests
+              run: cargo test --verbose
+              working-directory: ./backend
+
     rust-clippy-analyze:
         name: Run rust-clippy
         runs-on: ubuntu-latest
+        needs: build
         permissions:
             contents: read
             security-events: write
-            actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+            actions: read
+
         steps:
             - name: Checkout code
-              uses: actions/checkout@v2
+              uses: actions/checkout@v4
 
             - name: Install Rust toolchain
-              uses: actions-rs/toolchain@v1
+              uses: dtolnay/rust-toolchain@stable
               with:
-                  toolchain: stable
                   components: clippy
-                  override: true
 
-            - name: Install required cargo
-              run: cargo install clippy-sarif sarif-fmt
+            - name: Cache Rust dependencies
+              uses: Swatinem/rust-cache@v2
+              with:
+                  workspaces: "backend -> target"
+
+            - name: Cache cargo tools
+              uses: actions/cache@v3
+              with:
+                  path: ~/.cargo/bin
+                  key: ${{ runner.os }}-cargo-tools-${{ hashFiles('**/Cargo.lock') }}
+
+            - name: Install required cargo tools
+              run: |
+                  if ! command -v clippy-sarif &> /dev/null; then
+                      cargo install clippy-sarif
+                  fi
+                  if ! command -v sarif-fmt &> /dev/null; then
+                      cargo install sarif-fmt
+                  fi
 
             - name: Run rust-clippy
-              run: cargo clippy
-                  --all-features -- -D clippy::unwrap_used
-                  --message-format=json | clippy-sarif | tee rust-clippy-results.sarif | sarif-fmt
+              run: |
+                  cargo clippy \
+                    --all-features \
+                    --message-format=json \
+                    -- -D warnings \
+                    -D clippy::unwrap_used \
+                    -D clippy::panic \
+                    -D clippy::unimplemented \
+                    -D clippy::todo \
+                    | clippy-sarif | tee rust-clippy-results.sarif | sarif-fmt
               continue-on-error: true
               working-directory: ./backend
+
+            - name: Upload analysis results to GitHub
+              uses: github/codeql-action/upload-sarif@v3
+              with:
+                  sarif_file: backend/rust-clippy-results.sarif
+                  wait-for-processing: true
+
+            - name: Upload SARIF as artifact
+              uses: actions/upload-artifact@v4
+              if: always()
+              with:
+                  name: clippy-sarif
+                  path: backend/rust-clippy-results.sarif
