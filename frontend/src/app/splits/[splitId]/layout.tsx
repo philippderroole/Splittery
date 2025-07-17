@@ -3,9 +3,10 @@ import "server-only";
 import NavTabs from "@/app/components/nav-tabs";
 import SplitHeader from "@/components/split-header";
 import { SplitUserProvider } from "@/providers/split-user-provider";
+import { TagsProvider } from "@/providers/tag-provider";
 import { TransactionsProvider } from "@/providers/transactions-provider";
 import { getSplit } from "@/service/split-service";
-import { getMembers } from "@/service/split-user-service";
+import { getMembersWithTags, getTags } from "@/service/tag-service";
 import { getTransactions } from "@/service/transaction-service";
 import { notFound } from "next/navigation";
 import { SplitProvider } from "../../../providers/split-provider";
@@ -22,11 +23,20 @@ export default async function SplitLayout({
     let split;
     let splitUsers;
     let serializedTransactions;
+    let tags;
 
     try {
-        split = await getSplit(splitId);
-        splitUsers = await getMembers(splitId);
-        serializedTransactions = await getTransactions(split.id);
+        const values = await Promise.all([
+            getSplit(splitId),
+            getTags(splitId),
+            getMembersWithTags(splitId),
+            getTransactions(splitId),
+        ]);
+
+        split = values[0];
+        tags = values[1];
+        splitUsers = values[2];
+        serializedTransactions = values[3];
     } catch (error) {
         console.error("Error fetching split data:", error);
         notFound();
@@ -39,8 +49,10 @@ export default async function SplitLayout({
                     serializedTransactions={serializedTransactions}
                 >
                     <SplitUserProvider splitUsers={splitUsers}>
-                        <SplitHeader />
-                        {children}
+                        <TagsProvider tags={tags}>
+                            <SplitHeader />
+                            {children}
+                        </TagsProvider>
                     </SplitUserProvider>
                 </TransactionsProvider>
             </SplitProvider>

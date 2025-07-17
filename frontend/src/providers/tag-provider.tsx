@@ -32,5 +32,10 @@ export function TagsProvider({
 }
 
 export function useTags() {
-    return useContext(TagsContext);
+    const context = useContext(TagsContext);
+
+    if (!context) {
+        throw new Error("useTags must be used within a TagsProvider");
+    }
+    return context;
 }

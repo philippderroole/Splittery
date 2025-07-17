@@ -1,8 +1,10 @@
-use anyhow::{anyhow, Result};
+use std::collections::HashMap;
+
+use anyhow::{Result, anyhow};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::Tag;
+use crate::models::{MemberType, SplitMember, Tag};
 
 pub async fn get_all_member_tags(
     pool: &PgPool,
@@ -27,6 +29,59 @@ pub async fn get_all_member_tags(
         Ok(splits) => Ok(splits),
         Err(e) => Err(anyhow!("Failed to get tags: {}", e)),
     }
+}
+
+pub async fn get_members_with_tags(
+    pool: &PgPool,
+    split_id: Uuid,
+) -> Result<HashMap<SplitMember, Vec<Tag>>> {
+    let rows = sqlx::query!(
+        "
+        SELECT member.id AS member_id, member.public_id AS member_public_id, 
+               member.name AS member_name, member.created_at AS member_created_at, member.updated_at AS member_updated_at,
+               tags.id AS tag_id, tags.public_id AS tag_public_id, tags.is_custom AS tag_is_custom,
+               tags.name AS tag_name, tags.color AS tag_color, tags.updated_at AS tag_updated_at, tags.created_at AS tag_created_at
+        FROM split_members AS member
+        LEFT JOIN member_tags ON member.id = member_tags.member_id
+        LEFT JOIN tags ON member_tags.tag_id = tags.id
+        WHERE member.split_id = $1
+        ",
+        split_id
+    )
+    .fetch_all(pool)
+    .await;
+
+    let mut members: HashMap<SplitMember, Vec<Tag>> = HashMap::new();
+    match rows {
+        Ok(results) => {
+            for result in results {
+                let member = SplitMember {
+                    id: result.member_id,
+                    public_id: result.member_public_id,
+                    split_id,
+                    name: result.member_name,
+                    r#type: MemberType::Guest,
+                    created_at: result.member_created_at,
+                    updated_at: result.member_updated_at,
+                };
+                let tag = Tag {
+                    id: result.tag_id,
+                    public_id: result.tag_public_id,
+                    name: result.tag_name,
+                    color: result.tag_color,
+                    split_id,
+                    is_custom: result.tag_is_custom,
+                    created_at: result.tag_created_at,
+                    updated_at: result.tag_updated_at,
+                };
+
+                members.entry(member).or_default().push(tag);
+            }
+        }
+        Err(e) => return Err(anyhow!("Failed to get members with tags: {}", e)),
+    }
+
+    Ok(members)
 }
 
 pub async fn add_tag_to_member(

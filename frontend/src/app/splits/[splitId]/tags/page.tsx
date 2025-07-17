@@ -12,9 +12,10 @@ import {
     ListItemText,
     Typography,
 } from "@mui/material";
+import React from "react";
 import { CreateTagDialogButton } from "./components/create-tag-dialog";
 import { DeleteTagDialogButton } from "./components/delete-tag-dialog";
-import { EditTagDialogButton } from "./components/edit-tag-dialog";
+import { EditTagDialog } from "./components/edit-tag-dialog";
 
 export default function TagsPage() {
     const tags = useTags();
@@ -62,10 +63,20 @@ interface TagItemProps {
 function TagItem(props: TagItemProps) {
     const { tag } = props;
 
+    const [open, setOpen] = React.useState(false);
+
+    const openDialog = () => {
+        setOpen(true);
+    };
+
+    const closeDialog = () => {
+        setOpen(false);
+    };
+
     return (
         <>
             <ListItem disablePadding secondaryAction={<Actions tag={tag} />}>
-                <ListItemButton>
+                <ListItemButton onClick={openDialog}>
                     <ListItemIcon>
                         <Box
                             sx={{
@@ -91,6 +102,7 @@ function TagItem(props: TagItemProps) {
                     />
                 </ListItemButton>
             </ListItem>
+            <EditTagDialog initialTag={tag} open={open} onClose={closeDialog} />
         </>
     );
 }
@@ -104,7 +116,6 @@ function Actions(props: ActionsProps) {
 
     return (
         <Box sx={{ display: "flex" }}>
-            <EditTagDialogButton tag={tag} />
             {!tag.isPredefined && <DeleteTagDialogButton tag={tag} />}
         </Box>
     );

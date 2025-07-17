@@ -14,14 +14,14 @@ import {
     Fab,
 } from "@mui/material";
 import React from "react";
-import CreateUser from "./create-split-user";
+import CreateUser from "./member-form";
 
 interface CreateUserDialogProps {
     open: boolean;
     onClose: () => void;
 }
 
-export function CreateSplitUserDialog(props: CreateUserDialogProps) {
+export function CreateMemberDialog(props: CreateUserDialogProps) {
     const { open, onClose } = props;
 
     const split = useSplit();
@@ -58,7 +58,7 @@ export function CreateSplitUserDialog(props: CreateUserDialogProps) {
     );
 }
 
-export function CreateUserDialogButton() {
+export function CreateMemberDialogButton() {
     const [open, setOpen] = React.useState(false);
 
     const openDialog = () => {
@@ -74,7 +74,7 @@ export function CreateUserDialogButton() {
             <Fab color="primary" onClick={openDialog}>
                 <PersonAddAltIcon />
             </Fab>
-            <CreateSplitUserDialog open={open} onClose={closeDialog} />
+            <CreateMemberDialog open={open} onClose={closeDialog} />
         </>
     );
 }

@@ -1,6 +1,6 @@
 use std::fmt;
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use sqlx::PgPool;
 use uuid::Uuid;
 
@@ -124,6 +124,33 @@ pub async fn get_tag_by_name(
         sqlx::Error::RowNotFound => GetTagError::NotFound,
         _ => GetTagError::UnexpectedError(anyhow!(e)),
     })
+}
+
+pub async fn edit_tag(
+    pool: &PgPool,
+    split_id: Uuid,
+    tag_id: Uuid,
+    name: &String,
+    color: &String,
+) -> Result<Tag> {
+    let tag = sqlx::query_as!(
+        Tag,
+        "
+        UPDATE tags
+        SET name = $1, color = $2, updated_at = NOW()
+        WHERE split_id = $3 AND id = $4
+        RETURNING id, public_id, name, color, split_id, is_custom, created_at, updated_at
+        ",
+        name,
+        color,
+        split_id,
+        tag_id,
+    )
+    .fetch_one(pool)
+    .await
+    .map_err(|e| anyhow!("Failed to edit tag: {}", e))?;
+
+    Ok(tag)
 }
 
 #[derive(Debug)]

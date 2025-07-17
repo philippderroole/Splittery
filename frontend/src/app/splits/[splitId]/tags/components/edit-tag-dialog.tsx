@@ -1,9 +1,8 @@
 "use client";
 
-import { createTag } from "@/actions/create-tag-service";
+import { editTag } from "@/actions/tags/edit-tag-service";
 import { useSplit } from "@/providers/split-provider";
-import { CreateTagDto, Tag } from "@/utils/tag";
-import { Edit as EditIcon } from "@mui/icons-material";
+import { EditTagDto, Tag } from "@/utils/tag";
 import {
     Box,
     Dialog,
@@ -11,81 +10,81 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
-    IconButton,
+    useMediaQuery,
+    useTheme,
 } from "@mui/material";
-import React from "react";
-import EditTag from "./edit-tag";
+import TagForm from "./tag-form";
 
 interface EditTagDialogProps {
-    tag?: Tag;
+    initialTag: Tag;
     open: boolean;
     onClose: () => void;
 }
 
 export function EditTagDialog(props: EditTagDialogProps) {
-    const { tag, open, onClose } = props;
+    const { initialTag, open, onClose } = props;
+
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
     const split = useSplit();
 
-    const handleSubmit = async (tag: CreateTagDto) => {
+    const handleSubmit = async (tag: EditTagDto) => {
         try {
-            await createTag(split.id, tag);
+            await editTag(split.id, initialTag.id, tag);
         } catch {
             return new Error("Failed to create user. Please try again.");
         }
     };
 
     return (
-        <Dialog open={open} onClose={onClose}>
+        <Dialog
+            open={open}
+            onClose={onClose}
+            slotProps={{
+                paper: {
+                    sx: {
+                        ...(isMobile && {
+                            position: "fixed",
+                            top: "10%",
+                            margin: "0 16px",
+                            width: "calc(100% - 32px)",
+                            maxWidth: "none",
+                            borderRadius: 2,
+                        }),
+                    },
+                },
+            }}
+        >
             <Box sx={{ minWidth: "360px" }}>
-                <EditTag.Root
-                    initalTag={tag}
+                <TagForm.Root
+                    initalTag={initialTag}
                     onSubmit={handleSubmit}
                     onCancel={onClose}
                 >
                     <DialogTitle>
-                        <EditTag.Title />
+                        <TagForm.Title content={`Edit ${initialTag.name}`} />
                     </DialogTitle>
+
                     <DialogContent sx={{ paddingBottom: 0 }}>
                         <DialogContentText>
-                            <EditTag.Description />
+                            <TagForm.Description
+                                content={
+                                    initialTag?.isPredefined
+                                        ? "You can change the color."
+                                        : "Edit the details of the tag. You can change the name and color."
+                                }
+                            />
                         </DialogContentText>
                         <div style={{ marginTop: "16px" }} />
-                        <EditTag.FormInputs />
+                        <TagForm.FormInputs />
                     </DialogContent>
                     <DialogActions>
-                        <EditTag.CancelButton />
-                        <EditTag.SubmitButton />
+                        <TagForm.CancelButton />
+                        <TagForm.SubmitButton content={"Edit"} />
                     </DialogActions>
-                </EditTag.Root>
+                </TagForm.Root>
             </Box>
         </Dialog>
-    );
-}
-
-interface EditTagDialogButtonProps {
-    tag: Tag;
-}
-
-export function EditTagDialogButton(props: EditTagDialogButtonProps) {
-    const { tag } = props;
-
-    const [open, setOpen] = React.useState(false);
-
-    const openDialog = () => {
-        setOpen(true);
-    };
-
-    const closeDialog = () => {
-        setOpen(false);
-    };
-
-    return (
-        <>
-            <IconButton onClick={openDialog}>
-                <EditIcon />
-            </IconButton>
-            <EditTagDialog tag={tag} open={open} onClose={closeDialog} />
-        </>
     );
 }

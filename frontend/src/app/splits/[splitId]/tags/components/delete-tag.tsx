@@ -29,7 +29,7 @@ const useDeleteTagContext = () => {
 interface DeleteTagCompoundProps {
     tag: Tag;
     children?: ReactNode;
-    onSubmit: (tag: CreateTagDto) => Promise<Error | void>;
+    onSubmit: (tag: Tag) => Promise<Error | void>;
     onCancel: () => void;
 }
 

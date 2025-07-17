@@ -72,6 +72,30 @@ pub async fn create_tag(
     Ok(Json(TagResponse::from(tag)))
 }
 
+#[derive(Deserialize)]
+pub struct EditTagRequest {
+    pub name: String,
+    pub color: String,
+}
+
+pub async fn edit_tag(
+    State(pool): State<PgPool>,
+    Path((public_split_id, public_tag_id)): Path<(String, String)>,
+    Json(tag): Json<EditTagRequest>,
+) -> Result<Json<TagResponse>, StatusCode> {
+    let split_id = public_split_id.parse().unwrap();
+    let tag_id = public_tag_id.parse().unwrap();
+
+    let tag = services::edit_tag(&pool, split_id, tag_id, &tag.name, &tag.color)
+        .await
+        .map_err(|e| {
+            log::error!("Failed to edit tag, {e}");
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+
+    Ok(Json(TagResponse::from(tag)))
+}
+
 pub async fn delete_tag(
     State(pool): State<PgPool>,
     Path((split_url, tag_url)): Path<(String, String)>,

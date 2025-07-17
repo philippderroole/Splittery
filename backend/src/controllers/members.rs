@@ -4,9 +4,11 @@ use axum::{
     response::Json,
 };
 use bigdecimal::ToPrimitive;
+use serde::Serialize;
 use sqlx::PgPool;
 
 use crate::{
+    controllers::TagResponse,
     models::{MemberType, SplitMember},
     services::{self, CreateMemberError, DeleteTagError},
 };
@@ -64,18 +66,73 @@ pub async fn get_all_members(
     let mut response: Vec<MemberResponse> = Vec::new();
 
     for member in members {
-        let saldo = match services::get_member_balance(&pool, split_id, member.id).await {
-            Ok(balance) => balance.to_i64().unwrap(),
-            Err(e) => {
-                log::error!("Failed to get split balance, {e}");
-                return Err(StatusCode::INTERNAL_SERVER_ERROR);
-            }
-        };
+        let saldo = services::get_member_balance(&pool, split_id, member.id)
+            .await
+            .map_err(|e| {
+                log::error!("Failed to get member balance, {e}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            })?;
 
-        response.push(MemberResponse::from(member, public_split_id.clone(), saldo));
+        response.push(MemberResponse::from(
+            member,
+            public_split_id.clone(),
+            saldo.to_i64().unwrap(),
+        ));
     }
 
     Ok(Json(response))
+}
+
+#[derive(Serialize)]
+pub struct MemberWithTagsResponse {
+    #[serde(rename = "id")]
+    pub public_id: String,
+    pub name: String,
+    pub split_id: String,
+    pub saldo: i64,
+    pub r#type: MemberTypeResponse,
+    pub tags: Vec<TagResponse>,
+}
+
+pub async fn get_members_with_tags(
+    State(pool): State<PgPool>,
+    Path(public_split_id): Path<String>,
+) -> Result<Json<Vec<MemberWithTagsResponse>>, StatusCode> {
+    let split_id = public_split_id.parse().unwrap();
+
+    let members_with_tags = services::get_members_with_tags(&pool, split_id)
+        .await
+        .map_err(|e| {
+            log::error!("Failed to get members with tags, {e}");
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+
+    let mut members_with_tags_response = Vec::new();
+
+    for (member, tags) in members_with_tags.into_iter() {
+        let saldo = services::get_member_balance(&pool, split_id, member.id)
+            .await
+            .map_err(|e| {
+                log::error!("Failed to get member balance, {e}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            })?;
+
+        let member_response =
+            MemberResponse::from(member, public_split_id.clone(), saldo.to_i64().unwrap());
+
+        let member_response = MemberWithTagsResponse {
+            public_id: member_response.id,
+            name: member_response.name,
+            split_id: member_response.split_id,
+            saldo: member_response.saldo,
+            r#type: member_response.r#type,
+            tags: tags.into_iter().map(TagResponse::from).collect(),
+        };
+
+        members_with_tags_response.push(member_response);
+    }
+
+    Ok(Json(members_with_tags_response))
 }
 
 #[derive(serde::Deserialize)]
