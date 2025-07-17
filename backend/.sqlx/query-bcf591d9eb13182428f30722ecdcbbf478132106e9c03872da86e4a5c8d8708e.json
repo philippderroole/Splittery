@@ -1,0 +1,82 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO split_members (id, public_id, name, split_id, type)\n        VALUES ($1, $2, $3, $4, $5) \n        RETURNING id, public_id, name, split_id, type AS \"type: MemberType\", created_at, updated_at\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "public_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "split_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "type: MemberType",
+        "type_info": {
+          "Custom": {
+            "name": "member_type",
+            "kind": {
+              "Enum": [
+                "registered",
+                "guest"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 6,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        "Uuid",
+        {
+          "Custom": {
+            "name": "member_type",
+            "kind": {
+              "Enum": [
+                "registered",
+                "guest"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "bcf591d9eb13182428f30722ecdcbbf478132106e9c03872da86e4a5c8d8708e"
+}
