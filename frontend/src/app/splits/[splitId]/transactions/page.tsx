@@ -1,9 +1,9 @@
 "use client";
 
-import CreateTransactionButton from "@/app/splits/[splitId]/transactions/[transactionUrl]/components/create-transaction-button";
-import TransactionList from "@/components/transaction-list";
+import TransactionList from "@/app/splits/[splitId]/transactions/components/transaction-list";
 import { useSplit } from "@/providers/split-provider";
 import { Typography } from "@mui/material";
+import { CreateTransactionDialogButton } from "./components/create-transaction-dialog";
 
 export default function TransactionGroupListPage() {
     const split = useSplit();
@@ -20,7 +20,7 @@ export default function TransactionGroupListPage() {
                     zIndex: 1200,
                 }}
             >
-                <CreateTransactionButton split={split} />
+                <CreateTransactionDialogButton />
             </div>
         </>
     );

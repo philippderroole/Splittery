@@ -1,10 +1,8 @@
 import "server-only";
 
 export async function getSplit(splitId: string) {
-    console.debug("Fetching split data for splitId:", splitId);
     console.debug(
-        "URL:",
-        `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitId}`
+        `Fetching split from URL: ${process.env.NEXT_PUBLIC_API_URL}/splits/${splitId}`
     );
 
     const res = await fetch(
@@ -19,5 +17,9 @@ export async function getSplit(splitId: string) {
         throw new Error("Failed to fetch split data");
     }
 
-    return res.json();
+    const split = await res.json();
+
+    console.debug("Fetched split: ", split);
+
+    return split;
 }

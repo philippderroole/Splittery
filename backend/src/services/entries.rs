@@ -1,27 +1,8 @@
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::TransactionEntry;
-
-pub async fn get_all_entries(pool: &PgPool, transaction_id: Uuid) -> Result<Vec<TransactionEntry>> {
-    let query_result = sqlx::query_as!(
-        TransactionEntry,
-        "
-        SELECT id, name, amount, public_id, transaction_id, created_at, updated_at
-        FROM entries
-        WHERE transaction_id = $1
-        ",
-        transaction_id
-    )
-    .fetch_all(pool)
-    .await;
-
-    match query_result {
-        Ok(members) => Ok(members),
-        Err(e) => Err(anyhow!("Failed to get members: {}", e)),
-    }
-}
+use crate::models::{Entry, EntryDb};
 
 pub async fn create_entry(
     pool: &PgPool,
@@ -29,10 +10,10 @@ pub async fn create_entry(
     transaction_id: Uuid,
     name: String,
     amount: i64,
-) -> Result<TransactionEntry> {
+) -> Result<Entry> {
     let id = Uuid::new_v4();
-    let query_result = sqlx::query_as!(
-        TransactionEntry,
+    let entry = sqlx::query_as!(
+        EntryDb,
         "
         INSERT INTO entries (id, name, amount, public_id, transaction_id, split_id)
         VALUES ($1, $2, $3, $4, $5, $6)
@@ -46,12 +27,34 @@ pub async fn create_entry(
         split_id
     )
     .fetch_one(pool)
-    .await;
+    .await
+    .map_err(|e| anyhow!("Failed to create entry: {}", e))?;
 
-    match query_result {
-        Ok(entry) => Ok(entry),
-        Err(e) => Err(anyhow!("Failed to create entry: {}", e)),
-    }
+    Ok(Entry::from(entry, Vec::new()))
+}
+
+pub async fn get_all_entries_for_transaction(
+    pool: &PgPool,
+    transaction_id: Uuid,
+) -> Result<Vec<Entry>> {
+    sqlx::query_as!(
+        EntryDb,
+        "
+        SELECT id, public_id, name, amount, transaction_id, created_at, updated_at
+        FROM entries
+        WHERE transaction_id = $1
+        ",
+        transaction_id
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(|e| anyhow!("Failed to get entries: {}", e))
+    .map(|entries| {
+        entries
+            .into_iter()
+            .map(|entry| Entry::from(entry, Vec::new()))
+            .collect::<Vec<Entry>>()
+    })
 }
 
 pub async fn delete_entry(pool: &PgPool, item_id: Uuid) -> Result<()> {

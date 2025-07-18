@@ -3,7 +3,7 @@
 import { createMember } from "@/actions/create-split-user-service";
 import { useSplit } from "@/providers/split-provider";
 import { CreateMemberDto } from "@/utils/user";
-import PersonAddAltIcon from "@mui/icons-material/PersonAddAlt";
+import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import {
     Box,
     Dialog,
@@ -72,7 +72,7 @@ export function CreateMemberDialogButton() {
     return (
         <>
             <Fab color="primary" onClick={openDialog}>
-                <PersonAddAltIcon />
+                <GroupAddIcon />
             </Fab>
             <CreateMemberDialog open={open} onClose={closeDialog} />
         </>

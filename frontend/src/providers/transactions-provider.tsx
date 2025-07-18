@@ -1,9 +1,11 @@
 "use client";
 
 import { useSplitSocket } from "@/hooks/useSplitSocket";
-import { Currencies } from "@/utils/currencies";
-import { Money } from "@/utils/money";
-import { SerializedTransaction, Transaction } from "@/utils/transaction";
+import {
+    deserializeTransactions,
+    SerializedTransaction,
+    Transaction,
+} from "@/utils/transaction";
 import React, { useContext, useState } from "react";
 
 const TransactionContext = React.createContext<Transaction[]>(
@@ -19,21 +21,11 @@ export function TransactionsProvider({
     serializedTransactions: initialSerializedTransactions,
     children,
 }: TransactionProviderProps) {
-    const initialTransactions: Transaction[] =
-        initialSerializedTransactions.map((initialSerializedTransaction) => {
-            return {
-                ...initialSerializedTransaction,
-                date: new Date(initialSerializedTransaction.date),
-                amount: new Money(
-                    initialSerializedTransaction.amount,
-                    Currencies.EUR
-                ),
-                items: initialSerializedTransaction.items.map((item) => ({
-                    ...item,
-                    amount: new Money(item.amount, Currencies.EUR),
-                })),
-            };
-        });
+    const initialTransactions: Transaction[] = deserializeTransactions(
+        initialSerializedTransactions
+    );
+
+    console.log("Initial transactions:", initialTransactions);
 
     const [transactionState, setTransactionState] =
         useState<Transaction[]>(initialTransactions);

@@ -4,15 +4,15 @@ use anyhow::{Result, anyhow};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::{MemberType, SplitMember, Tag};
+use crate::models::{MemberType, SplitMember, Tag, TagDb};
 
 pub async fn get_all_member_tags(
     pool: &PgPool,
     split_id: Uuid,
     member_id: Uuid,
 ) -> Result<Vec<Tag>> {
-    let query_result = sqlx::query_as!(
-        Tag,
+    sqlx::query_as!(
+        TagDb,
         "
         SELECT id, public_id, name, color, split_id, is_custom, created_at, updated_at
         FROM tags
@@ -23,12 +23,9 @@ pub async fn get_all_member_tags(
         split_id
     )
     .fetch_all(pool)
-    .await;
-
-    match query_result {
-        Ok(splits) => Ok(splits),
-        Err(e) => Err(anyhow!("Failed to get tags: {}", e)),
-    }
+    .await
+    .map_err(|e| anyhow!("Failed to get tags: {}", e))
+    .map(|tags| tags.into_iter().map(Tag::from).collect())
 }
 
 pub async fn get_members_with_tags(

@@ -7,7 +7,8 @@ use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
 use crate::{
-    models::Transaction,
+    controllers::EntryResponse,
+    models::{Transaction, TransactionDb},
     services::{self, CreateTransactionError},
 };
 
@@ -17,14 +18,21 @@ pub struct TransactionResponse {
     pub public_id: String,
     pub name: String,
     pub amount: i64,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub entries: Vec<EntryResponse>,
 }
 
-impl From<Transaction> for TransactionResponse {
+impl TransactionResponse {
     fn from(transaction: Transaction) -> Self {
         Self {
-            public_id: transaction.public_id,
+            public_id: transaction.public_id.clone(),
             name: transaction.name,
             amount: transaction.amount,
+            entries: transaction
+                .entries
+                .into_iter()
+                .map(|entry| EntryResponse::from(entry, transaction.public_id.clone()))
+                .collect(),
         }
     }
 }
@@ -44,7 +52,7 @@ pub async fn get_all_transactions(
     let transactions = transactions
         .into_iter()
         .map(TransactionResponse::from)
-        .collect();
+        .collect::<Vec<TransactionResponse>>();
 
     Ok(Json(transactions))
 }
@@ -84,7 +92,7 @@ pub async fn create_transaction(
 pub async fn get_transaction(
     State(pool): State<PgPool>,
     Path((split_url, transaction_url)): Path<(String, String)>,
-) -> Result<Json<Transaction>, StatusCode> {
+) -> Result<Json<TransactionDb>, StatusCode> {
     unimplemented!();
 }
 
@@ -92,7 +100,7 @@ pub async fn update_transaction(
     State(pool): State<PgPool>,
     Path((split_url, transaction_url)): Path<(String, String)>,
     Json(payload): Json<CreateTransactionRequest>,
-) -> Result<Json<Transaction>, StatusCode> {
+) -> Result<Json<TransactionDb>, StatusCode> {
     unimplemented!();
 }
 

@@ -1,23 +1,22 @@
 "use client";
 
-import { Money } from "@/utils/money";
+import { useSplit } from "@/providers/split-provider";
+import { Transaction } from "@/utils/transaction";
 import { Avatar, Box, Typography } from "@mui/material";
 import Link from "next/link";
 
 interface TransactionProps {
-    name: string;
-    time: string;
-    amount: Money;
-    splitId: string;
-    url: string;
+    transaction: Transaction;
 }
 
-export default function Transaction(props: TransactionProps) {
-    const { name, time, amount, splitId, url } = props;
+export default function TransactionGroup(props: TransactionProps) {
+    const { transaction } = props;
+
+    const split = useSplit();
 
     return (
         <Link
-            href={`/splits/${splitId}/transactions/${url}`}
+            href={`/splits/${split.id}/transactions/${transaction.id}`}
             style={{
                 textDecoration: "none",
                 color: "inherit",
@@ -50,11 +49,13 @@ export default function Transaction(props: TransactionProps) {
                         flexGrow: 1,
                     }}
                 >
-                    <Typography variant="body1">{name}</Typography>
-                    <Typography variant="caption">{time}</Typography>
+                    <Typography variant="body1">{transaction.name}</Typography>
+                    <Typography variant="caption">{"time"}</Typography>
                 </Box>
                 <Box>
-                    <Typography variant="body1">{amount.toString()}</Typography>
+                    <Typography variant="body1">
+                        {transaction.amount.toString()}
+                    </Typography>
                 </Box>
             </Box>
         </Link>

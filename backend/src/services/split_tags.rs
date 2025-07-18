@@ -4,11 +4,11 @@ use anyhow::{Result, anyhow};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::Tag;
+use crate::models::{Tag, TagDb};
 
 pub async fn get_tags(pool: &PgPool, split_id: Uuid) -> Result<Vec<Tag>> {
-    let query_result = sqlx::query_as!(
-        Tag,
+    sqlx::query_as!(
+        TagDb,
         "
         SELECT id, public_id, name, color, split_id, is_custom, created_at, updated_at
         FROM tags
@@ -17,12 +17,9 @@ pub async fn get_tags(pool: &PgPool, split_id: Uuid) -> Result<Vec<Tag>> {
         split_id
     )
     .fetch_all(pool)
-    .await;
-
-    match query_result {
-        Ok(splits) => Ok(splits),
-        Err(e) => Err(anyhow!("Failed to get tags: {}", e)),
-    }
+    .await
+    .map_err(|e| anyhow!("Failed to get tags: {}", e))
+    .map(|tags| tags.into_iter().map(Tag::from).collect::<Vec<Tag>>())
 }
 
 pub async fn create_tag(
@@ -33,8 +30,8 @@ pub async fn create_tag(
     is_custom: bool,
 ) -> Result<Tag> {
     let tag_id = uuid::Uuid::new_v4();
-    let query_result = sqlx::query_as!(
-        Tag,
+    sqlx::query_as!(
+        TagDb,
         "
         INSERT INTO tags (id, public_id, name, color, split_id, is_custom)
         VALUES ($1, $2, $3, $4, $5, $6)
@@ -48,12 +45,9 @@ pub async fn create_tag(
         is_custom,
     )
     .fetch_one(pool)
-    .await;
-
-    match query_result {
-        Ok(tag) => Ok(tag),
-        Err(e) => Err(anyhow!("Failed to create tag: {}", e)),
-    }
+    .await
+    .map_err(|e| anyhow!("Failed to create tag: {}", e))
+    .map(Tag::from)
 }
 
 #[derive(Debug)]
@@ -79,7 +73,7 @@ impl fmt::Display for GetTagError {
 
 async fn get_tag(pool: &PgPool, split_id: Uuid, tag_id: Uuid) -> Result<Tag, GetTagError> {
     sqlx::query_as!(
-        Tag,
+        TagDb,
         "
         SELECT id, name, color, public_id, split_id, is_custom, created_at, updated_at FROM tags 
         WHERE split_id = $1 AND id = $2
@@ -93,6 +87,7 @@ async fn get_tag(pool: &PgPool, split_id: Uuid, tag_id: Uuid) -> Result<Tag, Get
         sqlx::Error::RowNotFound => GetTagError::NotFound,
         _ => GetTagError::UnexpectedError(anyhow!(e)),
     })
+    .map(Tag::from)
 }
 
 pub async fn get_all_tag(pool: &PgPool, split_id: Uuid) -> Result<Tag, GetTagError> {
@@ -110,7 +105,7 @@ pub async fn get_tag_by_name(
     tag_name: &String,
 ) -> Result<Tag, GetTagError> {
     sqlx::query_as!(
-        Tag,
+        TagDb,
         "
         SELECT id, name, color, public_id, split_id, is_custom, created_at, updated_at FROM tags 
         WHERE split_id = $1 AND name = $2
@@ -124,6 +119,7 @@ pub async fn get_tag_by_name(
         sqlx::Error::RowNotFound => GetTagError::NotFound,
         _ => GetTagError::UnexpectedError(anyhow!(e)),
     })
+    .map(Tag::from)
 }
 
 pub async fn edit_tag(
@@ -133,8 +129,8 @@ pub async fn edit_tag(
     name: &String,
     color: &String,
 ) -> Result<Tag> {
-    let tag = sqlx::query_as!(
-        Tag,
+    sqlx::query_as!(
+        TagDb,
         "
         UPDATE tags
         SET name = $1, color = $2, updated_at = NOW()
@@ -148,9 +144,8 @@ pub async fn edit_tag(
     )
     .fetch_one(pool)
     .await
-    .map_err(|e| anyhow!("Failed to edit tag: {}", e))?;
-
-    Ok(tag)
+    .map_err(|e| anyhow!("Failed to edit tag: {}", e))
+    .map(Tag::from)
 }
 
 #[derive(Debug)]
