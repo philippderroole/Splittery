@@ -1,9 +1,9 @@
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use serde::Serialize;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::Tag;
+use crate::models::TagDb;
 
 #[derive(Serialize)]
 pub struct EntryTagResponse {
@@ -17,7 +17,7 @@ pub struct EntryTagResponse {
 }
 
 impl EntryTagResponse {
-    fn from(tag: Tag, public_split_id: String) -> Self {
+    fn from(tag: TagDb, public_split_id: String) -> Self {
         Self {
             public_id: tag.public_id,
             name: tag.name,
@@ -35,7 +35,7 @@ pub async fn get_all_entry_tags(
     entry_id: Uuid,
 ) -> Result<Vec<EntryTagResponse>> {
     let tags = sqlx::query_as!(
-        Tag,
+        TagDb,
         "
         SELECT tags.id, tags.public_id, tags.name, color, tags.split_id, is_custom, tags.created_at, tags.updated_at
         FROM tags

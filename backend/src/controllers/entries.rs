@@ -6,7 +6,7 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
-use crate::{models::TransactionEntry, services};
+use crate::{models::Entry, services};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct EntryResponse {
@@ -16,31 +16,34 @@ pub struct EntryResponse {
     #[serde(rename = "transactionId")]
     pub public_transaction_id: String,
     pub amount: i64,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(rename = "tagIds")]
+    pub public_tag_ids: Vec<String>,
 }
 
 impl EntryResponse {
-    fn from(item: TransactionEntry, public_transaction_id: String) -> Self {
+    pub fn from(entry: Entry, public_transaction_id: String) -> Self {
         Self {
-            public_id: item.public_id,
-            name: item.name,
+            public_id: entry.public_id,
+            name: entry.name,
             public_transaction_id,
-            amount: item.amount,
+            amount: entry.amount,
+            public_tag_ids: entry.tags.into_iter().map(|tag| tag.public_id).collect(),
         }
     }
 }
 
-pub async fn get_all_transaction_entries(
+pub async fn get_all_entries_for_transaction(
     State(pool): State<PgPool>,
     Path((_split_url, public_transaction_id)): Path<(String, String)>,
 ) -> Result<Json<Vec<EntryResponse>>, StatusCode> {
     let entries =
-        match services::get_all_entries(&pool, public_transaction_id.parse().unwrap()).await {
-            Ok(members) => members,
-            Err(e) => {
-                log::error!("Failed to get members, {e}");
-                return Err(StatusCode::INTERNAL_SERVER_ERROR);
-            }
-        };
+        services::get_all_entries_for_transaction(&pool, public_transaction_id.parse().unwrap())
+            .await
+            .map_err(|e| {
+                log::error!("Failed to get entries for transaction: {e}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            })?;
 
     let response: Vec<EntryResponse> = entries
         .into_iter()
@@ -53,9 +56,10 @@ pub async fn get_all_transaction_entries(
 pub struct CreateEntryRequest {
     pub name: String,
     pub amount: i64,
+    #[serde(rename = "tagIds")]
+    pub public_tag_ids: Vec<String>,
 }
 
-#[axum::debug_handler]
 pub async fn create_transaction_entry(
     State(pool): State<PgPool>,
     Path((split_url, public_transaction_id)): Path<(String, String)>,
@@ -63,7 +67,7 @@ pub async fn create_transaction_entry(
 ) -> Result<Json<EntryResponse>, StatusCode> {
     let split_id = split_url.parse().unwrap();
     let transaction_id = public_transaction_id.parse().unwrap();
-    let entry = match services::create_entry(
+    let entry = services::create_entry(
         &pool,
         split_id,
         transaction_id,
@@ -71,13 +75,21 @@ pub async fn create_transaction_entry(
         payload.amount,
     )
     .await
-    {
-        Ok(entry) => entry,
-        Err(e) => {
-            log::error!("Failed to create entry, {e}");
-            return Err(StatusCode::INTERNAL_SERVER_ERROR);
-        }
-    };
+    .map_err(|e| {
+        log::error!("Failed to create entry: {e}");
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
+
+    for tag_id in payload.public_tag_ids {
+        let tag_id = tag_id.parse().unwrap();
+
+        services::add_tag_to_entry(&pool, split_id, transaction_id, entry.id, tag_id)
+            .await
+            .map_err(|e| {
+                log::error!("Failed to add tag to entry: {e}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            })?;
+    }
 
     Ok(Json(EntryResponse::from(entry, public_transaction_id)))
 }

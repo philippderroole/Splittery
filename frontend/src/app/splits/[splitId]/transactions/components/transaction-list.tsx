@@ -1,6 +1,8 @@
+"use client";
+
 import { useSplit } from "@/providers/split-provider";
 import { useTransactions } from "@/providers/transactions-provider";
-import { getFormattedDay, getFormattedTime } from "@/utils/date-formatter";
+import { getFormattedDay } from "@/utils/date-formatter";
 import { Transaction } from "@/utils/transaction";
 import { Typography } from "@mui/material";
 import dayjs from "dayjs";
@@ -31,11 +33,7 @@ export default function TransactionList() {
                         {transactions.map((transaction) => (
                             <TransactionGroup
                                 key={transaction.id}
-                                name={transaction.name}
-                                time={getFormattedTime(transaction.date)}
-                                amount={transaction.amount}
-                                splitId={split.id}
-                                url={transaction.url}
+                                transaction={transaction}
                             />
                         ))}
                     </div>

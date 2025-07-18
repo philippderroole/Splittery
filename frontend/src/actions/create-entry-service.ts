@@ -1,18 +1,15 @@
 "use server";
 
-import {
-    CreateTransactionItem,
-    SerializedTransactionItem,
-} from "@/utils/transaction-item";
+import { CreateEntryDto, SerializedEntry } from "@/utils/entry";
 import { revalidatePath } from "next/cache";
 
-export async function createTransactionItem(
-    transactionItem: CreateTransactionItem,
+export async function createEntry(
     splitId: string,
-    transactionId: string
-): Promise<SerializedTransactionItem> {
+    transactionId: string,
+    transactionItem: CreateEntryDto
+): Promise<SerializedEntry> {
     const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitId}/transactions/${transactionId}/items`,
+        `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitId}/transactions/${transactionId}/entries`,
         {
             method: "POST",
             headers: {

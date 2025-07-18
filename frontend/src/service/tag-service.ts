@@ -3,10 +3,8 @@ import { MemberWithTags } from "@/utils/user";
 import "server-only";
 
 export async function getTags(splitId: string): Promise<Tag[]> {
-    console.debug("Fetching tags data for splitId:", splitId);
     console.debug(
-        "URL:",
-        `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitId}/tags`
+        `Fetching tags from URL: ${process.env.NEXT_PUBLIC_API_URL}/splits/${splitId}/tags`
     );
 
     const res = await fetch(
@@ -21,7 +19,11 @@ export async function getTags(splitId: string): Promise<Tag[]> {
         throw new Error("Failed to fetch split data");
     }
 
-    return res.json();
+    const tags = await res.json();
+
+    console.debug("Fetched tags: ", tags);
+
+    return tags;
 }
 
 export async function getMembersWithTags(

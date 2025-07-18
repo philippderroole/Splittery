@@ -1,16 +1,13 @@
 "use server";
 
-import {
-    SerializedTransactionItem,
-    UpdateTransactionItem,
-} from "@/utils/transaction-item";
+import { SerializedEntry, UpdateEntityDto } from "@/utils/entry";
 import { revalidatePath } from "next/cache";
 
 export async function updateTransactionItem(
-    transactionItem: UpdateTransactionItem,
+    transactionItem: UpdateEntityDto,
     splitId: string,
     transactionId: string
-): Promise<SerializedTransactionItem> {
+): Promise<SerializedEntry> {
     const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitId}/transactions/${transactionId}/items/${transactionItem.url}`,
         {

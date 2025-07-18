@@ -1,12 +1,19 @@
 "use server";
 
-import { CreateTransaction, SerializedTransaction } from "@/utils/transaction";
+import { Tag } from "@/utils/tag";
+import {
+    CreateTransactionDto,
+    SerializedTransaction,
+} from "@/utils/transaction";
 import { revalidatePath } from "next/cache";
 
 export async function createTransaction(
-    transaction: CreateTransaction,
-    splitId: string
+    splitId: string,
+    transaction: CreateTransactionDto,
+    tags: Tag[]
 ): Promise<SerializedTransaction> {
+    console.log("Creating transaction:", transaction, splitId);
+
     const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/splits/${splitId}/transactions`,
         {
