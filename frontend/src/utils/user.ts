@@ -14,7 +14,7 @@ export interface SplitUser {
 }
 
 export interface CreateMemberDto {
-    username: string;
+    name: string;
 }
 
 export interface CreateUserDto {

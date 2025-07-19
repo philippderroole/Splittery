@@ -6,10 +6,10 @@ import { Alert, Button, FormControl, TextField } from "@mui/material";
 import { createContext, ReactNode, useContext, useState } from "react";
 
 type MemberFormContextType = {
-    user: CreateMemberDto;
+    member: CreateMemberDto;
     onSaveClick: () => void;
     onCancelClick: () => void;
-    setUsername: (name: string) => void;
+    setMemberName: (name: string) => void;
     isPending: boolean;
     error: string | null;
     validationError: string | null;
@@ -17,51 +17,50 @@ type MemberFormContextType = {
 
 const MemberFormContext = createContext<MemberFormContextType | null>(null);
 
-const useCreateUserContext = () => {
-    const currentUserContext = useContext(MemberFormContext);
+const useMemberFormContext = () => {
+    const currentMemberContext = useContext(MemberFormContext);
 
-    if (!currentUserContext) {
+    if (!currentMemberContext) {
         throw new Error(
-            "useCreateUserContext must be used within a CreateUserContext.Provider"
+            "useMemberFormContext must be used within a MemberFormContext.Provider"
         );
     }
 
-    return currentUserContext;
+    return currentMemberContext;
 };
 
 interface MemberFormCompoundProps {
+    member: CreateMemberDto;
+    setMember: (member: CreateMemberDto) => void;
     children?: ReactNode;
-    onSubmit: (user: CreateMemberDto) => Promise<Error | void>;
+    onSubmit: (member: CreateMemberDto) => Promise<Error | void>;
     onCancel: () => void;
 }
 
 function Root(props: MemberFormCompoundProps) {
-    const { children, onSubmit, onCancel } = props;
+    const { member, setMember, children, onSubmit, onCancel } = props;
 
     const tags = useTags();
 
     const [isPending, setPending] = useState(false);
-    const [user, setUser] = useState<CreateMemberDto>({ username: "" });
     const [error, setError] = useState<string | null>(null);
     const [validationError, setValidationError] = useState<string | null>(null);
 
     const onSaveClick = async () => {
         if (isPending) return;
 
-        const newUser = { ...user, name: user.username.trim() };
+        const newMember = { ...member, name: member.name.trim() };
 
-        const validationError = validateUserName(newUser.name);
+        const validationError = validateMemberName(newMember.name);
         setValidationError(validationError);
         // the validation error is delayed by one render cycle so we use the local variable
         if (validationError) {
             return;
         }
 
-        console.log("Submitting user:", newUser);
-
         setPending(true);
         setError(null);
-        const result = await onSubmit(newUser);
+        const result = await onSubmit(newMember);
         setPending(false);
 
         if (result instanceof Error) {
@@ -70,17 +69,18 @@ function Root(props: MemberFormCompoundProps) {
     };
 
     const onCancelClick = () => {
-        setUser({ username: "" });
+        setMember({ name: "" });
         setError(null);
+        setValidationError(null);
         onCancel();
     };
 
-    const setUsername = (username: string) => {
-        setUser((prev) => ({ ...prev, username }));
+    const setMemberName = (name: string) => {
+        setMember((prev: CreateMemberDto) => ({ ...prev, name }));
         setError(null);
     };
 
-    const validateUserName = (name: string) => {
+    const validateMemberName = (name: string) => {
         if (!name) {
             return "Username name cannot be empty.";
         }
@@ -100,8 +100,8 @@ function Root(props: MemberFormCompoundProps) {
     return (
         <MemberFormContext.Provider
             value={{
-                user,
-                setUsername,
+                member,
+                setMemberName,
                 onSaveClick,
                 onCancelClick,
                 isPending,
@@ -115,8 +115,8 @@ function Root(props: MemberFormCompoundProps) {
 }
 
 function FormInputs() {
-    const { user, setUsername, error, isPending, validationError } =
-        useCreateUserContext();
+    const { member, setMemberName, error, isPending, validationError } =
+        useMemberFormContext();
 
     const existsValidationError = validationError !== null;
 
@@ -130,8 +130,8 @@ function FormInputs() {
                     name="user-name"
                     label="Username"
                     type="text"
-                    value={user.username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    value={member.name}
+                    onChange={(e) => setMemberName(e.target.value)}
                     aria-label="Username"
                     fullWidth
                     disabled={isPending}
@@ -149,7 +149,7 @@ function FormInputs() {
 }
 
 function SubmitButton() {
-    const { onSaveClick, isPending } = useCreateUserContext();
+    const { onSaveClick, isPending } = useMemberFormContext();
 
     return (
         <Button
@@ -164,7 +164,7 @@ function SubmitButton() {
 }
 
 function CancelButton() {
-    const { onCancelClick, isPending } = useCreateUserContext();
+    const { onCancelClick, isPending } = useMemberFormContext();
 
     return (
         <Button
@@ -179,14 +179,14 @@ function CancelButton() {
 }
 
 function Title() {
-    return "Create a new user";
+    return "Create a new member";
 }
 
 function Description() {
-    return "Please enter a username for the new user.";
+    return "Please enter a username for the new member.";
 }
 
-const CreateUser = {
+const MemberForm = {
     Root,
     Title,
     Description,
@@ -195,4 +195,4 @@ const CreateUser = {
     SubmitButton,
 };
 
-export default CreateUser;
+export default MemberForm;

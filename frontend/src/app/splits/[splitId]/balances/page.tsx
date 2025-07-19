@@ -15,7 +15,7 @@ import {
     ListItemText,
     Typography,
 } from "@mui/material";
-import { CreateMemberDialogButton } from "./components/create-split-user-dialog";
+import { CreateMemberDialogButton } from "./components/create-member-dialog";
 
 export default function SplitPage() {
     const splitUsers = useSplitUsers();

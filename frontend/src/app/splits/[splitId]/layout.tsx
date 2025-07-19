@@ -1,6 +1,6 @@
 import "server-only";
 
-import NavTabs from "@/app/components/nav-tabs";
+import NavTabs from "@/app/splits/[splitId]/components/nav-tabs";
 import SplitHeader from "@/app/splits/[splitId]/components/split-header";
 import { SplitUserProvider } from "@/providers/split-user-provider";
 import { TagsProvider } from "@/providers/tag-provider";

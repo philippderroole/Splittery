@@ -18,9 +18,14 @@ export async function createMember(
         }
     );
 
-    console.log(res);
-
     if (!res.ok) {
+        console.error(
+            "Failed to create user:",
+            res.status,
+            res.statusText,
+            await res.text()
+        );
+
         throw new Error(
             `Failed to create user: ${res.status} ${res.statusText}`
         );

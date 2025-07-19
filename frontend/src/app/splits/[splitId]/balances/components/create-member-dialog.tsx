@@ -1,6 +1,6 @@
 "use client";
 
-import { createMember } from "@/actions/create-split-user-service";
+import { createMember } from "@/actions/create-member-service";
 import { useSplit } from "@/providers/split-provider";
 import { CreateMemberDto } from "@/utils/user";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
@@ -13,8 +13,8 @@ import {
     DialogTitle,
     Fab,
 } from "@mui/material";
-import React from "react";
-import CreateUser from "./member-form";
+import React, { useState } from "react";
+import MemberForm from "./member-form";
 
 interface CreateUserDialogProps {
     open: boolean;
@@ -25,6 +25,8 @@ export function CreateMemberDialog(props: CreateUserDialogProps) {
     const { open, onClose } = props;
 
     const split = useSplit();
+
+    const [member, setMember] = useState<CreateMemberDto>({ name: "" });
 
     const handleSubmit = async (user: CreateMemberDto) => {
         try {
@@ -37,22 +39,27 @@ export function CreateMemberDialog(props: CreateUserDialogProps) {
     return (
         <Dialog open={open} onClose={onClose}>
             <Box sx={{ minWidth: "360px" }}>
-                <CreateUser.Root onSubmit={handleSubmit} onCancel={onClose}>
+                <MemberForm.Root
+                    member={member}
+                    setMember={setMember}
+                    onSubmit={handleSubmit}
+                    onCancel={onClose}
+                >
                     <DialogTitle>
-                        <CreateUser.Title />
+                        <MemberForm.Title />
                     </DialogTitle>
-                    <DialogContent sx={{ paddingBottom: 0 }}>
+                    <DialogContent>
                         <DialogContentText>
-                            <CreateUser.Description />
+                            <MemberForm.Description />
                         </DialogContentText>
                         <div style={{ marginTop: "16px" }} />
-                        <CreateUser.FormInputs />
+                        <MemberForm.FormInputs />
                     </DialogContent>
                     <DialogActions>
-                        <CreateUser.CancelButton />
-                        <CreateUser.SubmitButton />
+                        <MemberForm.CancelButton />
+                        <MemberForm.SubmitButton />
                     </DialogActions>
-                </CreateUser.Root>
+                </MemberForm.Root>
             </Box>
         </Dialog>
     );

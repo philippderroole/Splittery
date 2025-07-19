@@ -1,7 +1,7 @@
 import "server-only";
 
-import { CreateSplitDialogButton } from "@/app/components/create-split-dialog";
 import { Typography } from "@mui/material";
+import { CreateSplitDialogButton } from "./components/create-split-dialog-button";
 
 export default async function HomePage() {
     return (

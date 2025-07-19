@@ -39,7 +39,8 @@ CREATE TABLE tags (
     split_id UUID NOT NULL REFERENCES splits(id) ON DELETE CASCADE,
     is_custom BOOLEAN NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+    updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+    CONSTRAINT unique_tag_name UNIQUE (name, split_id)
 );
 
 CREATE TABLE transactions (

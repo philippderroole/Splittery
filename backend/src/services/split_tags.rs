@@ -190,7 +190,7 @@ pub async fn delete_tag(
 
     let query_result = sqlx::query!(
         "
-        DELETE FROM tags 
+        DELETE FROM tags
         WHERE split_id = $1 AND id = $2
         ",
         split_id,

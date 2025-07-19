@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        DELETE FROM tags \n        WHERE split_id = $1 AND id = $2\n        ",
+  "query": "\n        DELETE FROM tags\n        WHERE split_id = $1 AND id = $2\n        ",
   "describe": {
     "columns": [],
     "parameters": {
@@ -11,5 +11,5 @@
     },
     "nullable": []
   },
-  "hash": "a2586221ba366431f82b63e701e8ba9155b45bd4296996ed94d0dafcb4424c39"
+  "hash": "ec2b4cd2063cbbd86f7cd48c2ac72370c517571dc97efcf07f1af35def68baf2"
 }
