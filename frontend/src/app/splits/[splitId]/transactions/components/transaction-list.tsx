@@ -1,6 +1,5 @@
 "use client";
 
-import { useSplit } from "@/providers/split-provider";
 import { useTransactions } from "@/providers/transactions-provider";
 import { getFormattedDay } from "@/utils/date-formatter";
 import { Transaction } from "@/utils/transaction";
@@ -9,7 +8,6 @@ import dayjs from "dayjs";
 import { default as TransactionGroup } from "./transaction";
 
 export default function TransactionList() {
-    const split = useSplit();
     const transactions = useTransactions();
 
     const transactionsPerDay = transactions

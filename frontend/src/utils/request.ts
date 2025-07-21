@@ -1,5 +1,6 @@
 import { revalidatePath } from "next/cache";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function GET(url: string, init?: RequestInit): Promise<any> {
     console.debug("Getting data from:", url);
 
@@ -27,6 +28,7 @@ export async function GET(url: string, init?: RequestInit): Promise<any> {
     return json;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function POST(url: string, init?: RequestInit): Promise<any> {
     console.debug("Posting data to:", url);
 
@@ -59,6 +61,7 @@ export async function POST(url: string, init?: RequestInit): Promise<any> {
     return json;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function PUT(url: string, init?: RequestInit): Promise<any> {
     console.debug("Putting data to:", url);
 
@@ -91,6 +94,7 @@ export async function PUT(url: string, init?: RequestInit): Promise<any> {
     return json;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function DELETE(url: string, init?: RequestInit): Promise<void> {
     console.debug("Deleting data from:", url);
 

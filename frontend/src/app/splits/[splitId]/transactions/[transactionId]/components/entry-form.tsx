@@ -176,14 +176,6 @@ function Root(props: EntryFormCompoundProps) {
         return null;
     };
 
-    const validatePayee = (payee: string | null) => {
-        if (!payee || payee === undefined) {
-            return "Payee is required.";
-        }
-
-        return null;
-    };
-
     const validateEntry = (transaction: CreateEntryDto) => {
         const nameError = validateTransactionName(transaction.name);
         const amountError = validateTransactionAmount(transaction.amount);
@@ -332,10 +324,10 @@ function ChipList() {
                             },
                         }}
                         onClick={() => {
-                            selected ? removeTag(tag) : addTag(tag);
+                            selected ? removeTag(tag) : addTag(tag); // eslint-disable-line @typescript-eslint/no-unused-expressions
                         }}
                         onDelete={() => {
-                            selected ? removeTag(tag) : addTag(tag);
+                            selected ? removeTag(tag) : addTag(tag); // eslint-disable-line @typescript-eslint/no-unused-expressions
                         }}
                     />
                 );

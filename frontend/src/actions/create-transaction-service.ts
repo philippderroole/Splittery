@@ -1,7 +1,6 @@
 "use server";
 
 import { POST } from "@/utils/request";
-import { Tag } from "@/utils/tag";
 import {
     CreateTransactionDto,
     SerializedTransaction,
@@ -9,8 +8,7 @@ import {
 
 export async function createTransaction(
     splitId: string,
-    transaction: CreateTransactionDto,
-    tags: Tag[]
+    transaction: CreateTransactionDto
 ): Promise<SerializedTransaction> {
     return await POST(
         `${process.env.INTERNAL_API_URL}/splits/${splitId}/transactions`,

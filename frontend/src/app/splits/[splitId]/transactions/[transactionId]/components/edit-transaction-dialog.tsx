@@ -2,7 +2,6 @@
 
 import { createTransaction } from "@/actions/create-transaction-service";
 import { useSplit } from "@/providers/split-provider";
-import { Tag } from "@/utils/tag";
 import { CreateTransactionDto, Transaction } from "@/utils/transaction";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import {
@@ -33,18 +32,11 @@ export function EditTransactionDialog(props: EditTransactionDialogProps) {
 
     const split = useSplit();
 
-    const handleSubmit = async (
-        transaction: CreateTransactionDto,
-        selectedTags: Tag[]
-    ) => {
+    const handleSubmit = async (transaction: CreateTransactionDto) => {
         console.debug("Submitting transaction:", transaction);
 
         try {
-            const newTransaction = await createTransaction(
-                split.id,
-                transaction,
-                selectedTags
-            );
+            await createTransaction(split.id, transaction);
         } catch (e) {
             console.error("Error creating transaction:", e);
             return new Error("Failed to create transaction. Please try again.");

@@ -4,7 +4,6 @@ import { useSplitUsers } from "@/providers/split-user-provider";
 import { useTags } from "@/providers/tag-provider";
 import { Tag } from "@/utils/tag";
 import { CreateTransactionDto, Transaction } from "@/utils/transaction";
-import { SplitUser } from "@/utils/user";
 import CheckIcon from "@mui/icons-material/Check";
 import {
     Alert,
@@ -82,7 +81,6 @@ function Root(props: TransactionFormCompoundProps) {
                   tags: [],
               }
     );
-    const [payee, setPayeeInternal] = useState<SplitUser>({} as SplitUser);
     const [selectedTags, setSelectedTags] = useState<Tag[]>(tags);
     const [error, setError] = useState<string | null>(null);
     const [validationErrors, setValidationErrors] = useState<
@@ -384,10 +382,10 @@ function ChipList() {
                             },
                         }}
                         onClick={() => {
-                            selected ? removeTag(tag) : addTag(tag);
+                            selected ? removeTag(tag) : addTag(tag); // eslint-disable-line @typescript-eslint/no-unused-expressions
                         }}
                         onDelete={() => {
-                            selected ? removeTag(tag) : addTag(tag);
+                            selected ? removeTag(tag) : addTag(tag); // eslint-disable-line @typescript-eslint/no-unused-expressions
                         }}
                     />
                 );
