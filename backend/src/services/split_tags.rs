@@ -4,13 +4,13 @@ use anyhow::{Result, anyhow};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::{Tag, TagDb};
+use crate::models::{Tag, TagDb, TagType, tag};
 
 pub async fn get_tags(pool: &PgPool, split_id: Uuid) -> Result<Vec<Tag>> {
     sqlx::query_as!(
         TagDb,
         "
-        SELECT id, public_id, name, color, split_id, is_custom, created_at, updated_at
+        SELECT id, public_id, name, color, split_id, type AS \"type: TagType\", created_at, updated_at
         FROM tags
         WHERE split_id = $1
         ",
@@ -27,22 +27,22 @@ pub async fn create_tag(
     split_id: Uuid,
     name: &String,
     color: &String,
-    is_custom: bool,
+    tag_type: TagType,
 ) -> Result<Tag> {
     let tag_id = uuid::Uuid::new_v4();
     sqlx::query_as!(
         TagDb,
         "
-        INSERT INTO tags (id, public_id, name, color, split_id, is_custom)
+        INSERT INTO tags (id, public_id, name, color, split_id, type)
         VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING id, public_id, name, color, split_id, is_custom, created_at, updated_at
+        RETURNING id, public_id, name, color, split_id, type AS \"type: TagType\", created_at, updated_at
         ",
         tag_id,
         tag_id.to_string(),
         name,
         color,
         split_id,
-        is_custom,
+        tag_type as TagType,
     )
     .fetch_one(pool)
     .await
@@ -75,7 +75,7 @@ async fn get_tag(pool: &PgPool, split_id: Uuid, tag_id: Uuid) -> Result<Tag, Get
     sqlx::query_as!(
         TagDb,
         "
-        SELECT id, name, color, public_id, split_id, is_custom, created_at, updated_at FROM tags 
+        SELECT id, name, color, public_id, split_id, type AS \"type: TagType\", created_at, updated_at FROM tags 
         WHERE split_id = $1 AND id = $2
         ",
         split_id,
@@ -107,7 +107,7 @@ pub async fn get_tag_by_name(
     sqlx::query_as!(
         TagDb,
         "
-        SELECT id, name, color, public_id, split_id, is_custom, created_at, updated_at FROM tags 
+        SELECT id, name, color, public_id, split_id, type AS \"type: TagType\", created_at, updated_at FROM tags 
         WHERE split_id = $1 AND name = $2
         ",
         split_id,
@@ -135,7 +135,7 @@ pub async fn edit_tag(
         UPDATE tags
         SET name = $1, color = $2, updated_at = NOW()
         WHERE split_id = $3 AND id = $4
-        RETURNING id, public_id, name, color, split_id, is_custom, created_at, updated_at
+        RETURNING id, public_id, name, color, split_id, type AS \"type: TagType\", created_at, updated_at
         ",
         name,
         color,
@@ -184,7 +184,7 @@ pub async fn delete_tag(
         GetTagError::UnexpectedError(e) => DeleteTagError::UnexpectedError(e),
     })?;
 
-    if !delete_non_custom && !tag.is_custom {
+    if !delete_non_custom && tag.r#type != TagType::CustomTag {
         return Err(DeleteTagError::NonCustomTagDeletionNotAllowed);
     }
 
@@ -215,7 +215,7 @@ pub async fn delete_tag_by_name(
     let tag = sqlx::query_as!(
         Tag,
         "
-        SELECT id, name, color, public_id, split_id, is_custom, created_at, updated_at FROM tags 
+        SELECT id, name, color, public_id, split_id, type AS \"type: TagType\", created_at, updated_at FROM tags 
         WHERE split_id = $1 AND name = $2
         ",
         split_id,

@@ -33,7 +33,7 @@ export interface CreateTransactionDto {
     name: string;
     amount: number | null;
     memberId: string | null;
-    tags: Tag[];
+    tagIds: string[];
 }
 
 export interface UpdateTransaction {

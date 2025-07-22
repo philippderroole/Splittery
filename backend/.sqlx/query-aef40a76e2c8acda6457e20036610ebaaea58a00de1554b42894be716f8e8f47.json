@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        DELETE FROM member_tags \n        WHERE member_id = $1 AND tag_id IN (\n            SELECT id FROM tags WHERE type = 'customtag'\n        )\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "aef40a76e2c8acda6457e20036610ebaaea58a00de1554b42894be716f8e8f47"
+}

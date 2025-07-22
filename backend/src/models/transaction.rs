@@ -2,6 +2,8 @@ use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+use crate::models::Tag;
+
 #[derive(Debug, Clone, sqlx::FromRow, Serialize, Deserialize)]
 pub struct EntryDb {
     pub id: Uuid,
@@ -79,45 +81,6 @@ impl Transaction {
             updated_at: db_transaction.updated_at,
             entries,
             tags,
-        }
-    }
-}
-
-#[derive(Debug, Clone, sqlx::FromRow, Serialize, Deserialize)]
-pub struct TagDb {
-    pub id: Uuid,
-    pub public_id: String,
-    pub name: String,
-    pub color: String,
-    pub split_id: Uuid,
-    pub is_custom: bool,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Tag {
-    pub id: Uuid,
-    pub public_id: String,
-    pub name: String,
-    pub color: String,
-    pub split_id: Uuid,
-    pub is_custom: bool,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
-}
-
-impl Tag {
-    pub fn from(db_tag: TagDb) -> Self {
-        Self {
-            id: db_tag.id,
-            public_id: db_tag.public_id,
-            name: db_tag.name,
-            color: db_tag.color,
-            split_id: db_tag.split_id,
-            is_custom: db_tag.is_custom,
-            created_at: db_tag.created_at,
-            updated_at: db_tag.updated_at,
         }
     }
 }

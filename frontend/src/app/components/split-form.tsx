@@ -124,7 +124,7 @@ interface SubmitButtonProps {
     content: string;
 }
 
-function SubmitButton(props: SubmitButtonProps) {
+function SubmitButton({ content }: SubmitButtonProps) {
     const { onSaveClick, isPending } = useCreateSplitContext();
 
     return (
@@ -134,12 +134,16 @@ function SubmitButton(props: SubmitButtonProps) {
             onClick={onSaveClick}
             loading={isPending}
         >
-            {props.content}
+            {content}
         </Button>
     );
 }
 
-function CancelButton() {
+interface CancelButtonProps {
+    content: string;
+}
+
+function CancelButton({ content }: CancelButtonProps) {
     const { onCancelClick, isPending } = useCreateSplitContext();
 
     return (
@@ -149,7 +153,7 @@ function CancelButton() {
             onClick={onCancelClick}
             disabled={isPending}
         >
-            Cancel
+            {content}
         </Button>
     );
 }

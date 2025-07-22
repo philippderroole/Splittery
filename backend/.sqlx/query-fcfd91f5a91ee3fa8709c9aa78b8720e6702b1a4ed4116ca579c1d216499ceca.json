@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        INSERT INTO tags (id, public_id, name, color, split_id, is_custom)\n        VALUES ($1, $2, $3, $4, $5, $6)\n        RETURNING id, public_id, name, color, split_id, is_custom, created_at, updated_at\n        ",
+  "query": "\n        UPDATE tags\n        SET name = $1, color = $2, updated_at = NOW()\n        WHERE split_id = $3 AND id = $4\n        RETURNING id, public_id, name, color, split_id, type AS \"type: TagType\", created_at, updated_at\n        ",
   "describe": {
     "columns": [
       {
@@ -30,8 +30,19 @@
       },
       {
         "ordinal": 5,
-        "name": "is_custom",
-        "type_info": "Bool"
+        "name": "type: TagType",
+        "type_info": {
+          "Custom": {
+            "name": "tag_type",
+            "kind": {
+              "Enum": [
+                "alltag",
+                "usertag",
+                "customtag"
+              ]
+            }
+          }
+        }
       },
       {
         "ordinal": 6,
@@ -46,12 +57,10 @@
     ],
     "parameters": {
       "Left": [
-        "Uuid",
-        "Varchar",
         "Varchar",
         "Varchar",
         "Uuid",
-        "Bool"
+        "Uuid"
       ]
     },
     "nullable": [
@@ -65,5 +74,5 @@
       false
     ]
   },
-  "hash": "3e4333837b6acd0c03c64f385b7319f420f4d8f86f369f02c408c544e756f954"
+  "hash": "fcfd91f5a91ee3fa8709c9aa78b8720e6702b1a4ed4116ca579c1d216499ceca"
 }

@@ -1,72 +1,86 @@
 "use client";
 
-import { createMember } from "@/actions/member-service";
+import { editMember } from "@/actions/member-service";
 import MobileDialog from "@/components/mobile-dialog";
 import { useSplit } from "@/providers/split-provider";
-import { CreateMemberWithTagsDto } from "@/utils/user";
-import GroupAddIcon from "@mui/icons-material/GroupAdd";
+import { CreateMemberWithTagsDto, MemberWithTags } from "@/utils/user";
 import {
     Alert,
     DialogActions,
     DialogContent,
     DialogContentText,
     DialogTitle,
-    Fab,
 } from "@mui/material";
-import React, { useState } from "react";
+import { useState } from "react";
 import MemberForm from "./member-form";
 
-interface CreateUserDialogProps {
+interface EditMemberProps {
+    member: MemberWithTags;
     open: boolean;
     onClose: () => void;
 }
 
-export function CreateMemberDialog(props: CreateUserDialogProps) {
-    const { open, onClose } = props;
-
+export function EditMemberDialog({
+    member: initalMember,
+    open,
+    onClose,
+}: EditMemberProps) {
     const split = useSplit();
 
+    const initalTagIds = initalMember.tags.map((tag) => tag.id);
+
     const [member, setMember] = useState<CreateMemberWithTagsDto>({
-        name: "",
-        tagIds: [],
+        name: initalMember.name,
+        tagIds: initalTagIds,
     });
     const [error, setError] = useState<string | null>(null);
 
     const handleSubmit = async (member: CreateMemberWithTagsDto) => {
         try {
-            await createMember(member, split.id);
+            await editMember(split.id, initalMember.id, member);
+            onClose();
         } catch {
-            setError("Failed to create user. Please try again.");
+            setError("Failed to edit member. Please try again.");
         }
     };
 
-    const handleAbort = () => {
+    const handleCancel = () => {
         reset();
         onClose();
     };
 
     const reset = () => {
-        setMember({ name: "", tagIds: [] });
+        setMember({
+            name: initalMember.name,
+            tagIds: initalTagIds,
+        });
         setError(null);
     };
 
     return (
-        <MobileDialog open={open} onClose={handleAbort}>
+        <MobileDialog open={open} onClose={handleCancel}>
             <MemberForm.Root
                 member={member}
                 setMember={setMember}
                 onSubmit={handleSubmit}
-                onCancel={handleAbort}
+                onCancel={handleCancel}
+                validationOptions={{
+                    excludeId: initalMember.id,
+                    excludeTagname: initalMember.name,
+                }}
             >
                 <DialogTitle>
                     <MemberForm.Title>
-                        <>Create a new member</>
+                        <>Edit {initalMember.name}</>
                     </MemberForm.Title>
                 </DialogTitle>
                 <DialogContent>
                     <DialogContentText>
                         <MemberForm.Description>
-                            <>Please enter a username for the new member.</>
+                            <>
+                                Edit the details of the member. You can change
+                                the name and tags.
+                            </>
                         </MemberForm.Description>
                     </DialogContentText>
                     <div style={{ marginTop: "16px" }} />
@@ -80,31 +94,10 @@ export function CreateMemberDialog(props: CreateUserDialogProps) {
                 <DialogActions>
                     <MemberForm.CancelButton content="Cancel" />
                     <MemberForm.SubmitButton>
-                        <>Create</>
+                        <>Edit</>
                     </MemberForm.SubmitButton>
                 </DialogActions>
             </MemberForm.Root>
         </MobileDialog>
-    );
-}
-
-export function CreateMemberDialogButton() {
-    const [open, setOpen] = React.useState(false);
-
-    const openDialog = () => {
-        setOpen(true);
-    };
-
-    const closeDialog = () => {
-        setOpen(false);
-    };
-
-    return (
-        <>
-            <Fab color="primary" onClick={openDialog}>
-                <GroupAddIcon />
-            </Fab>
-            <CreateMemberDialog open={open} onClose={closeDialog} />
-        </>
     );
 }

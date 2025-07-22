@@ -1,16 +1,16 @@
 "use client";
 
-import { createMember } from "@/actions/create-member-service";
 import { createSplit } from "@/actions/create-split-service";
+import { createMember } from "@/actions/member-service";
+import MobileDialog from "@/components/mobile-dialog";
 import { CreateSplitDto } from "@/utils/split";
-import { CreateMemberDto } from "@/utils/user";
+import { CreateMemberDto, CreateMemberWithTagsDto } from "@/utils/user";
 import FiberNewIcon from "@mui/icons-material/FiberNew";
 import LoginIcon from "@mui/icons-material/Login";
 import {
     Alert,
     Box,
     Button,
-    Dialog,
     DialogActions,
     DialogContent,
     DialogContentText,
@@ -34,64 +34,11 @@ export function CreateSplitDialog(props: CreateSplitDialogProps) {
     const { open, onClose } = props;
 
     const [split, setSplit] = useState<CreateSplitDto>({ name: "" });
-    const [member, setMember] = useState<CreateMemberDto>({ name: "" });
+    const [member, setMember] = useState<CreateMemberWithTagsDto>({
+        name: "",
+        tagIds: [],
+    });
     const [error, setError] = useState<string | null>(null);
-
-    const handleCancel = () => {
-        setSplit({ name: "" });
-        setMember({ name: "" });
-        setError(null);
-        onClose();
-    };
-
-    const handleSubmit = async () => {
-        const trimmedSplit = { ...split, name: split.name.trim() };
-        const trimmedMember = { ...member, name: member.name.trim() };
-
-        try {
-            const newSplit = await createSplit(trimmedSplit);
-            await createMember(trimmedMember, newSplit.id);
-            window.location.href = `/splits/${newSplit.id}/balances`;
-        } catch {
-            setError(
-                "Failed to create split and add member. Please try again."
-            );
-        }
-    };
-
-    return (
-        <Dialog open={open} onClose={handleCancel}>
-            <StepperForm
-                split={split}
-                setSplit={setSplit}
-                member={member}
-                setMember={setMember}
-                onSubmit={handleSubmit}
-                onCancel={handleCancel}
-                error={error}
-            />
-        </Dialog>
-    );
-}
-
-interface StepperFormProps {
-    split: CreateSplitDto;
-    setSplit: (split: CreateSplitDto) => void;
-    member: CreateMemberDto;
-    setMember: (member: CreateMemberDto) => void;
-    onSubmit: () => Promise<void>;
-    onCancel: () => void;
-    error: string | null;
-}
-
-function StepperForm({
-    split,
-    setSplit,
-    member,
-    setMember,
-    onSubmit,
-    error,
-}: StepperFormProps) {
     const [activeStep, setActiveStep] = useState(0);
 
     const nextStep = () => {
@@ -102,8 +49,30 @@ function StepperForm({
         setActiveStep((prev) => Math.max(prev - 1, 0));
     };
 
+    const handleSubmit = async () => {
+        const trimmedSplit = { ...split, name: split.name.trim() };
+        const trimmedMember = { ...member, name: member.name.trim() };
+
+        try {
+            const newSplit = await createSplit(trimmedSplit);
+            await createMember({ ...trimmedMember, tagIds: [] }, newSplit.id);
+            window.location.href = `/splits/${newSplit.id}/balances`;
+        } catch {
+            setError(
+                "Failed to create split and add member. Please try again."
+            );
+        }
+    };
+
+    const handleCancel = () => {
+        setSplit({ name: "" });
+        setMember({ name: "", tagIds: [] });
+        setError(null);
+        onClose();
+    };
+
     return (
-        <Box sx={{ minWidth: "380px" }}>
+        <MobileDialog open={open} onClose={handleCancel}>
             {(() => {
                 switch (activeStep) {
                     case 0:
@@ -122,7 +91,7 @@ function StepperForm({
                             <Step2
                                 member={member}
                                 setMember={setMember}
-                                nextStep={async () => await onSubmit()}
+                                nextStep={handleSubmit}
                                 prevStep={prevStep}
                                 error={error}
                             />
@@ -131,7 +100,7 @@ function StepperForm({
                         return null;
                 }
             })()}
-        </Box>
+        </MobileDialog>
     );
 }
 
@@ -221,9 +190,7 @@ function Step1({ split, setSplit, nextStep, prevStep }: Step1Props) {
                 <SplitForm.FormInputs />
             </DialogContent>
             <DialogActions>
-                <Button onClick={prevStep} color="secondary">
-                    Back
-                </Button>
+                <SplitForm.CancelButton content="Back" />
                 <SplitForm.SubmitButton content="Next" />
             </DialogActions>
         </SplitForm.Root>
@@ -231,28 +198,32 @@ function Step1({ split, setSplit, nextStep, prevStep }: Step1Props) {
 }
 
 interface Step2Props {
-    member: CreateMemberDto;
-    setMember: (member: CreateMemberDto) => void;
-    nextStep: () => void;
+    member: CreateMemberWithTagsDto;
+    setMember: (member: CreateMemberWithTagsDto) => void;
+    nextStep: () => Promise<void>;
     prevStep: () => void;
     error: string | null;
 }
 
 function Step2({ member, setMember, nextStep, prevStep, error }: Step2Props) {
-    const handleMemberSubmit = async (member: CreateMemberDto) => {
+    const handleSubmit = async (member: CreateMemberDto) => {
         if (!member.name.trim()) return;
-        nextStep();
+        await nextStep();
     };
 
     return (
         <MemberForm.Root
             member={member}
             setMember={setMember}
-            onSubmit={handleMemberSubmit}
+            onSubmit={handleSubmit}
             onCancel={prevStep}
+            stayPending={true}
+            showTagSelection={false}
         >
             <DialogTitle>
-                <MemberForm.Title />
+                <MemberForm.Title>
+                    <>Please enter a username for the new member.</>
+                </MemberForm.Title>
                 <StepperHeader activeStep={1} />
             </DialogTitle>
             <DialogContent>
@@ -268,10 +239,10 @@ function Step2({ member, setMember, nextStep, prevStep, error }: Step2Props) {
                 )}
             </DialogContent>
             <DialogActions>
-                <Button onClick={prevStep} color="secondary">
-                    Back
-                </Button>
-                <MemberForm.SubmitButton />
+                <MemberForm.CancelButton content="Back" />
+                <MemberForm.SubmitButton>
+                    <>Create</>
+                </MemberForm.SubmitButton>
             </DialogActions>
         </MemberForm.Root>
     );

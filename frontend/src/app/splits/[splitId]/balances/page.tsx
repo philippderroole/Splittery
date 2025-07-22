@@ -1,9 +1,9 @@
 "use client";
 
-import { useSplitUsers } from "@/providers/split-user-provider";
+import { useMembers } from "@/providers/split-user-provider";
 import { Currencies } from "@/utils/currencies";
 import { Money } from "@/utils/money";
-import { MemberWithTags, SplitUser } from "@/utils/user";
+import { Member, MemberWithTags } from "@/utils/user";
 import {
     Avatar,
     Box,
@@ -15,10 +15,12 @@ import {
     ListItemText,
     Typography,
 } from "@mui/material";
+import { useState } from "react";
 import { CreateMemberDialogButton } from "./components/create-member-dialog";
+import { EditMemberDialog } from "./components/edit-member-dialog";
 
 export default function SplitPage() {
-    const splitUsers = useSplitUsers();
+    const splitUsers = useMembers();
 
     console.debug("SplitPage: ", splitUsers);
 
@@ -53,46 +55,61 @@ interface SplitUserItemProps {
     member: MemberWithTags;
 }
 
-function SplitUserItem(props: SplitUserItemProps) {
-    const { member } = props;
+function SplitUserItem({ member }: SplitUserItemProps) {
+    const [open, setOpen] = useState(false);
+
+    const handleOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
 
     return (
-        <ListItemButton>
-            <ListItem
-                disablePadding
-                secondaryAction={<SaldoItem user={member} />}
-            >
-                <ListItemAvatar>
-                    <Avatar
-                        alt={`Avatar n°${""}}`}
-                        src={`/static/images/avatar/${member.avatarUri}.jpg`}
+        <>
+            <EditMemberDialog
+                open={open}
+                onClose={handleClose}
+                member={member}
+            />
+            <ListItemButton onClick={handleOpen}>
+                <ListItem
+                    disablePadding
+                    secondaryAction={<SaldoItem user={member} />}
+                >
+                    <ListItemAvatar>
+                        <Avatar
+                            alt={`Avatar n°${""}}`}
+                            src={`/static/images/avatar/${member.avatarUri}.jpg`}
+                        />
+                    </ListItemAvatar>
+                    <ListItemText
+                        primary={member.name}
+                        secondary={
+                            <Box sx={{ display: "flex", gap: "2px" }}>
+                                {member.tags.map((tag) => (
+                                    <Chip
+                                        key={tag.id}
+                                        label={tag.name}
+                                        size="small"
+                                        variant="filled"
+                                        sx={{
+                                            backgroundColor: tag.color,
+                                            mt: 0.5,
+                                        }}
+                                    />
+                                ))}
+                            </Box>
+                        }
                     />
-                </ListItemAvatar>
-                <ListItemText
-                    primary={member.name}
-                    secondary={
-                        <Box sx={{ display: "flex", gap: "2px" }}>
-                            {member.tags.map((tag) => (
-                                <Chip
-                                    key={tag.id}
-                                    label={tag.name}
-                                    size="small"
-                                    variant="filled"
-                                    sx={{
-                                        backgroundColor: tag.color,
-                                        mt: 0.5,
-                                    }}
-                                />
-                            ))}
-                        </Box>
-                    }
-                />
-            </ListItem>
-        </ListItemButton>
+                </ListItem>
+            </ListItemButton>
+        </>
     );
 }
 
-function SaldoItem(props: { user: SplitUser }) {
+function SaldoItem(props: { user: Member }) {
     const { user } = props;
 
     return (

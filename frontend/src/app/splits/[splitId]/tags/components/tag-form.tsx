@@ -3,7 +3,6 @@
 import { useTags } from "@/providers/tag-provider";
 import { CreateTagDto, Tag } from "@/utils/tag";
 import {
-    Alert,
     Box,
     Button,
     FormControl,
@@ -22,7 +21,6 @@ type TagFormContextType = {
     color: string;
     setColor: (color: string) => void;
     isPending: boolean;
-    error: string | null;
     validationError: string | null;
 };
 
@@ -40,88 +38,103 @@ const useTagFormContext = () => {
     return currentTagContext;
 };
 
+interface TagValidationOptions {
+    excludeTagId?: string; // For edit mode - exclude current tag from duplicate check
+    minLength?: number;
+    maxLength?: number;
+    allowEmpty?: boolean;
+}
+
+const validateTagName = (
+    name: string,
+    existingTags: Tag[],
+    options: TagValidationOptions = {}
+) => {
+    const {
+        excludeTagId,
+        minLength = 3,
+        maxLength = 50,
+        allowEmpty = false,
+    } = options;
+
+    if (!name && !allowEmpty) {
+        return "Tag name cannot be empty.";
+    }
+
+    if (name && name.length < minLength) {
+        return `Tag name must be at least ${minLength} characters long.`;
+    }
+
+    if (name && name.length > maxLength) {
+        return `Tag name must not exceed ${maxLength} characters.`;
+    }
+
+    const duplicateTag = existingTags.find(
+        (tag) =>
+            tag.name.toLowerCase() === name.toLowerCase() &&
+            tag.id !== excludeTagId
+    );
+
+    if (duplicateTag) {
+        return "Tag name already exists. Please choose a different name.";
+    }
+
+    return null;
+};
+
 interface TagFormCompoundProps {
-    initalTag?: Tag;
+    tag: CreateTagDto;
+    setTag: (tag: CreateTagDto) => void;
     children?: ReactNode;
     onSubmit: (tag: CreateTagDto) => Promise<Error | void>;
     onCancel: () => void;
+    validationOptions?: TagValidationOptions;
 }
 
-function Root(props: TagFormCompoundProps) {
-    const { initalTag, children, onSubmit, onCancel } = props;
-
+function Root({
+    tag,
+    setTag,
+    children,
+    onSubmit,
+    onCancel,
+    validationOptions = {},
+}: TagFormCompoundProps) {
     const tags = useTags();
 
     const [isPending, setPending] = useState(false);
-    const [tag, setTag] = useState<CreateTagDto>(
-        initalTag
-            ? { ...initalTag }
-            : {
-                  name: "",
-                  color: "#f44336",
-              }
-    );
-    const [error, setError] = useState<string | null>(null);
     const [validationError, setValidationError] = useState<string | null>(null);
 
-    const onSaveClick = async () => {
+    const handleSubmit = async () => {
         if (isPending) return;
+        setPending(true);
 
         const newTag = { ...tag, name: tag.name.trim() };
 
-        const validationError = validateTagName(newTag.name);
+        const validationError = validateTagName(newTag.name, tags, {
+            ...validationOptions,
+        });
         setValidationError(validationError);
         // the validation error is delayed by one render cycle so we use the local variable
         if (validationError) {
+            setPending(false);
             return;
         }
 
-        console.debug("Submitting tag:", newTag);
+        await onSubmit(newTag);
 
-        setPending(true);
-        setError(null);
-        const result = await onSubmit(newTag);
         setPending(false);
-
-        if (result instanceof Error) {
-            setError(result.message);
-        }
     };
 
-    const onCancelClick = () => {
-        setTag({ ...tag, name: "" });
-        setError(null);
+    const handleAbort = () => {
         onCancel();
     };
 
     const setName = (name: string) => {
-        setTag((prev) => ({ ...prev, name }));
-        setError(null);
+        setTag({ ...tag, name });
     };
 
     const setColor = (color: string) => {
-        setTag((prev) => ({ ...prev, color }));
-        setError(null);
-    };
-
-    const validateTagName = (name: string) => {
-        if (!name) {
-            return "Tagname name cannot be empty.";
-        }
-        if (name.length < 3) {
-            return "Tagname name must be at least 3 characters long.";
-        }
-        if (name.length > 50) {
-            return "Tagname name must not exceed 50 characters.";
-        }
-        if (
-            initalTag?.name !== name &&
-            tags.some((tag) => tag.name.toLowerCase() === name.toLowerCase())
-        ) {
-            return "Tagname already exists. Please choose a different name.";
-        }
-
-        return null;
+        setTag({ ...tag, color });
     };
 
     return (
@@ -131,10 +144,9 @@ function Root(props: TagFormCompoundProps) {
                 setName,
                 color: tag.color,
                 setColor,
-                onSaveClick,
-                onCancelClick,
+                onSaveClick: handleSubmit,
+                onCancelClick: handleAbort,
                 isPending,
-                error,
                 validationError,
             }}
         >
@@ -144,14 +156,13 @@ function Root(props: TagFormCompoundProps) {
 }
 
 function FormInputs() {
-    const { tag, setName, error, isPending, validationError } =
-        useTagFormContext();
+    const { tag, setName, isPending, validationError } = useTagFormContext();
 
     const existsValidationError = validationError !== null;
 
     return (
         <>
-            {!tag.isPredefined && (
+            {tag.type == "CustomTag" && (
                 <FormControl sx={{ paddingTop: "5px" }} fullWidth>
                     <TextField
                         autoFocus
@@ -182,11 +193,6 @@ function FormInputs() {
                 Custom Color
             </Typography>
             <ColorSelector />
-            {error && (
-                <Alert severity="error" sx={{ mt: 2 }}>
-                    {error}
-                </Alert>
-            )}
         </>
     );
 }

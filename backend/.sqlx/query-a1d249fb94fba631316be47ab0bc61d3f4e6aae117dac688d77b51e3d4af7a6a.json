@@ -1,0 +1,76 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT id, name, color, public_id, split_id, type AS \"type: TagType\", created_at, updated_at FROM tags \n        WHERE split_id = $1 AND id = $2\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "color",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "public_id",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 4,
+        "name": "split_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 5,
+        "name": "type: TagType",
+        "type_info": {
+          "Custom": {
+            "name": "tag_type",
+            "kind": {
+              "Enum": [
+                "alltag",
+                "usertag",
+                "customtag"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 7,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "a1d249fb94fba631316be47ab0bc61d3f4e6aae117dac688d77b51e3d4af7a6a"
+}

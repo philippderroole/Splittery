@@ -2,7 +2,10 @@ use anyhow::Result;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::{models::Split, services};
+use crate::{
+    models::{Split, TagType},
+    services,
+};
 use anyhow::anyhow;
 
 pub async fn create_split(pool: &PgPool, name: String) -> Result<Split> {
@@ -24,7 +27,7 @@ pub async fn create_split(pool: &PgPool, name: String) -> Result<Split> {
     .await
     .map_err(|e| anyhow!("Failed to create split: {}", e))?;
 
-    let _tag = services::create_tag(pool, id, &String::from("all"), &all_color, false)
+    let _tag = services::create_tag(pool, id, &String::from("all"), &all_color, TagType::AllTag)
         .await
         .map_err(|e| anyhow!("Failed to create tag: {}", e))?;
 

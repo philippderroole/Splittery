@@ -113,6 +113,33 @@ pub async fn get_member(pool: &PgPool, split_id: Uuid, member_id: Uuid) -> Resul
     }
 }
 
+pub async fn edit_member(pool: &PgPool, member_id: Uuid, name: String) -> Result<SplitMember> {
+    sqlx::query_as!(
+        SplitMember,
+        "
+        UPDATE split_members
+        SET name = $2, updated_at = NOW()
+        WHERE id = $1
+        RETURNING id, public_id, name, split_id, type AS \"type: MemberType\", created_at, updated_at
+        ",
+        member_id,
+        name
+    )
+    .fetch_one(pool)
+    .await
+    .map_err(|e| {
+        match e {
+            sqlx::Error::Database(err) if err.constraint() == Some("split_members_split_id_name_key") => {
+                anyhow!("Duplicate member name")
+            }
+            sqlx::Error::Database(err) if err.constraint().is_some() => {
+                anyhow!("Unexpected error: {}", err.constraint().unwrap())
+            }
+            _ => anyhow!("Failed to edit member: {}", e),
+        }
+    })
+}
+
 pub async fn delete_member(pool: &PgPool, member_id: &Uuid) -> Result<()> {
     let query_result = sqlx::query!("DELETE FROM split_members WHERE id = $1", member_id)
         .execute(pool)

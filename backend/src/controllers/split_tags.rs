@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
 use crate::{
-    models::Tag,
+    models::{Tag, TagType},
     services::{self, DeleteTagError},
 };
 
@@ -16,8 +16,7 @@ pub struct TagResponse {
     pub id: String,
     pub name: String,
     pub color: String,
-    #[serde(rename = "isPredefined")]
-    pub is_predefined: bool,
+    pub r#type: TagType,
 }
 
 impl From<Tag> for TagResponse {
@@ -26,7 +25,7 @@ impl From<Tag> for TagResponse {
             id: tag.public_id,
             name: tag.name,
             color: tag.color,
-            is_predefined: !tag.is_custom,
+            r#type: tag.r#type,
         }
     }
 }
@@ -61,7 +60,9 @@ pub async fn create_tag(
     Json(tag): Json<CreateTagRequest>,
 ) -> Result<Json<TagResponse>, StatusCode> {
     let split_id = split_url.parse().unwrap();
-    let tag = match services::create_tag(&pool, split_id, &tag.name, &tag.color, true).await {
+    let tag = match services::create_tag(&pool, split_id, &tag.name, &tag.color, TagType::CustomTag)
+        .await
+    {
         Ok(tag) => tag,
         Err(e) => {
             log::error!("Failed to create tag, {e}");

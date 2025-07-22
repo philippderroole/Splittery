@@ -30,7 +30,7 @@ export async function GET(url: string, init?: RequestInit): Promise<any> {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function POST(url: string, init?: RequestInit): Promise<any> {
-    console.debug("Posting data to:", url);
+    console.debug("Posting data to:", url, init?.body);
 
     const res = await fetch(url, {
         ...init,
@@ -63,7 +63,7 @@ export async function POST(url: string, init?: RequestInit): Promise<any> {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function PUT(url: string, init?: RequestInit): Promise<any> {
-    console.debug("Putting data to:", url);
+    console.debug("Putting data to:", url, init?.body);
 
     const res = await fetch(url, {
         ...init,

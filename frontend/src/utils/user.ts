@@ -5,7 +5,7 @@ export interface User {
     username: string;
 }
 
-export interface SplitUser {
+export interface Member {
     id: string;
     name: string;
     avatarUri: string;
@@ -15,6 +15,15 @@ export interface SplitUser {
 
 export interface CreateMemberDto {
     name: string;
+}
+
+export interface EditMemberDto {
+    name: string;
+    tagIds: string[];
+}
+
+export interface CreateMemberWithTagsDto extends CreateMemberDto {
+    tagIds: string[];
 }
 
 export interface CreateUserDto {
@@ -27,6 +36,6 @@ export interface SerializedUser {
     username: string;
 }
 
-export interface MemberWithTags extends SplitUser {
+export interface MemberWithTags extends Member {
     tags: Tag[];
 }

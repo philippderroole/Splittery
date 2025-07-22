@@ -161,17 +161,60 @@ pub async fn create_member(
             }
         })?;
 
-    let tag = services::create_tag(&pool, split_id, &member.name, &color, false)
-        .await
-        .map_err(|e| {
-            log::error!("Failed to create tag for member, {e}");
-            StatusCode::INTERNAL_SERVER_ERROR
-        })?;
+    let tag = services::create_tag(
+        &pool,
+        split_id,
+        &member.name,
+        &color,
+        crate::models::TagType::UserTag,
+    )
+    .await
+    .map_err(|e| {
+        log::error!("Failed to create tag for member, {e}");
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
 
     services::add_tag_to_member(&pool, split_id, member.id, tag.id)
         .await
         .map_err(|e| {
             log::error!("Failed to add tag to member, {e}");
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+
+    Ok(Json(vec![MemberResponse::from(member, public_split_id, 0)]))
+}
+
+#[derive(serde::Deserialize)]
+pub struct EditMemberRequest {
+    pub name: String,
+    #[serde(rename = "tagIds")]
+    pub tag_ids: Vec<String>,
+}
+
+pub async fn edit_member(
+    State(pool): State<PgPool>,
+    Path((public_split_id, public_member_id)): Path<(String, String)>,
+    Json(request): Json<EditMemberRequest>,
+) -> Result<Json<Vec<MemberResponse>>, StatusCode> {
+    let split_id = public_split_id.parse().unwrap();
+    let member_id = public_member_id.parse().unwrap();
+    let tag_ids: Vec<_> = request
+        .tag_ids
+        .iter()
+        .map(|id| id.parse().unwrap())
+        .collect();
+
+    let member = services::edit_member(&pool, member_id, request.name)
+        .await
+        .map_err(|e| {
+            log::error!("Failed to get member, {e}");
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+
+    services::set_tags_for_member(&pool, split_id, member_id, &tag_ids)
+        .await
+        .map_err(|e| {
+            log::error!("Failed to create tag for member, {e}");
             StatusCode::INTERNAL_SERVER_ERROR
         })?;
 

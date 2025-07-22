@@ -1,15 +1,12 @@
 "use client";
 
-import { useSplitUsers } from "@/providers/split-user-provider";
+import TagSelection from "@/components/tag-selection";
+import { useMembers } from "@/providers/split-user-provider";
 import { useTags } from "@/providers/tag-provider";
-import { Tag } from "@/utils/tag";
 import { CreateTransactionDto, Transaction } from "@/utils/transaction";
-import CheckIcon from "@mui/icons-material/Check";
 import {
     Alert,
-    Box,
     Button,
-    Chip,
     FormControl,
     FormHelperText,
     InputAdornment,
@@ -25,8 +22,7 @@ type TransactionFormContextType = {
     setName: (name: string) => void;
     setAmount: (amount: string) => void;
     setPayee: (payee: string) => void;
-    selectedTags: Tag[];
-    setSelectedTags: (tags: Tag[]) => void;
+    setSelectedTags: (tags: string[]) => void;
     isPending: boolean;
     error: string | null;
     validationErrors: Map<string, string | null>;
@@ -53,10 +49,7 @@ const useTransactionFormContext = () => {
 interface TransactionFormCompoundProps {
     initalTransaction?: Transaction;
     children?: ReactNode;
-    onSubmit: (
-        transaction: CreateTransactionDto,
-        tags: Tag[]
-    ) => Promise<Error | void>;
+    onSubmit: (transaction: CreateTransactionDto) => Promise<Error | void>;
     onCancel: () => void;
 }
 
@@ -64,7 +57,7 @@ function Root(props: TransactionFormCompoundProps) {
     const { initalTransaction, children, onSubmit, onCancel } = props;
 
     const tags = useTags();
-    const members = useSplitUsers();
+    const members = useMembers();
 
     const [isPending, setPending] = useState(false);
     const [transaction, setTransaction] = useState<CreateTransactionDto>(
@@ -73,15 +66,15 @@ function Root(props: TransactionFormCompoundProps) {
                   ...initalTransaction,
                   amount: initalTransaction.amount.getAmount(),
                   memberId: "",
+                  tagIds: initalTransaction.tags.map((tag) => tag.id),
               }
             : {
                   name: "",
                   amount: null,
                   memberId: "",
-                  tags: [],
+                  tagIds: [],
               }
     );
-    const [selectedTags, setSelectedTags] = useState<Tag[]>(tags);
     const [error, setError] = useState<string | null>(null);
     const [validationErrors, setValidationErrors] = useState<
         Map<string, string | null>
@@ -110,7 +103,7 @@ function Root(props: TransactionFormCompoundProps) {
 
         setPending(true);
         setError(null);
-        const result = await onSubmit(newTransaction, selectedTags);
+        const result = await onSubmit(newTransaction);
         setPending(false);
 
         if (result instanceof Error) {
@@ -128,7 +121,7 @@ function Root(props: TransactionFormCompoundProps) {
     };
 
     const clearTransaction = () => {
-        setTransaction({ name: "", amount: null, memberId: "", tags: [] });
+        setTransaction({ name: "", amount: null, memberId: "", tagIds: [] });
         setError(null);
         setValidationErrors(
             new Map<string, string | null>([
@@ -141,6 +134,11 @@ function Root(props: TransactionFormCompoundProps) {
 
     const setName = (name: string) => {
         setTransaction((prev) => ({ ...prev, name }));
+        setError(null);
+    };
+
+    const setSelectedTags = (tags: string[]) => {
+        setTransaction((prev) => ({ ...prev, tagIds: tags }));
         setError(null);
     };
 
@@ -220,7 +218,6 @@ function Root(props: TransactionFormCompoundProps) {
                 setName,
                 setAmount,
                 setPayee,
-                selectedTags,
                 setSelectedTags,
                 isPending,
                 error,
@@ -240,12 +237,14 @@ function FormInputs() {
         setName,
         setAmount,
         setPayee,
+        setSelectedTags,
         error,
         isPending,
         validationErrors,
     } = useTransactionFormContext();
 
-    const users = useSplitUsers();
+    const users = useMembers();
+    const tags = useTags();
 
     return (
         <>
@@ -319,78 +318,17 @@ function FormInputs() {
                     </MenuItem>
                 ))}
             </TextField>
-            <ChipList />
+            <TagSelection
+                allTags={tags}
+                selectedTags={transaction.tagIds}
+                setSelectedTags={setSelectedTags}
+            />
             {error && (
                 <Alert severity="error" sx={{ mt: 2 }}>
                     {error}
                 </Alert>
             )}
         </>
-    );
-}
-
-function ChipList() {
-    const { selectedTags, setSelectedTags } = useTransactionFormContext();
-
-    const tags = useTags();
-
-    const addTag = (tag: Tag) => {
-        setSelectedTags([...selectedTags, tag]);
-    };
-
-    const removeTag = (tag: Tag) => {
-        setSelectedTags(selectedTags.filter((t) => t.id !== tag.id));
-    };
-
-    return (
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-            {tags.map((tag) => {
-                const selected = selectedTags.some((t) => t.id === tag.id);
-
-                return (
-                    <Chip
-                        key={tag.id}
-                        label={tag.name}
-                        variant={selected ? "filled" : "outlined"}
-                        deleteIcon={selected ? <CheckIcon /> : <div />}
-                        sx={{
-                            mt: 0.5,
-                            backgroundColor: selected
-                                ? tag.color
-                                : "transparent",
-                            borderColor: tag.color,
-                            color: selected ? "white" : tag.color,
-                            "&:hover": {
-                                backgroundColor: selected
-                                    ? tag.color
-                                    : `${tag.color}20`, // 20% opacity
-                            },
-                            "&:active": {
-                                backgroundColor: selected
-                                    ? tag.color
-                                    : `${tag.color}40`, // 40% opacity
-                            },
-                            "&.MuiChip-filled": {
-                                "&:hover": {
-                                    backgroundColor: tag.color,
-                                    filter: "brightness(0.9)",
-                                },
-                                "&:active": {
-                                    backgroundColor: tag.color,
-                                    filter: "brightness(0.8)",
-                                },
-                            },
-                        }}
-                        onClick={() => {
-                            selected ? removeTag(tag) : addTag(tag); // eslint-disable-line @typescript-eslint/no-unused-expressions
-                        }}
-                        onDelete={() => {
-                            selected ? removeTag(tag) : addTag(tag); // eslint-disable-line @typescript-eslint/no-unused-expressions
-                        }}
-                    />
-                );
-            })}
-        </Box>
     );
 }
 

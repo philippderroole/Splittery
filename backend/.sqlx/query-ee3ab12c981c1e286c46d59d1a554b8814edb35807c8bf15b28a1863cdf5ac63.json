@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT member.id AS member_id, member.public_id AS member_public_id, \n               member.name AS member_name, member.created_at AS member_created_at, member.updated_at AS member_updated_at,\n               tags.id AS tag_id, tags.public_id AS tag_public_id, tags.is_custom AS tag_is_custom,\n               tags.name AS tag_name, tags.color AS tag_color, tags.updated_at AS tag_updated_at, tags.created_at AS tag_created_at\n        FROM split_members AS member\n        LEFT JOIN member_tags ON member.id = member_tags.member_id\n        LEFT JOIN tags ON member_tags.tag_id = tags.id\n        WHERE member.split_id = $1\n        ",
+  "query": "\n        SELECT member.id AS member_id, member.public_id AS member_public_id, \n               member.name AS member_name, member.created_at AS member_created_at, member.updated_at AS member_updated_at,\n               tags.id AS tag_id, tags.public_id AS tag_public_id, tags.type AS \"tag_type: TagType\",\n               tags.name AS tag_name, tags.color AS tag_color, tags.updated_at AS tag_updated_at, tags.created_at AS tag_created_at\n        FROM split_members AS member\n        LEFT JOIN member_tags ON member.id = member_tags.member_id\n        LEFT JOIN tags ON member_tags.tag_id = tags.id\n        WHERE member.split_id = $1\n        ",
   "describe": {
     "columns": [
       {
@@ -40,8 +40,19 @@
       },
       {
         "ordinal": 7,
-        "name": "tag_is_custom",
-        "type_info": "Bool"
+        "name": "tag_type: TagType",
+        "type_info": {
+          "Custom": {
+            "name": "tag_type",
+            "kind": {
+              "Enum": [
+                "alltag",
+                "usertag",
+                "customtag"
+              ]
+            }
+          }
+        }
       },
       {
         "ordinal": 8,
@@ -84,5 +95,5 @@
       false
     ]
   },
-  "hash": "b3628b4c3f188221bd54e5e4c67db110b77a0bc5bec0d19db29c97638ed8f4f4"
+  "hash": "ee3ab12c981c1e286c46d59d1a554b8814edb35807c8bf15b28a1863cdf5ac63"
 }

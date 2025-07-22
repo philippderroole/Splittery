@@ -1,18 +1,22 @@
 "use client";
 
+import TagSelection from "@/components/tag-selection";
+import { useMembers } from "@/providers/split-user-provider";
 import { useTags } from "@/providers/tag-provider";
-import { CreateMemberDto } from "@/utils/user";
-import { Alert, Button, FormControl, TextField } from "@mui/material";
+import { Tag } from "@/utils/tag";
+import { CreateMemberWithTagsDto, MemberWithTags } from "@/utils/user";
+import { Button, TextField } from "@mui/material";
 import { createContext, ReactNode, useContext, useState } from "react";
 
 type MemberFormContextType = {
-    member: CreateMemberDto;
-    onSaveClick: () => void;
-    onCancelClick: () => void;
+    member: CreateMemberWithTagsDto;
     setMemberName: (name: string) => void;
+    setSelectedTags: (tagIds: string[]) => void;
+    onSubmit: () => void;
+    onCancel: () => void;
     isPending: boolean;
-    error: string | null;
     validationError: string | null;
+    showTagSelection: boolean;
 };
 
 const MemberFormContext = createContext<MemberFormContextType | null>(null);
@@ -29,72 +33,134 @@ const useMemberFormContext = () => {
     return currentMemberContext;
 };
 
-interface MemberFormCompoundProps {
-    member: CreateMemberDto;
-    setMember: (member: CreateMemberDto) => void;
-    children?: ReactNode;
-    onSubmit: (member: CreateMemberDto) => Promise<Error | void>;
-    onCancel: () => void;
+interface MemberValidationOptions {
+    excludeId?: string;
+    excludeTagname?: string;
+    minLength?: number;
+    maxLength?: number;
+    allowEmpty?: boolean;
 }
 
-function Root(props: MemberFormCompoundProps) {
-    const { member, setMember, children, onSubmit, onCancel } = props;
+const validateMember = (
+    name: string,
+    existingMembers: MemberWithTags[],
+    existingTags: Tag[],
+    options: MemberValidationOptions = {}
+) => {
+    const {
+        excludeId,
+        excludeTagname,
+        minLength = 3,
+        maxLength = 50,
+        allowEmpty = false,
+    } = options;
 
+    if (!name && !allowEmpty) {
+        return "Username name cannot be empty.";
+    }
+
+    if (name && name.length < minLength) {
+        return `Username name must be at least ${minLength} characters long.`;
+    }
+
+    if (name && name.length > maxLength) {
+        return `Username name must not exceed ${maxLength} characters.`;
+    }
+
+    const duplicateMember = existingMembers.find(
+        (member) =>
+            member.name.toLowerCase() === name.toLowerCase() &&
+            member.id !== excludeId
+    );
+
+    if (duplicateMember) {
+        return "Username name already exists. Please choose a different name.";
+    }
+
+    const intersectingTagname = existingTags.some(
+        (tag) =>
+            tag.name.toLowerCase() === name.toLowerCase() &&
+            tag.name !== excludeTagname
+    );
+
+    if (intersectingTagname) {
+        return "A tag with this name already exists. Please choose a different name or rename the existing tag.";
+    }
+
+    return null;
+};
+
+interface MemberFormCompoundProps {
+    member: CreateMemberWithTagsDto;
+    setMember: (member: CreateMemberWithTagsDto) => void;
+    children?: ReactNode;
+    onSubmit: (member: CreateMemberWithTagsDto) => Promise<Error | void>;
+    onCancel: () => void;
+    stayPending?: boolean;
+    showTagSelection?: boolean;
+    validationOptions?: MemberValidationOptions;
+}
+
+function Root({
+    member,
+    setMember,
+    children,
+    onSubmit,
+    onCancel,
+    stayPending,
+    showTagSelection = true,
+    validationOptions = {},
+}: MemberFormCompoundProps) {
+    const members = useMembers();
     const tags = useTags();
 
     const [isPending, setPending] = useState(false);
-    const [error, setError] = useState<string | null>(null);
     const [validationError, setValidationError] = useState<string | null>(null);
 
-    const onSaveClick = async () => {
+    const handleSubmit = async () => {
         if (isPending) return;
+        setPending(true);
 
         const newMember = { ...member, name: member.name.trim() };
 
-        const validationError = validateMemberName(newMember.name);
+        const validationError = validateMember(newMember.name, members, tags, {
+            ...validationOptions,
+        });
         setValidationError(validationError);
         // the validation error is delayed by one render cycle so we use the local variable
         if (validationError) {
+            setPending(false);
             return;
         }
 
-        setPending(true);
-        setError(null);
         const result = await onSubmit(newMember);
-        setPending(false);
 
         if (result instanceof Error) {
-            setError(result.message);
+            setPending(false);
+            return;
+        }
+
+        if (!stayPending) {
+            setPending(false);
         }
     };
 
-    const onCancelClick = () => {
-        setMember({ name: "" });
-        setError(null);
-        setValidationError(null);
+    const handleCancel = () => {
+        reset();
         onCancel();
     };
 
-    const setMemberName = (name: string) => {
-        setMember((prev: CreateMemberDto) => ({ ...prev, name }));
-        setError(null);
+    const reset = () => {
+        setMember({ name: "", tagIds: [] });
+        setValidationError(null);
     };
 
-    const validateMemberName = (name: string) => {
-        if (!name) {
-            return "Username name cannot be empty.";
-        }
-        if (name.length < 3) {
-            return "Username name must be at least 3 characters long.";
-        }
-        if (name.length > 50) {
-            return "Username name must not exceed 50 characters.";
-        }
-        if (tags.some((tag) => tag.name.toLowerCase() === name.toLowerCase())) {
-            return "A tag with this name already exists. Please choose a different name or rename the existing tag.";
-        }
+    const setMemberName = (name: string) => {
+        setMember({ ...member, name });
+    };
 
-        return null;
+    const setSelectedTags = (tagIds: string[]) => {
+        setMember({ ...member, tagIds });
     };
 
     return (
@@ -102,11 +168,12 @@ function Root(props: MemberFormCompoundProps) {
             value={{
                 member,
                 setMemberName,
-                onSaveClick,
-                onCancelClick,
+                setSelectedTags,
+                onSubmit: handleSubmit,
+                onCancel: handleCancel,
                 isPending,
-                error,
                 validationError,
+                showTagSelection,
             }}
         >
             {children}
@@ -115,75 +182,114 @@ function Root(props: MemberFormCompoundProps) {
 }
 
 function FormInputs() {
-    const { member, setMemberName, error, isPending, validationError } =
-        useMemberFormContext();
+    const {
+        member,
+        setMemberName,
+        setSelectedTags,
+        isPending,
+        validationError,
+        showTagSelection,
+    } = useMemberFormContext();
 
-    const existsValidationError = validationError !== null;
+    const tags = useTags();
+
+    const dummyTag = {
+        id: "dummy-tag",
+        name: member.name || "New User",
+        type: "UserTag",
+        color: "#327a1cff",
+    } as Tag;
+
+    const shownTags = [
+        dummyTag,
+        ...tags.filter((tag) => tag.type !== "UserTag"),
+    ];
+    const shownSelectedTags = [dummyTag.id, ...member.tagIds];
+
+    const handleSetSelectedTags = (tagIds: string[]) => {
+        setSelectedTags(tagIds.filter((id) => id !== dummyTag.id));
+    };
 
     return (
         <>
-            <FormControl sx={{ paddingTop: "5px" }} fullWidth>
-                <TextField
-                    autoFocus
-                    required
-                    id="user-name"
-                    name="user-name"
-                    label="Username"
-                    type="text"
-                    value={member.name}
-                    onChange={(e) => setMemberName(e.target.value)}
-                    aria-label="Username"
-                    fullWidth
-                    disabled={isPending}
-                    error={existsValidationError}
-                    helperText={existsValidationError && validationError}
+            <TextField
+                autoFocus
+                required
+                id="user-name"
+                name="user-name"
+                label="Username"
+                type="text"
+                value={member.name}
+                onChange={(e) => setMemberName(e.target.value)}
+                aria-label="Username"
+                fullWidth
+                disabled={isPending}
+                error={validationError !== null}
+                helperText={validationError !== null && validationError}
+            />
+            {showTagSelection && (
+                <TagSelection
+                    allTags={shownTags}
+                    selectedTags={shownSelectedTags}
+                    setSelectedTags={handleSetSelectedTags}
                 />
-            </FormControl>
-            {error && (
-                <Alert severity="error" sx={{ mt: 2 }}>
-                    {error}
-                </Alert>
             )}
         </>
     );
 }
 
-function SubmitButton() {
-    const { onSaveClick, isPending } = useMemberFormContext();
+interface SubmitButtonProps {
+    children: ReactNode;
+}
+
+function SubmitButton({ children }: SubmitButtonProps) {
+    const { onSubmit, isPending } = useMemberFormContext();
 
     return (
         <Button
             variant="contained"
             color="primary"
-            onClick={onSaveClick}
+            onClick={onSubmit}
             loading={isPending}
         >
-            Create
+            <>{children}</>
         </Button>
     );
 }
 
-function CancelButton() {
-    const { onCancelClick, isPending } = useMemberFormContext();
+interface CancelButtonProps {
+    content: string;
+}
+
+function CancelButton({ content }: CancelButtonProps) {
+    const { onCancel, isPending } = useMemberFormContext();
 
     return (
         <Button
             variant="outlined"
             color="secondary"
-            onClick={onCancelClick}
+            onClick={onCancel}
             disabled={isPending}
         >
-            Cancel
+            {content}
         </Button>
     );
 }
 
-function Title() {
-    return "Create a new member";
+interface TitleProps {
+    children: ReactNode;
 }
 
-function Description() {
-    return "Please enter a username for the new member.";
+function Title({ children }: TitleProps) {
+    return <>{children}</>;
+}
+
+interface DescriptionProps {
+    children: ReactNode;
+}
+
+function Description({ children }: DescriptionProps) {
+    return <>{children}</>;
 }
 
 const MemberForm = {

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT id, name, color, public_id, split_id, is_custom, created_at, updated_at FROM tags \n        WHERE split_id = $1 AND name = $2\n        ",
+  "query": "\n        SELECT id, name, color, public_id, split_id, type AS \"type: TagType\", created_at, updated_at FROM tags \n        WHERE split_id = $1 AND name = $2\n        ",
   "describe": {
     "columns": [
       {
@@ -30,8 +30,19 @@
       },
       {
         "ordinal": 5,
-        "name": "is_custom",
-        "type_info": "Bool"
+        "name": "type: TagType",
+        "type_info": {
+          "Custom": {
+            "name": "tag_type",
+            "kind": {
+              "Enum": [
+                "alltag",
+                "usertag",
+                "customtag"
+              ]
+            }
+          }
+        }
       },
       {
         "ordinal": 6,
@@ -61,5 +72,5 @@
       false
     ]
   },
-  "hash": "c8c54dc1eb1ac659b02ad9ef3ec38e8780c2618e1863b2ba52c0eeeb39b7e948"
+  "hash": "e394c6c7e12d030e0628ec8d6740ac25d34038e1532b8422e9cd973b1811dcc7"
 }

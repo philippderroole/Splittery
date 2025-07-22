@@ -5,7 +5,7 @@ import { useSplit } from "@/providers/split-provider";
 import { Tag } from "@/utils/tag";
 import { Delete as DeleteIcon } from "@mui/icons-material";
 import {
-    Box,
+    Alert,
     Dialog,
     DialogActions,
     DialogContent,
@@ -13,7 +13,7 @@ import {
     DialogTitle,
     IconButton,
 } from "@mui/material";
-import React from "react";
+import React, { useState } from "react";
 import DeleteTag from "./delete-tag";
 
 interface DeleteTagDialogProps {
@@ -27,36 +27,42 @@ export function DeleteTagDialog(props: DeleteTagDialogProps) {
 
     const split = useSplit();
 
+    const [error, setError] = useState<string | null>(null);
+
     const handleSubmit = async (tag: Tag) => {
         try {
             await deleteTag(split.id, tag.id);
+            onClose();
         } catch {
-            return new Error("Failed to delete tag. Please try again.");
+            setError("Failed to delete tag. Please try again.");
         }
     };
 
     return (
         <Dialog open={open} onClose={onClose}>
-            <Box sx={{ minWidth: "360px" }}>
-                <DeleteTag.Root
-                    tag={tag}
-                    onSubmit={handleSubmit}
-                    onCancel={onClose}
-                >
-                    <DialogTitle>
-                        <DeleteTag.Title />
-                    </DialogTitle>
-                    <DialogContent sx={{ paddingBottom: 0 }}>
-                        <DialogContentText>
-                            <DeleteTag.Description />
-                        </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                        <DeleteTag.CancelButton />
-                        <DeleteTag.SubmitButton />
-                    </DialogActions>
-                </DeleteTag.Root>
-            </Box>
+            <DeleteTag.Root
+                tag={tag}
+                onSubmit={handleSubmit}
+                onCancel={onClose}
+            >
+                <DialogTitle>
+                    <DeleteTag.Title />
+                </DialogTitle>
+                <DialogContent sx={{ paddingBottom: 0 }}>
+                    <DialogContentText>
+                        <DeleteTag.Description />
+                    </DialogContentText>
+                    {error && (
+                        <Alert severity="error" sx={{ mt: 2 }}>
+                            {error}
+                        </Alert>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <DeleteTag.CancelButton />
+                    <DeleteTag.SubmitButton />
+                </DialogActions>
+            </DeleteTag.Root>
         </Dialog>
     );
 }

@@ -52,7 +52,7 @@ export function EditTransactionDialog(props: EditTransactionDialogProps) {
                     sx: {
                         ...(isMobile && {
                             position: "fixed",
-                            top: "10%",
+                            top: "5%",
                             margin: "0 16px",
                             width: "calc(100% - 32px)",
                             maxWidth: "none",

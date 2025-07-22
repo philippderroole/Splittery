@@ -37,6 +37,6 @@ export function SplitUserProvider({
     );
 }
 
-export function useSplitUsers() {
+export function useMembers() {
     return useContext(SplitUserContext);
 }

@@ -116,7 +116,7 @@ function Actions(props: ActionsProps) {
 
     return (
         <Box sx={{ display: "flex" }}>
-            {!tag.isPredefined && <DeleteTagDialogButton tag={tag} />}
+            {tag.type === "CustomTag" && <DeleteTagDialogButton tag={tag} />}
         </Box>
     );
 }

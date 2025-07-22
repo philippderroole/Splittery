@@ -4,7 +4,7 @@ use anyhow::{Result, anyhow};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::{Entry, EntryDb, Tag, Transaction, TransactionDb};
+use crate::models::{Entry, EntryDb, Tag, TagType, Transaction, TransactionDb};
 
 pub async fn get_all_transactions(pool: &PgPool, split_id: Uuid) -> Result<Vec<Transaction>> {
     let rows = sqlx::query!(
@@ -18,7 +18,7 @@ pub async fn get_all_transactions(pool: &PgPool, split_id: Uuid) -> Result<Vec<T
             e.name AS "entry_name?", e.amount AS "entry_amount?",
             e.created_at as "entry_created_at?", e.updated_at as "entry_updated_at?",
             tag.id AS "tag_id?", tag.name AS "tag_name?", tag.color AS "tag_color?",
-            tag.public_id as "tag_public_id?", tag.is_custom as "tag_is_custom?",
+            tag.public_id as "tag_public_id?", tag.type as "tag_type?: TagType",
             tag.created_at as "tag_created_at?", tag.updated_at as "tag_updated_at?"
         FROM transactions t
         LEFT JOIN entries e ON t.id = e.transaction_id
@@ -101,7 +101,7 @@ pub async fn get_all_transactions(pool: &PgPool, split_id: Uuid) -> Result<Vec<T
                 row.tag_name,
                 row.tag_color,
                 row.tag_public_id,
-                row.tag_is_custom,
+                row.tag_type,
                 row.tag_created_at,
                 row.tag_updated_at,
             ) {
@@ -112,7 +112,7 @@ pub async fn get_all_transactions(pool: &PgPool, split_id: Uuid) -> Result<Vec<T
                         name: tag_name,
                         color: tag_color,
                         public_id: tag_public_id,
-                        is_custom: tag_is_custom,
+                        r#type: tag_is_custom,
                         split_id,
                         created_at: tag_created_at,
                         updated_at: tag_updated_at,

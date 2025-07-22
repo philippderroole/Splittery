@@ -3,7 +3,7 @@ use serde::Serialize;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::TagDb;
+use crate::models::{TagDb, TagType};
 
 #[derive(Serialize)]
 pub struct EntryTagResponse {
@@ -13,7 +13,7 @@ pub struct EntryTagResponse {
     pub color: String,
     #[serde(rename = "splitId")]
     pub public_split_id: String,
-    pub is_predefined: bool,
+    pub r#type: TagType,
 }
 
 impl EntryTagResponse {
@@ -23,7 +23,7 @@ impl EntryTagResponse {
             name: tag.name,
             color: tag.color,
             public_split_id,
-            is_predefined: !tag.is_custom,
+            r#type: tag.r#type,
         }
     }
 }
@@ -37,7 +37,7 @@ pub async fn get_all_entry_tags(
     let tags = sqlx::query_as!(
         TagDb,
         "
-        SELECT tags.id, tags.public_id, tags.name, color, tags.split_id, is_custom, tags.created_at, tags.updated_at
+        SELECT tags.id, tags.public_id, tags.name, color, tags.split_id, type AS \"type: TagType\", tags.created_at, tags.updated_at
         FROM tags
         JOIN entry_tags ON tags.id = entry_tags.tag_id
         JOIN entries ON entry_tags.entry_id = entries.id
