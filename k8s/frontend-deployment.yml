@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: frontend
+    namespace: splittery
+spec:
+    replicas: 1
+    selector:
+        matchLabels:
+            app: frontend
+    template:
+        metadata:
+            labels:
+                app: frontend
+        spec:
+            containers:
+                - name: splittery-frontend
+                  image: philippderroole/splittery-frontend:latest
+                  imagePullPolicy: Always
+                  ports:
+                      - containerPort: 3000
+                  env:
+                      - name: INTERNAL_API_URL
+                        value: http://backend-service:8000/api/v1

@@ -17,6 +17,8 @@ async fn main() -> anyhow::Result<()> {
 
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
+    log::info!("Connecting to database at {database_url}");
+
     let pool = sqlx::postgres::PgPoolOptions::new()
         .max_connections(20)
         .connect(&database_url)
