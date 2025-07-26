@@ -1,27 +1,73 @@
+use std::collections::HashMap;
 use std::fmt;
 
-use crate::models::{MemberType, SplitMember};
-use crate::services::add_tag_to_member;
-use crate::services::{self, GetTagError};
+use crate::models::member::{Member, MemberDb, MemberType};
+use crate::models::tag::{Tag, TagType};
+use crate::services::{self, get_tag_by_name, get_tags_for_member};
 use anyhow::Result;
 use anyhow::anyhow;
 use bigdecimal::BigDecimal;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-pub async fn get_all_members(pool: &PgPool, split_id: Uuid) -> Result<Vec<SplitMember>> {
-    sqlx::query_as!(
-        SplitMember,
+pub async fn get_all_members(pool: &PgPool, split_id: Uuid) -> Result<Vec<Member>> {
+    let rows = sqlx::query!(
         "
-        SELECT id, public_id, name, split_id, type AS \"type: MemberType\", created_at, updated_at
-        FROM split_members
-        WHERE split_id = $1
+        SELECT member.id AS member_id, member.public_id AS member_public_id, 
+               member.name AS member_name, member.created_at AS member_created_at, member.updated_at AS member_updated_at,
+               tags.id AS tag_id, tags.public_id AS tag_public_id, tags.type AS \"tag_type: TagType\",
+               tags.name AS tag_name, tags.color AS tag_color, tags.updated_at AS tag_updated_at, tags.created_at AS tag_created_at
+        FROM split_members AS member
+        LEFT JOIN member_tags ON member.id = member_tags.member_id
+        LEFT JOIN tags ON member_tags.tag_id = tags.id
+        WHERE member.split_id = $1
         ",
         split_id
     )
     .fetch_all(pool)
-    .await
-    .map_err(|e| anyhow!("Failed to get members: {}", e))
+    .await;
+
+    let mut members: HashMap<Member, Vec<Tag>> = HashMap::new();
+    match rows {
+        Ok(results) => {
+            for result in results {
+                let member = Member {
+                    id: result.member_id,
+                    public_id: result.member_public_id,
+                    split_id,
+                    name: result.member_name,
+                    r#type: MemberType::Guest,
+                    tags: vec![],
+                    created_at: result.member_created_at,
+                    updated_at: result.member_updated_at,
+                };
+                let tag = Tag {
+                    id: result.tag_id,
+                    public_id: result.tag_public_id,
+                    name: result.tag_name,
+                    color: result.tag_color,
+                    split_id,
+                    r#type: result.tag_type,
+                    created_at: result.tag_created_at,
+                    updated_at: result.tag_updated_at,
+                };
+
+                members.entry(member).or_default().push(tag);
+            }
+        }
+        Err(e) => return Err(anyhow!("Failed to get members with tags: {}", e)),
+    }
+
+    let members: Vec<Member> = members
+        .into_iter()
+        .map(|(member, tags)| {
+            let mut member = member;
+            member.tags = tags;
+            member
+        })
+        .collect();
+
+    Ok(members)
 }
 
 #[derive(Debug)]
@@ -45,10 +91,11 @@ pub async fn create_member(
     pool: &PgPool,
     split_id: Uuid,
     name: String,
-) -> Result<SplitMember, CreateMemberError> {
+) -> Result<Member, CreateMemberError> {
     let member_id = Uuid::new_v4();
+
     let member = sqlx::query_as!(
-        SplitMember,
+        MemberDb,
         "
         INSERT INTO split_members (id, public_id, name, split_id, type)
         VALUES ($1, $2, $3, $4, $5) 
@@ -74,28 +121,34 @@ pub async fn create_member(
         e => CreateMemberError::UnexpectedError(anyhow!(e)),
     })?;
 
-    let tag = services::get_all_tag(pool, split_id)
-        .await
-        .map_err(|e| match e {
-            GetTagError::NotFound => {
-                CreateMemberError::UnexpectedError(anyhow!("Predefined tag 'all' not found"))
-            }
-            GetTagError::PredefinedTagNotFound => {
-                CreateMemberError::UnexpectedError(anyhow!("Predefined tag 'all' not found"))
-            }
-            GetTagError::UnexpectedError(e) => CreateMemberError::UnexpectedError(e),
-        })?;
+    let member_tag = services::create_tag(
+        pool,
+        split_id,
+        &member.name,
+        "#ff5858ff",
+        crate::models::TagType::UserTag,
+    )
+    .await
+    .map_err(|e| CreateMemberError::UnexpectedError(anyhow!(e)))?;
 
-    add_tag_to_member(pool, split_id, member_id, tag.id)
+    let all_tag = services::get_all_tag(pool, split_id)
+        .await
+        .map_err(|e| CreateMemberError::UnexpectedError(anyhow!(e)))?;
+
+    services::add_tag_to_member(pool, split_id, member.id, member_tag.id)
         .await
         .map_err(CreateMemberError::UnexpectedError)?;
 
-    Ok(member)
+    services::add_tag_to_member(pool, split_id, member.id, all_tag.id)
+        .await
+        .map_err(CreateMemberError::UnexpectedError)?;
+
+    Ok(Member::from(member, vec![all_tag, member_tag]))
 }
 
-pub async fn get_member(pool: &PgPool, split_id: Uuid, member_id: Uuid) -> Result<SplitMember> {
-    let query_result = sqlx::query_as!(
-        SplitMember,
+pub async fn get_member(pool: &PgPool, split_id: Uuid, member_id: Uuid) -> Result<Member> {
+    let member = sqlx::query_as!(
+        MemberDb,
         "
         SELECT id, public_id, name, split_id, type AS \"type: MemberType\", created_at, updated_at
         FROM split_members
@@ -105,17 +158,25 @@ pub async fn get_member(pool: &PgPool, split_id: Uuid, member_id: Uuid) -> Resul
         member_id
     )
     .fetch_one(pool)
-    .await;
+    .await
+    .map_err(|e| match e {
+        sqlx::Error::RowNotFound => anyhow!("Member not found"),
+        _ => anyhow!("Failed to get member: {}", e),
+    })?;
 
-    match query_result {
-        Ok(member) => Ok(member),
-        Err(e) => Err(anyhow!("Failed to get member: {}", e)),
-    }
+    let tags = services::get_tags_for_member(pool, split_id, member_id).await?;
+
+    Ok(Member::from(member, tags))
 }
 
-pub async fn edit_member(pool: &PgPool, member_id: Uuid, name: String) -> Result<SplitMember> {
-    sqlx::query_as!(
-        SplitMember,
+pub async fn edit_member(
+    pool: &PgPool,
+    split_id: Uuid,
+    member_id: Uuid,
+    name: String,
+) -> Result<Member> {
+    let _member = sqlx::query_as!(
+        MemberDb,
         "
         UPDATE split_members
         SET name = $2, updated_at = NOW()
@@ -137,7 +198,21 @@ pub async fn edit_member(pool: &PgPool, member_id: Uuid, name: String) -> Result
             }
             _ => anyhow!("Failed to edit member: {}", e),
         }
-    })
+    })?;
+
+    let tags = get_tags_for_member(pool, split_id, member_id);
+    let member_tag = tags
+        .await
+        .map_err(|e| anyhow!("Failed to get member tags: {}", e))?
+        .into_iter()
+        .find(|tag| tag.r#type == TagType::UserTag)
+        .ok_or_else(|| anyhow!("Member tag not found"))?;
+
+    services::edit_tag(pool, split_id, member_tag.id, &name, &member_tag.color)
+        .await
+        .map_err(|e| anyhow!("Failed to edit member tag: {}", e))?;
+
+    get_member(pool, split_id, member_id).await
 }
 
 pub async fn delete_member(pool: &PgPool, member_id: &Uuid) -> Result<()> {

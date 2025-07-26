@@ -1,7 +1,9 @@
 "use client";
+
 import { useSplitSocket } from "@/hooks/useSplitSocket";
 import { Tag } from "@/utils/tag";
 import React, { useContext, useState } from "react";
+import { useSplit } from "./split-provider";
 
 const TagsContext = React.createContext<Tag[]>([]);
 
@@ -16,13 +18,28 @@ export function TagsProvider({
 }: TagsProviderProps) {
     const [tagsState, setTagsState] = useState<Tag[]>(initialTags);
 
-    useSplitSocket(
-        "splitId", // Replace with the actual split ID or context if needed
-        ["TagChanged", "TagDeleted"],
-        (payload: unknown) => {
-            setTagsState(payload as Tag[]);
-        }
-    );
+    const split = useSplit();
+
+    useSplitSocket(split.id, ["MemberCreated"], (payload: unknown) => {
+        const memberPayload = payload as { tags: Tag[] };
+
+        const newTags = memberPayload.tags.filter(
+            (tag) => !tagsState.some((existingTag) => existingTag.id === tag.id)
+        );
+
+        setTagsState([...tagsState, ...newTags]);
+    });
+
+    useSplitSocket(split.id, ["MemberEdited"], (payload: unknown) => {
+        const memberPayload = payload as { tags: Tag[] };
+
+        const oldTags = tagsState.filter(
+            (tag) =>
+                !memberPayload.tags.some((memberTag) => memberTag.id === tag.id)
+        );
+
+        setTagsState([...oldTags, ...memberPayload.tags]);
+    });
 
     return (
         <TagsContext.Provider value={tagsState}>

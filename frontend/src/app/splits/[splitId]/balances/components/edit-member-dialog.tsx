@@ -3,7 +3,7 @@
 import { editMember } from "@/actions/member-service";
 import MobileDialog from "@/components/mobile-dialog";
 import { useSplit } from "@/providers/split-provider";
-import { CreateMemberWithTagsDto, MemberWithTags } from "@/utils/user";
+import { CreateMemberWithTagsDto, Member } from "@/utils/user";
 import {
     Alert,
     DialogActions,
@@ -12,10 +12,10 @@ import {
     DialogTitle,
 } from "@mui/material";
 import { useState } from "react";
-import MemberForm from "./member-form";
+import MemberForm from "../../../../../components/member-form";
 
 interface EditMemberProps {
-    member: MemberWithTags;
+    member: Member;
     open: boolean;
     onClose: () => void;
 }
@@ -27,20 +27,25 @@ export function EditMemberDialog({
 }: EditMemberProps) {
     const split = useSplit();
 
-    const initalTagIds = initalMember.tags.map((tag) => tag.id);
+    const initalTagIds = initalMember.tagIds;
 
     const [member, setMember] = useState<CreateMemberWithTagsDto>({
         name: initalMember.name,
         tagIds: initalTagIds,
     });
     const [error, setError] = useState<string | null>(null);
+    const [isPending, setPending] = useState(false);
 
     const handleSubmit = async (member: CreateMemberWithTagsDto) => {
+        setPending(true);
+
         try {
             await editMember(split.id, initalMember.id, member);
+            reset();
             onClose();
         } catch {
             setError("Failed to edit member. Please try again.");
+            setPending(false);
         }
     };
 
@@ -55,6 +60,7 @@ export function EditMemberDialog({
             tagIds: initalTagIds,
         });
         setError(null);
+        setPending(false);
     };
 
     return (
@@ -68,6 +74,7 @@ export function EditMemberDialog({
                     excludeId: initalMember.id,
                     excludeTagname: initalMember.name,
                 }}
+                isPending={isPending}
             >
                 <DialogTitle>
                     <MemberForm.Title>

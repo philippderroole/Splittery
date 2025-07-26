@@ -14,7 +14,7 @@ import {
     Fab,
 } from "@mui/material";
 import React, { useState } from "react";
-import MemberForm from "./member-form";
+import MemberForm from "../../../../../components/member-form";
 
 interface CreateUserDialogProps {
     open: boolean;
@@ -31,16 +31,22 @@ export function CreateMemberDialog(props: CreateUserDialogProps) {
         tagIds: [],
     });
     const [error, setError] = useState<string | null>(null);
+    const [isPending, setPending] = useState(false);
 
     const handleSubmit = async (member: CreateMemberWithTagsDto) => {
+        setPending(true);
+
         try {
             await createMember(member, split.id);
+            reset();
+            onClose();
         } catch {
             setError("Failed to create user. Please try again.");
+            setPending(false);
         }
     };
 
-    const handleAbort = () => {
+    const handleCancel = () => {
         reset();
         onClose();
     };
@@ -48,15 +54,17 @@ export function CreateMemberDialog(props: CreateUserDialogProps) {
     const reset = () => {
         setMember({ name: "", tagIds: [] });
         setError(null);
+        setPending(false);
     };
 
     return (
-        <MobileDialog open={open} onClose={handleAbort}>
+        <MobileDialog open={open} onClose={handleCancel}>
             <MemberForm.Root
                 member={member}
                 setMember={setMember}
                 onSubmit={handleSubmit}
-                onCancel={handleAbort}
+                onCancel={handleCancel}
+                isPending={isPending}
             >
                 <DialogTitle>
                     <MemberForm.Title>

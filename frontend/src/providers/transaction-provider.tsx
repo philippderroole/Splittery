@@ -17,15 +17,10 @@ export function TransactionProvider({
 }: TransactionProviderProps) {
     const transactions = useTransactions();
 
-    console.log("TransactionProvider transactions:", transactions);
-    console.log("TransactionProvider id:", transactionId);
-
     const transaction = useMemo(
         () => transactions.find((t) => t.id === transactionId)!,
         [transactions, transactionId]
     );
-
-    console.log("TransactionProvider transaction:", transaction);
 
     return (
         <TransactionContext.Provider value={transaction}>

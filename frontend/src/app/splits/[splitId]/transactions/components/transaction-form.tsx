@@ -1,7 +1,7 @@
 "use client";
 
 import TagSelection from "@/components/tag-selection";
-import { useMembers } from "@/providers/split-user-provider";
+import { useMembers } from "@/providers/member-provider";
 import { useTags } from "@/providers/tag-provider";
 import { CreateTransactionDto, Transaction } from "@/utils/transaction";
 import {

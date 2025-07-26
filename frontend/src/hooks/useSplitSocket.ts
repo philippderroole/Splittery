@@ -7,16 +7,47 @@ export function useSplitSocket(
     onUpdate: (payload: unknown) => void
 ) {
     const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
+    const onUpdateRef = useRef(onUpdate);
+    const typesRef = useRef(types);
+
+    // Keep refs updated with latest values
+    useEffect(() => {
+        onUpdateRef.current = onUpdate;
+    }, [onUpdate]);
 
     useEffect(() => {
-        subscriptionRef.current = subscribeToMessages(splitId, (message) => {
-            console.debug(`Received split update for ${splitId}:`, message);
+        typesRef.current = types;
+    }, [types]);
 
-            if (types.includes(message.type)) {
+    useEffect(() => {
+        // Clean up previous subscription
+        if (subscriptionRef.current) {
+            subscriptionRef.current.unsubscribe();
+        }
+
+        subscriptionRef.current = subscribeToMessages(splitId, (message) => {
+            if (!typesRef.current.includes(message.type)) {
                 return;
             }
 
-            onUpdate(message.payload);
+            onUpdateRef.current(message.payload);
         });
-    }, [splitId, onUpdate, types]);
+
+        // Cleanup on unmount or splitId change
+        return () => {
+            if (subscriptionRef.current) {
+                subscriptionRef.current.unsubscribe();
+                subscriptionRef.current = null;
+            }
+        };
+    }, [splitId]); // Only depend on splitId
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            if (subscriptionRef.current) {
+                subscriptionRef.current.unsubscribe();
+            }
+        };
+    }, []);
 }

@@ -21,8 +21,8 @@ import {
     Typography,
 } from "@mui/material";
 import { useState } from "react";
-import MemberForm from "../splits/[splitId]/balances/components/member-form";
-import SplitForm from "./split-form";
+import MemberForm from "../../components/member-form";
+import SplitForm from "../../components/split-form";
 
 interface CreateSplitDialogProps {
     open: boolean;
@@ -38,6 +38,7 @@ export function CreateSplitDialog(props: CreateSplitDialogProps) {
         name: "",
         tagIds: [],
     });
+    const [isPending, setPending] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [activeStep, setActiveStep] = useState(0);
 
@@ -50,6 +51,8 @@ export function CreateSplitDialog(props: CreateSplitDialogProps) {
     };
 
     const handleSubmit = async () => {
+        setPending(true);
+
         const trimmedSplit = { ...split, name: split.name.trim() };
         const trimmedMember = { ...member, name: member.name.trim() };
 
@@ -61,13 +64,16 @@ export function CreateSplitDialog(props: CreateSplitDialogProps) {
             setError(
                 "Failed to create split and add member. Please try again."
             );
+            setPending(false);
         }
     };
 
     const handleCancel = () => {
         setSplit({ name: "" });
         setMember({ name: "", tagIds: [] });
+        setPending(false);
         setError(null);
+        setActiveStep(0);
         onClose();
     };
 
@@ -94,6 +100,8 @@ export function CreateSplitDialog(props: CreateSplitDialogProps) {
                                 nextStep={handleSubmit}
                                 prevStep={prevStep}
                                 error={error}
+                                isPending={isPending}
+                                setPending={setPending}
                             />
                         );
                     default:
@@ -203,9 +211,18 @@ interface Step2Props {
     nextStep: () => Promise<void>;
     prevStep: () => void;
     error: string | null;
+    isPending: boolean;
+    setPending: (pending: boolean) => void;
 }
 
-function Step2({ member, setMember, nextStep, prevStep, error }: Step2Props) {
+function Step2({
+    member,
+    setMember,
+    nextStep,
+    prevStep,
+    error,
+    isPending,
+}: Step2Props) {
     const handleSubmit = async (member: CreateMemberDto) => {
         if (!member.name.trim()) return;
         await nextStep();
@@ -217,8 +234,8 @@ function Step2({ member, setMember, nextStep, prevStep, error }: Step2Props) {
             setMember={setMember}
             onSubmit={handleSubmit}
             onCancel={prevStep}
-            stayPending={true}
             showTagSelection={false}
+            isPending={isPending}
         >
             <DialogTitle>
                 <MemberForm.Title>

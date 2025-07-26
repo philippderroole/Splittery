@@ -11,7 +11,7 @@ use crate::{
     services::{self, DeleteTagError},
 };
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Clone)]
 pub struct TagResponse {
     pub id: String,
     pub name: String,

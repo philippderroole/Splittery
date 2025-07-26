@@ -1,10 +1,10 @@
 "use client";
 
 import TagSelection from "@/components/tag-selection";
-import { useMembers } from "@/providers/split-user-provider";
+import { useMembers } from "@/providers/member-provider";
 import { useTags } from "@/providers/tag-provider";
 import { Tag } from "@/utils/tag";
-import { CreateMemberWithTagsDto, MemberWithTags } from "@/utils/user";
+import { CreateMemberWithTagsDto, Member } from "@/utils/user";
 import { Button, TextField } from "@mui/material";
 import { createContext, ReactNode, useContext, useState } from "react";
 
@@ -43,7 +43,7 @@ interface MemberValidationOptions {
 
 const validateMember = (
     name: string,
-    existingMembers: MemberWithTags[],
+    existingMembers: Member[],
     existingTags: Tag[],
     options: MemberValidationOptions = {}
 ) => {
@@ -96,7 +96,7 @@ interface MemberFormCompoundProps {
     children?: ReactNode;
     onSubmit: (member: CreateMemberWithTagsDto) => Promise<Error | void>;
     onCancel: () => void;
-    stayPending?: boolean;
+    isPending: boolean;
     showTagSelection?: boolean;
     validationOptions?: MemberValidationOptions;
 }
@@ -107,19 +107,17 @@ function Root({
     children,
     onSubmit,
     onCancel,
-    stayPending,
+    isPending,
     showTagSelection = true,
     validationOptions = {},
 }: MemberFormCompoundProps) {
     const members = useMembers();
     const tags = useTags();
 
-    const [isPending, setPending] = useState(false);
     const [validationError, setValidationError] = useState<string | null>(null);
 
     const handleSubmit = async () => {
         if (isPending) return;
-        setPending(true);
 
         const newMember = { ...member, name: member.name.trim() };
 
@@ -129,19 +127,13 @@ function Root({
         setValidationError(validationError);
         // the validation error is delayed by one render cycle so we use the local variable
         if (validationError) {
-            setPending(false);
             return;
         }
 
         const result = await onSubmit(newMember);
 
         if (result instanceof Error) {
-            setPending(false);
             return;
-        }
-
-        if (!stayPending) {
-            setPending(false);
         }
     };
 

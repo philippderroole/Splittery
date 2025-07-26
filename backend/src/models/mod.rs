@@ -1,3 +1,4 @@
+pub mod member;
 pub mod split;
 pub mod tag;
 pub mod transaction;

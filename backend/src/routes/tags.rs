@@ -10,7 +10,6 @@ pub fn tags_routes() -> Router<PgPool> {
     Router::new().nest(
         "/splits/{splitId}",
         Router::new()
-            .route("/members/tags", get(controllers::get_members_with_tags))
             .nest(
                 "/members/{memberId}/tags",
                 Router::new()

@@ -4,7 +4,7 @@ use anyhow::{Result, anyhow};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::{Tag, TagDb, TagType, tag};
+use crate::models::{Tag, TagDb, TagType};
 
 pub async fn get_tags(pool: &PgPool, split_id: Uuid) -> Result<Vec<Tag>> {
     sqlx::query_as!(
@@ -26,7 +26,7 @@ pub async fn create_tag(
     pool: &PgPool,
     split_id: Uuid,
     name: &String,
-    color: &String,
+    color: &str,
     tag_type: TagType,
 ) -> Result<Tag> {
     let tag_id = uuid::Uuid::new_v4();

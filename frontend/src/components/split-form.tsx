@@ -1,7 +1,7 @@
 import { CreateSplitDto } from "@/utils/split";
 import { Button } from "@mui/material";
 import { createContext, ReactNode, useContext, useState } from "react";
-import SplitNameField from "./split-name-field";
+import SplitNameField from "../app/components/split-name-field";
 
 type CreateSplitContextType = {
     split: CreateSplitDto;
@@ -87,7 +87,7 @@ function Root(props: CreateSplitCompoundProps) {
                 setSplitName,
                 onSaveClick,
                 onCancelClick,
-                isPending: isPending,
+                isPending,
                 validationErrors,
             }}
         >

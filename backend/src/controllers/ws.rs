@@ -13,6 +13,8 @@ use std::sync::Arc;
 use tokio::sync::{RwLock, broadcast};
 use uuid::Uuid;
 
+use crate::controllers::{MemberResponse, TagResponse};
+
 // Shared broadcaster for split updates
 type SplitBroadcast = Arc<broadcast::Sender<String>>;
 
@@ -32,7 +34,7 @@ pub async fn ws_split_updates(
     Path(split_url): Path<String>,
     State(_db): State<PgPool>,
 ) -> impl IntoResponse {
-    info!("WebSocket connection for split info: {}", split_url);
+    info!("WebSocket connection for split info: {split_url}");
     // Get or create broadcast channel for this split
     let broadcasters = get_split_broadcasters();
     let broadcast_tx = {
@@ -77,38 +79,17 @@ async fn handle_ws(mut socket: WebSocket, _split_url: String, broadcast_tx: Spli
     }
 }
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize)]
 #[serde(tag = "type", content = "payload")]
 pub enum SplitUpdateMessage {
-    SplitChanged {
-        split_id: Uuid,
-        name: String,
+    MemberCreated {
+        member: MemberResponse,
+        tags: Vec<TagResponse>,
     },
-    SplitDeleted {
-        split_id: Uuid,
+    MemberEdited {
+        member: MemberResponse,
+        tags: Vec<TagResponse>,
     },
-    TransactionCreated {
-        transaction_id: uuid::Uuid,
-    },
-    TransactionUpdated {
-        transaction_id: uuid::Uuid,
-    },
-    TransactionDeleted {
-        transaction_id: uuid::Uuid,
-    },
-    TransactionItemCreated {
-        item_id: uuid::Uuid,
-        transaction_id: uuid::Uuid,
-    },
-    TransactionItemUpdated {
-        item_id: uuid::Uuid,
-        transaction_id: uuid::Uuid,
-    },
-    TransactionItemDeleted {
-        item_id: uuid::Uuid,
-        transaction_id: uuid::Uuid,
-    },
-    // Add more as needed
 }
 
 pub async fn ensure_split_broadcaster(split_url: &str) -> SplitBroadcast {

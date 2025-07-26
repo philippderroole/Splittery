@@ -2,11 +2,12 @@ import "server-only";
 
 import NavTabs from "@/app/splits/[splitId]/components/nav-tabs";
 import SplitHeader from "@/app/splits/[splitId]/components/split-header";
-import { SplitUserProvider } from "@/providers/split-user-provider";
+import { MembersProvider } from "@/providers/member-provider";
 import { TagsProvider } from "@/providers/tag-provider";
 import { TransactionsProvider } from "@/providers/transactions-provider";
+import { getMembers } from "@/service/member-service";
 import { getSplit } from "@/service/split-service";
-import { getMembersWithTags, getTags } from "@/service/tag-service";
+import { getTags } from "@/service/tag-service";
 import { getTransactions } from "@/service/transaction-service";
 import { notFound } from "next/navigation";
 import { SplitProvider } from "../../../providers/split-provider";
@@ -29,7 +30,7 @@ export default async function SplitLayout({
         const values = await Promise.all([
             getSplit(splitId),
             getTags(splitId),
-            getMembersWithTags(splitId),
+            getMembers(splitId),
             getTransactions(splitId),
         ]);
 
@@ -48,12 +49,12 @@ export default async function SplitLayout({
                 <TransactionsProvider
                     serializedTransactions={serializedTransactions}
                 >
-                    <SplitUserProvider splitUsers={splitUsers}>
+                    <MembersProvider members={splitUsers}>
                         <TagsProvider tags={tags}>
                             <SplitHeader />
                             {children}
                         </TagsProvider>
-                    </SplitUserProvider>
+                    </MembersProvider>
                 </TransactionsProvider>
             </SplitProvider>
             <div

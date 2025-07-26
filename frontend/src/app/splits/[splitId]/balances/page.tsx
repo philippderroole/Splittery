@@ -1,9 +1,10 @@
 "use client";
 
-import { useMembers } from "@/providers/split-user-provider";
+import { useMembers } from "@/providers/member-provider";
+import { useTags } from "@/providers/tag-provider";
 import { Currencies } from "@/utils/currencies";
 import { Money } from "@/utils/money";
-import { Member, MemberWithTags } from "@/utils/user";
+import { Member } from "@/utils/user";
 import {
     Avatar,
     Box,
@@ -20,9 +21,7 @@ import { CreateMemberDialogButton } from "./components/create-member-dialog";
 import { EditMemberDialog } from "./components/edit-member-dialog";
 
 export default function SplitPage() {
-    const splitUsers = useMembers();
-
-    console.debug("SplitPage: ", splitUsers);
+    const members = useMembers();
 
     return (
         <div
@@ -33,8 +32,8 @@ export default function SplitPage() {
         >
             <Typography variant="h4">Balances</Typography>
             <List sx={{ width: "100%", padding: 0 }}>
-                {splitUsers.map((user) => {
-                    return <SplitUserItem member={user} key={user.id} />;
+                {members.map((member) => {
+                    return <SplitUserItem member={member} key={member.id} />;
                 })}
             </List>
             <div
@@ -52,10 +51,12 @@ export default function SplitPage() {
 }
 
 interface SplitUserItemProps {
-    member: MemberWithTags;
+    member: Member;
 }
 
 function SplitUserItem({ member }: SplitUserItemProps) {
+    const tags = useTags();
+
     const [open, setOpen] = useState(false);
 
     const handleOpen = () => {
@@ -88,18 +89,26 @@ function SplitUserItem({ member }: SplitUserItemProps) {
                         primary={member.name}
                         secondary={
                             <Box sx={{ display: "flex", gap: "2px" }}>
-                                {member.tags.map((tag) => (
-                                    <Chip
-                                        key={tag.id}
-                                        label={tag.name}
-                                        size="small"
-                                        variant="filled"
-                                        sx={{
-                                            backgroundColor: tag.color,
-                                            mt: 0.5,
-                                        }}
-                                    />
-                                ))}
+                                {member.tagIds.map((tagId) => {
+                                    const tag = tags.find(
+                                        (t) => t.id === tagId
+                                    );
+                                    if (!tag) {
+                                        return null;
+                                    }
+                                    return (
+                                        <Chip
+                                            key={tag.id}
+                                            label={tag.name}
+                                            size="small"
+                                            variant="filled"
+                                            sx={{
+                                                backgroundColor: tag.color,
+                                                mt: 0.5,
+                                            }}
+                                        />
+                                    );
+                                })}
                             </Box>
                         }
                     />

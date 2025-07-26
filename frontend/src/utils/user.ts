@@ -1,5 +1,3 @@
-import { Tag } from "./tag";
-
 export interface User {
     id: string;
     username: string;
@@ -11,6 +9,7 @@ export interface Member {
     avatarUri: string;
     saldo: number;
     type: "Guest" | "Registered";
+    tagIds: string[];
 }
 
 export interface CreateMemberDto {
@@ -34,8 +33,4 @@ export interface CreateUserDto {
 export interface SerializedUser {
     id: string;
     username: string;
-}
-
-export interface MemberWithTags extends Member {
-    tags: Tag[];
 }

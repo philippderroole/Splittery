@@ -7,6 +7,7 @@ import {
     Transaction,
 } from "@/utils/transaction";
 import React, { useContext, useState } from "react";
+import { useSplit } from "./split-provider";
 
 const TransactionContext = React.createContext<Transaction[]>(
     [] as Transaction[]
@@ -25,13 +26,13 @@ export function TransactionsProvider({
         initialSerializedTransactions
     );
 
-    console.log("Initial transactions:", initialTransactions);
-
     const [transactionState, setTransactionState] =
         useState<Transaction[]>(initialTransactions);
 
+    const split = useSplit();
+
     useSplitSocket(
-        "splitId", // Replace with the actual split ID or context if needed
+        split.id, // Replace with the actual split ID or context if needed
         ["TransactionChanged", "TransactionDeleted"],
         (payload: unknown) => {
             setTransactionState(payload as Transaction[]);
