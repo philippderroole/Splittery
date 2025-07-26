@@ -3,9 +3,8 @@
 import TagSelection from "@/components/tag-selection";
 import { useMembers } from "@/providers/member-provider";
 import { useTags } from "@/providers/tag-provider";
-import { CreateTransactionDto, Transaction } from "@/utils/transaction";
+import { CreateTransactionDto } from "@/utils/transaction";
 import {
-    Alert,
     Button,
     FormControl,
     FormHelperText,
@@ -23,11 +22,10 @@ type TransactionFormContextType = {
     setAmount: (amount: string) => void;
     setPayee: (payee: string) => void;
     setSelectedTags: (tags: string[]) => void;
-    isPending: boolean;
-    error: string | null;
     validationErrors: Map<string, string | null>;
-    onSaveClick: () => void;
-    onCancelClick: () => void;
+    onSubmit: () => void;
+    onCancel: () => void;
+    isPending: boolean;
 };
 
 const TransactionFormContext = createContext<TransactionFormContextType | null>(
@@ -47,35 +45,24 @@ const useTransactionFormContext = () => {
 };
 
 interface TransactionFormCompoundProps {
-    initalTransaction?: Transaction;
+    transaction: CreateTransactionDto;
+    setTransaction: (transaction: CreateTransactionDto) => void;
     children?: ReactNode;
     onSubmit: (transaction: CreateTransactionDto) => Promise<Error | void>;
     onCancel: () => void;
+    isPending: boolean;
 }
 
-function Root(props: TransactionFormCompoundProps) {
-    const { initalTransaction, children, onSubmit, onCancel } = props;
-
-    const tags = useTags();
+function Root({
+    transaction,
+    setTransaction,
+    children,
+    onSubmit,
+    onCancel,
+    isPending,
+}: TransactionFormCompoundProps) {
     const members = useMembers();
 
-    const [isPending, setPending] = useState(false);
-    const [transaction, setTransaction] = useState<CreateTransactionDto>(
-        initalTransaction
-            ? {
-                  ...initalTransaction,
-                  amount: initalTransaction.amount.getAmount(),
-                  memberId: "",
-                  tagIds: initalTransaction.tags.map((tag) => tag.id),
-              }
-            : {
-                  name: "",
-                  amount: null,
-                  memberId: "",
-                  tagIds: [],
-              }
-    );
-    const [error, setError] = useState<string | null>(null);
     const [validationErrors, setValidationErrors] = useState<
         Map<string, string | null>
     >(
@@ -86,7 +73,7 @@ function Root(props: TransactionFormCompoundProps) {
         ])
     );
 
-    const onSaveClick = async () => {
+    const handleSubmit = async () => {
         if (isPending) return;
 
         const newTransaction = {
@@ -101,45 +88,15 @@ function Root(props: TransactionFormCompoundProps) {
             return;
         }
 
-        setPending(true);
-        setError(null);
-        const result = await onSubmit(newTransaction);
-        setPending(false);
-
-        if (result instanceof Error) {
-            setError(result.message);
-            return;
-        }
-
-        clearTransaction();
-        onCancel();
-    };
-
-    const onCancelClick = () => {
-        clearTransaction();
-        onCancel();
-    };
-
-    const clearTransaction = () => {
-        setTransaction({ name: "", amount: null, memberId: "", tagIds: [] });
-        setError(null);
-        setValidationErrors(
-            new Map<string, string | null>([
-                ["name", null],
-                ["amount", null],
-                ["payee", null],
-            ])
-        );
+        await onSubmit(newTransaction);
     };
 
     const setName = (name: string) => {
-        setTransaction((prev) => ({ ...prev, name }));
-        setError(null);
+        setTransaction({ ...transaction, name });
     };
 
-    const setSelectedTags = (tags: string[]) => {
-        setTransaction((prev) => ({ ...prev, tagIds: tags }));
-        setError(null);
+    const setSelectedTags = (tagIds: string[]) => {
+        setTransaction({ ...transaction, tagIds });
     };
 
     const setAmount = (amount: string) => {
@@ -151,14 +108,12 @@ function Root(props: TransactionFormCompoundProps) {
             newAmount = Number(amount);
         }
 
-        setTransaction((prev) => ({ ...prev, amount: newAmount }));
-        setError(null);
+        setTransaction({ ...transaction, amount: newAmount });
     };
 
     const setPayee = (name: string) => {
         const member = members.find((user) => user.name === name);
-        setTransaction((prev) => ({ ...prev, memberId: member?.id || null }));
-        setError(null);
+        setTransaction({ ...transaction, memberId: member?.id || null });
     };
 
     const validateTransactionName = (name: string) => {
@@ -219,11 +174,10 @@ function Root(props: TransactionFormCompoundProps) {
                 setAmount,
                 setPayee,
                 setSelectedTags,
+                onSubmit: handleSubmit,
+                onCancel,
                 isPending,
-                error,
                 validationErrors,
-                onSaveClick,
-                onCancelClick,
             }}
         >
             {children}
@@ -238,7 +192,6 @@ function FormInputs() {
         setAmount,
         setPayee,
         setSelectedTags,
-        error,
         isPending,
         validationErrors,
     } = useTransactionFormContext();
@@ -322,37 +275,33 @@ function FormInputs() {
                 allTags={tags}
                 selectedTags={transaction.tagIds}
                 setSelectedTags={setSelectedTags}
+                disabled={isPending}
             />
-            {error && (
-                <Alert severity="error" sx={{ mt: 2 }}>
-                    {error}
-                </Alert>
-            )}
         </>
     );
 }
 
 interface SubmitButtonProps {
-    content: ReactNode | string;
+    content: ReactNode;
 }
 
-function SubmitButton(props: SubmitButtonProps) {
-    const { onSaveClick, isPending } = useTransactionFormContext();
+function SubmitButton({ content }: SubmitButtonProps) {
+    const { onSubmit, isPending } = useTransactionFormContext();
 
     return (
         <Button
             variant="contained"
             color="primary"
-            onClick={onSaveClick}
+            onClick={onSubmit}
             loading={isPending}
         >
-            {props.content}
+            <>{content}</>
         </Button>
     );
 }
 
 function CancelButton() {
-    const { onCancelClick, isPending } = useTransactionFormContext();
+    const { onCancel: onCancelClick, isPending } = useTransactionFormContext();
 
     return (
         <Button
@@ -361,7 +310,7 @@ function CancelButton() {
             onClick={onCancelClick}
             disabled={isPending}
         >
-            Cancel
+            <>Cancel</>
         </Button>
     );
 }

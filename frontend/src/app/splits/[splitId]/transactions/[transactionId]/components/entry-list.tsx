@@ -2,7 +2,6 @@
 
 import { useTags } from "@/providers/tag-provider";
 import { useTransaction } from "@/providers/transaction-provider";
-import { Currencies } from "@/utils/currencies";
 import { TransactionEntry } from "@/utils/entry";
 import { Money } from "@/utils/money";
 import {
@@ -20,27 +19,69 @@ import { EditTransactionDialog } from "./edit-transaction-dialog";
 export default function EntryList() {
     const transaction = useTransaction();
 
-    const remainingAmount: Money =
-        transaction.entries.find((item) => item.name === "Remaining")?.amount ??
-        new Money(0, Currencies.EUR);
+    const remainingAmount: Money = transaction.entries.reduce(
+        (acc, entry) => acc.subtract(entry.amount),
+        transaction.amount
+    );
 
     return (
         <>
             <List>
-                <ListItem
-                    secondaryAction={
-                        <Typography sx={{ paddingRight: "16px" }}>
-                            {remainingAmount.toString()}
-                        </Typography>
-                    }
-                >
-                    <ListItemText>Remaining</ListItemText>
-                </ListItem>
+                <RemainingEntryListItem
+                    remainingAmount={remainingAmount}
+                    tagIds={transaction.tags.map((tag) => tag.id)}
+                />
                 {transaction.entries.map((entry) => (
-                    <EntryItem key={entry.id} entry={entry}></EntryItem>
+                    <EntryListItem key={entry.id} entry={entry}></EntryListItem>
                 ))}
             </List>
         </>
+    );
+}
+
+interface RemainingEntryListItemProps {
+    remainingAmount: Money;
+    tagIds: string[];
+}
+
+function RemainingEntryListItem({
+    remainingAmount,
+    tagIds,
+}: RemainingEntryListItemProps) {
+    const tags = useTags();
+
+    return (
+        <ListItem
+            secondaryAction={
+                <Typography sx={{ paddingRight: "16px" }}>
+                    {remainingAmount.toString()}
+                </Typography>
+            }
+        >
+            <ListItemText
+                secondary={
+                    <Box sx={{ display: "flex", gap: "2px" }}>
+                        {tagIds.map((id) => {
+                            const tag = tags.find((tag) => tag.id === id)!;
+                            return (
+                                <Chip
+                                    key={id}
+                                    label={tag.name}
+                                    size="small"
+                                    variant="filled"
+                                    sx={{
+                                        backgroundColor: tag.color,
+                                        mt: 0.5,
+                                    }}
+                                />
+                            );
+                        })}
+                    </Box>
+                }
+            >
+                Remaining
+            </ListItemText>
+        </ListItem>
     );
 }
 
@@ -48,10 +89,11 @@ interface EntryItemProps {
     entry: TransactionEntry;
 }
 
-function EntryItem(props: EntryItemProps) {
+function EntryListItem(props: EntryItemProps) {
     const { entry } = props;
 
     const tags = useTags();
+    const transaction = useTransaction();
 
     const [open, setOpen] = useState(false);
 
@@ -65,7 +107,11 @@ function EntryItem(props: EntryItemProps) {
 
     return (
         <>
-            <EditTransactionDialog open={open} onClose={closeDialog} />
+            <EditTransactionDialog
+                transaction={transaction}
+                open={open}
+                onClose={closeDialog}
+            />
             <ListItemButton onClick={openDialog}>
                 <ListItem
                     disablePadding
@@ -73,12 +119,6 @@ function EntryItem(props: EntryItemProps) {
                         <Typography>{entry.amount.toString()}</Typography>
                     }
                 >
-                    {/* <ListItemAvatar>
-                        <Avatar
-                            alt={`Avatar n°${""}}`}
-                            // src={`/static/images/avatar/${member.avatarUri}.jpg`}
-                        />
-                    </ListItemAvatar> */}
                     <ListItemText
                         primary={entry.name}
                         secondary={

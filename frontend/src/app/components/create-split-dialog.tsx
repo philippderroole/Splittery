@@ -47,7 +47,7 @@ export function CreateSplitDialog(props: CreateSplitDialogProps) {
     };
 
     const prevStep = () => {
-        setActiveStep((prev) => Math.max(prev - 1, 0));
+        setActiveStep((prev) => prev - 1);
     };
 
     const handleSubmit = async () => {
@@ -174,8 +174,7 @@ interface Step1Props {
 }
 
 function Step1({ split, setSplit, nextStep, prevStep }: Step1Props) {
-    const handleSubmit = async (split: CreateSplitDto) => {
-        if (!split.name.trim()) return;
+    const handleSubmit = async (_split: CreateSplitDto) => {
         nextStep();
     };
 

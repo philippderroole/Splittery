@@ -12,7 +12,7 @@ pub async fn get_all_transactions(pool: &PgPool, split_id: Uuid) -> Result<Vec<T
         SELECT
             t.id as transaction_id, t.public_id as transaction_public_id, 
             t.name as transaction_name, t.amount as transaction_amount,
-            t.member_id as transaction_member_id,
+            t.member_id as transaction_member_id, t.executed_at as transaction_executed_at,
             t.created_at as transaction_created_at, t.updated_at as transaction_updated_at,
             e.id AS "entry_id?", e.public_id as "entry_public_id?", 
             e.name AS "entry_name?", e.amount AS "entry_amount?",
@@ -47,6 +47,7 @@ pub async fn get_all_transactions(pool: &PgPool, split_id: Uuid) -> Result<Vec<T
             amount: row.transaction_amount,
             split_id,
             member_id: row.transaction_member_id,
+            executed_at: row.transaction_executed_at,
             created_at: row.transaction_created_at,
             updated_at: row.transaction_updated_at,
         };
@@ -171,7 +172,7 @@ pub async fn create_transaction(
         "
         INSERT INTO transactions (id, public_id, name, amount, split_id, member_id)
         VALUES ($1, $2, $3, $4, $5, $6)
-        RETURNING id, name, public_id, amount, split_id, member_id, created_at, updated_at
+        RETURNING id, name, public_id, amount, split_id, member_id, executed_at, created_at, updated_at
         ",
         transaction_id,
         transaction_id.to_string(),

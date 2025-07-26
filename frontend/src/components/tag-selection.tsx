@@ -3,15 +3,17 @@ import CheckIcon from "@mui/icons-material/Check";
 import { Box, Chip } from "@mui/material";
 
 interface TagSelectionProps {
-    allTags: Tag[];
+    allTags: (Tag & { isDisabled?: boolean })[];
     selectedTags: string[];
     setSelectedTags: (tags: string[]) => void;
+    disabled?: boolean;
 }
 
 export default function TagSelection({
     allTags,
     selectedTags,
     setSelectedTags,
+    disabled = false,
 }: TagSelectionProps) {
     const addTag = (tag: Tag) => {
         setSelectedTags([...selectedTags, tag.id]);
@@ -32,9 +34,7 @@ export default function TagSelection({
                         label={tag.name}
                         variant={selected ? "filled" : "outlined"}
                         deleteIcon={selected ? <CheckIcon /> : <div />}
-                        disabled={
-                            tag.type === "AllTag" || tag.type === "UserTag"
-                        }
+                        disabled={disabled || tag.isDisabled || false}
                         sx={{
                             mt: 0.5,
                             backgroundColor: selected

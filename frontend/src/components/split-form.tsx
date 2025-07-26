@@ -5,7 +5,7 @@ import SplitNameField from "../app/components/split-name-field";
 
 type CreateSplitContextType = {
     split: CreateSplitDto;
-    onSaveClick: () => void;
+    onSubmit: () => void;
     onCancelClick: () => void;
     setSplitName: (name: string) => void;
     isPending: boolean;
@@ -43,16 +43,16 @@ function Root(props: CreateSplitCompoundProps) {
         Map<string, string | null>
     >(new Map());
 
-    const onSaveClick = async () => {
+    const handleSubmit = async () => {
         if (isPending) return;
 
         const newSplit = { ...split, name: split.name.trim() };
 
         const nameError = validateSplitName(newSplit.name);
-        const newErrors = new Map([["name", nameError]]);
-        setValidationErrors(newErrors);
-
-        if (nameError) {
+        const validationErrors = new Map([["name", nameError]]);
+        setValidationErrors(validationErrors);
+        // the validation error is delayed by one render cycle so we use the local variable
+        if (validationErrors.values().some((error) => error !== null)) {
             return;
         }
 
@@ -61,7 +61,7 @@ function Root(props: CreateSplitCompoundProps) {
         setPending(false);
     };
 
-    const onCancelClick = () => {
+    const handleCancel = () => {
         resetForm();
         onCancel();
     };
@@ -85,8 +85,8 @@ function Root(props: CreateSplitCompoundProps) {
             value={{
                 split,
                 setSplitName,
-                onSaveClick,
-                onCancelClick,
+                onSubmit: handleSubmit,
+                onCancelClick: handleCancel,
                 isPending,
                 validationErrors,
             }}
@@ -125,13 +125,13 @@ interface SubmitButtonProps {
 }
 
 function SubmitButton({ content }: SubmitButtonProps) {
-    const { onSaveClick, isPending } = useCreateSplitContext();
+    const { onSubmit, isPending } = useCreateSplitContext();
 
     return (
         <Button
             variant="contained"
             color="primary"
-            onClick={onSaveClick}
+            onClick={onSubmit}
             loading={isPending}
         >
             {content}

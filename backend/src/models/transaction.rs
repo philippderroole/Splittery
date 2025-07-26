@@ -50,6 +50,7 @@ pub struct TransactionDb {
     pub amount: i64, // Amount in cents
     pub member_id: Uuid,
     pub split_id: Uuid,
+    pub executed_at: DateTime<Utc>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -62,6 +63,7 @@ pub struct Transaction {
     pub amount: i64, // Amount in cents
     pub member_id: Uuid,
     pub split_id: Uuid,
+    pub executed_at: DateTime<Utc>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
     pub entries: Vec<Entry>,
@@ -77,6 +79,7 @@ impl Transaction {
             amount: db_transaction.amount,
             member_id: db_transaction.member_id,
             split_id: db_transaction.split_id,
+            executed_at: db_transaction.executed_at,
             created_at: db_transaction.created_at,
             updated_at: db_transaction.updated_at,
             entries,

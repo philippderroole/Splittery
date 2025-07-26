@@ -3,7 +3,7 @@ use std::fmt;
 
 use crate::models::member::{Member, MemberDb, MemberType};
 use crate::models::tag::{Tag, TagType};
-use crate::services::{self, get_tag_by_name, get_tags_for_member};
+use crate::services::{self, get_tags_for_member};
 use anyhow::Result;
 use anyhow::anyhow;
 use bigdecimal::BigDecimal;

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        INSERT INTO transactions (id, public_id, name, amount, split_id, member_id)\n        VALUES ($1, $2, $3, $4, $5, $6)\n        RETURNING id, name, public_id, amount, split_id, member_id, created_at, updated_at\n        ",
+  "query": "\n        INSERT INTO transactions (id, public_id, name, amount, split_id, member_id)\n        VALUES ($1, $2, $3, $4, $5, $6)\n        RETURNING id, name, public_id, amount, split_id, member_id, executed_at, created_at, updated_at\n        ",
   "describe": {
     "columns": [
       {
@@ -35,11 +35,16 @@
       },
       {
         "ordinal": 6,
-        "name": "created_at",
+        "name": "executed_at",
         "type_info": "Timestamptz"
       },
       {
         "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
         "name": "updated_at",
         "type_info": "Timestamptz"
       }
@@ -62,8 +67,9 @@
       false,
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "3df4909098155c99763b6db7a4af758ad8bb46e5088a433ca536f715a505c93f"
+  "hash": "bf85aaa22a36759c0db5a0ced2445d1c773d083ededca5799543ba4a6fa2fb69"
 }

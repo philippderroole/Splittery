@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT\n            t.id as transaction_id, t.public_id as transaction_public_id, \n            t.name as transaction_name, t.amount as transaction_amount,\n            t.member_id as transaction_member_id,\n            t.created_at as transaction_created_at, t.updated_at as transaction_updated_at,\n            e.id AS \"entry_id?\", e.public_id as \"entry_public_id?\", \n            e.name AS \"entry_name?\", e.amount AS \"entry_amount?\",\n            e.created_at as \"entry_created_at?\", e.updated_at as \"entry_updated_at?\",\n            tag.id AS \"tag_id?\", tag.name AS \"tag_name?\", tag.color AS \"tag_color?\",\n            tag.public_id as \"tag_public_id?\", tag.type as \"tag_type?: TagType\",\n            tag.created_at as \"tag_created_at?\", tag.updated_at as \"tag_updated_at?\"\n        FROM transactions t\n        LEFT JOIN entries e ON t.id = e.transaction_id\n        LEFT JOIN entry_tags et ON e.id = et.entry_id\n        LEFT JOIN tags tag ON et.tag_id = tag.id AND tag.split_id = $1\n        WHERE t.split_id = $1\n        ORDER BY t.created_at DESC, t.id, e.id, tag.name\n        ",
+  "query": "\n        SELECT\n            t.id as transaction_id, t.public_id as transaction_public_id, \n            t.name as transaction_name, t.amount as transaction_amount,\n            t.member_id as transaction_member_id, t.executed_at as transaction_executed_at,\n            t.created_at as transaction_created_at, t.updated_at as transaction_updated_at,\n            e.id AS \"entry_id?\", e.public_id as \"entry_public_id?\", \n            e.name AS \"entry_name?\", e.amount AS \"entry_amount?\",\n            e.created_at as \"entry_created_at?\", e.updated_at as \"entry_updated_at?\",\n            tag.id AS \"tag_id?\", tag.name AS \"tag_name?\", tag.color AS \"tag_color?\",\n            tag.public_id as \"tag_public_id?\", tag.type as \"tag_type?: TagType\",\n            tag.created_at as \"tag_created_at?\", tag.updated_at as \"tag_updated_at?\"\n        FROM transactions t\n        LEFT JOIN entries e ON t.id = e.transaction_id\n        LEFT JOIN entry_tags et ON e.id = et.entry_id\n        LEFT JOIN tags tag ON et.tag_id = tag.id AND tag.split_id = $1\n        WHERE t.split_id = $1\n        ORDER BY t.created_at DESC, t.id, e.id, tag.name\n        ",
   "describe": {
     "columns": [
       {
@@ -30,66 +30,71 @@
       },
       {
         "ordinal": 5,
-        "name": "transaction_created_at",
+        "name": "transaction_executed_at",
         "type_info": "Timestamptz"
       },
       {
         "ordinal": 6,
-        "name": "transaction_updated_at",
+        "name": "transaction_created_at",
         "type_info": "Timestamptz"
       },
       {
         "ordinal": 7,
+        "name": "transaction_updated_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
         "name": "entry_id?",
         "type_info": "Uuid"
       },
       {
-        "ordinal": 8,
+        "ordinal": 9,
         "name": "entry_public_id?",
         "type_info": "Varchar"
       },
       {
-        "ordinal": 9,
+        "ordinal": 10,
         "name": "entry_name?",
         "type_info": "Varchar"
       },
       {
-        "ordinal": 10,
+        "ordinal": 11,
         "name": "entry_amount?",
         "type_info": "Int8"
       },
       {
-        "ordinal": 11,
+        "ordinal": 12,
         "name": "entry_created_at?",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 12,
+        "ordinal": 13,
         "name": "entry_updated_at?",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 13,
+        "ordinal": 14,
         "name": "tag_id?",
         "type_info": "Uuid"
       },
       {
-        "ordinal": 14,
+        "ordinal": 15,
         "name": "tag_name?",
         "type_info": "Varchar"
       },
       {
-        "ordinal": 15,
+        "ordinal": 16,
         "name": "tag_color?",
         "type_info": "Varchar"
       },
       {
-        "ordinal": 16,
+        "ordinal": 17,
         "name": "tag_public_id?",
         "type_info": "Varchar"
       },
       {
-        "ordinal": 17,
+        "ordinal": 18,
         "name": "tag_type?: TagType",
         "type_info": {
           "Custom": {
@@ -105,12 +110,12 @@
         }
       },
       {
-        "ordinal": 18,
+        "ordinal": 19,
         "name": "tag_created_at?",
         "type_info": "Timestamptz"
       },
       {
-        "ordinal": 19,
+        "ordinal": 20,
         "name": "tag_updated_at?",
         "type_info": "Timestamptz"
       }
@@ -140,8 +145,9 @@
       false,
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "0c38ba3ea3dbf073ea2266de4d4088d13506c66ed5d11149c642c0fd3053726f"
+  "hash": "84cdc661f8aadae33f09ccd31aaccde8df403d185e6e5dec6669238f3591c77c"
 }

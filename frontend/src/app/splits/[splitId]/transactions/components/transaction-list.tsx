@@ -5,15 +5,19 @@ import { getFormattedDay } from "@/utils/date-formatter";
 import { Transaction } from "@/utils/transaction";
 import { Typography } from "@mui/material";
 import dayjs from "dayjs";
-import { default as TransactionGroup } from "./transaction";
+import { default as TransactionGroup } from "./transaction-list-item";
 
 export default function TransactionList() {
     const transactions = useTransactions();
 
     const transactionsPerDay = transactions
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .sort(
+            (a, b) =>
+                new Date(b.executedAt).getTime() -
+                new Date(a.executedAt).getTime()
+        )
         .reduce<Map<string, Transaction[]>>((acc, group) => {
-            const date = dayjs(group.date).format("MM-DD-YYYY");
+            const date = dayjs(group.executedAt).format("MM-DD-YYYY");
 
             acc.set(date, acc.get(date)?.concat(group) || [group]);
 
