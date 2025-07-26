@@ -20,6 +20,8 @@ pub struct TransactionResponse {
     pub amount: i64,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub entries: Vec<EntryResponse>,
+    #[serde(rename = "executedAt")]
+    pub executed_at: String,
 }
 
 impl TransactionResponse {
@@ -33,6 +35,7 @@ impl TransactionResponse {
                 .into_iter()
                 .map(|entry| EntryResponse::from(entry, transaction.public_id.clone()))
                 .collect(),
+            executed_at: transaction.executed_at.to_rfc3339(),
         }
     }
 }

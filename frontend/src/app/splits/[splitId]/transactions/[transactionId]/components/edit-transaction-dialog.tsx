@@ -1,71 +1,80 @@
 "use client";
 
 import { createTransaction } from "@/actions/create-transaction-service";
+import MobileDialog from "@/components/mobile-dialog";
 import { useSplit } from "@/providers/split-provider";
 import { CreateTransactionDto, Transaction } from "@/utils/transaction";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import {
+    Alert,
     Box,
-    Dialog,
     DialogActions,
     DialogContent,
     DialogContentText,
     DialogTitle,
-    Fab,
-    useMediaQuery,
-    useTheme,
 } from "@mui/material";
-import React from "react";
-import TransactionForm from "../../components/transaction-form";
+import { useState } from "react";
+import TransactionForm from "../../../../../../components/transaction-form";
 
 interface EditTransactionDialogProps {
-    transaction?: Transaction;
+    transaction: Transaction;
     open: boolean;
     onClose: () => void;
 }
 
-export function EditTransactionDialog(props: EditTransactionDialogProps) {
-    const { open, onClose } = props;
-
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
+export function EditTransactionDialog({
+    transaction: initalTransaction,
+    open,
+    onClose,
+}: EditTransactionDialogProps) {
     const split = useSplit();
 
+    const [transaction, setTransaction] = useState<CreateTransactionDto>({
+        ...initalTransaction,
+        amount: initalTransaction.amount.getAmount(),
+        memberId: "",
+        tagIds: initalTransaction.tags.map((tag) => tag.id),
+    });
+    const [error, setError] = useState<string | null>(null);
+    const [isPending, setPending] = useState(false);
+
     const handleSubmit = async (transaction: CreateTransactionDto) => {
-        console.debug("Submitting transaction:", transaction);
+        setPending(true);
 
         try {
             await createTransaction(split.id, transaction);
+            reset();
+            onClose();
         } catch (e) {
-            console.error("Error creating transaction:", e);
-            return new Error("Failed to create transaction. Please try again.");
+            setError("Failed to create transaction. Please try again.");
+            setPending(false);
         }
     };
 
+    const handleCancel = () => {
+        reset();
+        onClose();
+    };
+
+    const reset = () => {
+        setTransaction({
+            ...initalTransaction,
+            amount: initalTransaction.amount.getAmount(),
+            memberId: "",
+            tagIds: initalTransaction.tags.map((tag) => tag.id),
+        });
+        setError(null);
+        setPending(false);
+    };
+
     return (
-        <Dialog
-            open={open}
-            onClose={onClose}
-            slotProps={{
-                paper: {
-                    sx: {
-                        ...(isMobile && {
-                            position: "fixed",
-                            top: "5%",
-                            margin: "0 16px",
-                            width: "calc(100% - 32px)",
-                            maxWidth: "none",
-                            borderRadius: 2,
-                        }),
-                    },
-                },
-            }}
-        >
+        <MobileDialog open={open} onClose={handleCancel}>
             <Box sx={{ minWidth: "360px" }}>
                 <TransactionForm.Root
+                    transaction={transaction}
+                    setTransaction={setTransaction}
                     onSubmit={handleSubmit}
                     onCancel={onClose}
+                    isPending={isPending}
                 >
                     <DialogTitle>
                         <TransactionForm.Title content={"Edit transaction"} />
@@ -76,6 +85,11 @@ export function EditTransactionDialog(props: EditTransactionDialogProps) {
                         </DialogContentText>
                         <div style={{ marginTop: "16px" }} />
                         <TransactionForm.FormInputs />
+                        {error && (
+                            <Alert severity="error" sx={{ mt: 2 }}>
+                                {error}
+                            </Alert>
+                        )}
                     </DialogContent>
                     <DialogActions>
                         <TransactionForm.CancelButton />
@@ -83,27 +97,6 @@ export function EditTransactionDialog(props: EditTransactionDialogProps) {
                     </DialogActions>
                 </TransactionForm.Root>
             </Box>
-        </Dialog>
-    );
-}
-
-export function EditTransactionDialogButton() {
-    const [open, setOpen] = React.useState(false);
-
-    const openDialog = () => {
-        setOpen(true);
-    };
-
-    const closeDialog = () => {
-        setOpen(false);
-    };
-
-    return (
-        <>
-            <Fab color="primary" onClick={openDialog}>
-                <ShoppingCartIcon />
-            </Fab>
-            <EditTransactionDialog open={open} onClose={closeDialog} />
-        </>
+        </MobileDialog>
     );
 }

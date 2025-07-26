@@ -2,21 +2,14 @@
 
 import { useTags } from "@/providers/tag-provider";
 import { CreateTagDto, Tag } from "@/utils/tag";
-import {
-    Box,
-    Button,
-    FormControl,
-    TextField,
-    Typography,
-    useMediaQuery,
-    useTheme,
-} from "@mui/material";
+import { Button, FormControl, TextField } from "@mui/material";
 import { createContext, ReactNode, useContext, useState } from "react";
+import { ColorSelector } from "./color-selector";
 
 type TagFormContextType = {
     tag: CreateTagDto;
-    onSaveClick: () => void;
-    onCancelClick: () => void;
+    onSubmit: () => void;
+    onCancel: () => void;
     setName: (name: string) => void;
     color: string;
     setColor: (color: string) => void;
@@ -125,7 +118,7 @@ function Root({
         setPending(false);
     };
 
-    const handleAbort = () => {
+    const handleCancel = () => {
         onCancel();
     };
 
@@ -144,8 +137,8 @@ function Root({
                 setName,
                 color: tag.color,
                 setColor,
-                onSaveClick: handleSubmit,
-                onCancelClick: handleAbort,
+                onSubmit: handleSubmit,
+                onCancel: handleCancel,
                 isPending,
                 validationError,
             }}
@@ -156,7 +149,8 @@ function Root({
 }
 
 function FormInputs() {
-    const { tag, setName, isPending, validationError } = useTagFormContext();
+    const { tag, setName, isPending, validationError, color, setColor } =
+        useTagFormContext();
 
     const existsValidationError = validationError !== null;
 
@@ -181,18 +175,8 @@ function FormInputs() {
                     />
                 </FormControl>
             )}
-            <Typography variant="subtitle1" gutterBottom>
-                Selected Color
-            </Typography>
-            <SelectedColor />
-            <Typography variant="subtitle2" gutterBottom>
-                Preset Colors
-            </Typography>
-            <PresetColorPalette />
-            <Typography variant="subtitle2" gutterBottom>
-                Custom Color
-            </Typography>
-            <ColorSelector />
+
+            <ColorSelector color={color} setColor={setColor} />
         </>
     );
 }
@@ -202,7 +186,7 @@ interface SubmitButtonProps {
 }
 
 function SubmitButton(props: SubmitButtonProps) {
-    const { onSaveClick, isPending } = useTagFormContext();
+    const { onSubmit: onSaveClick, isPending } = useTagFormContext();
 
     return (
         <Button
@@ -217,7 +201,7 @@ function SubmitButton(props: SubmitButtonProps) {
 }
 
 function CancelButton() {
-    const { onCancelClick, isPending } = useTagFormContext();
+    const { onCancel: onCancelClick, isPending } = useTagFormContext();
 
     return (
         <Button
@@ -245,132 +229,6 @@ interface DescriptionProps {
 
 function Description(props: DescriptionProps) {
     return <>{props.content}</>;
-}
-
-function PresetColorPalette() {
-    const { color: selectedColor, setColor } = useTagFormContext();
-
-    const DEFAULT_COLORS = [
-        "#f44336",
-        "#e91e63",
-        "#9c27b0",
-        "#673ab7",
-        "#3f51b5",
-        "#2196f3",
-        "#03a9f4",
-        "#00bcd4",
-        "#009688",
-        "#4caf50",
-        "#8bc34a",
-        "#cddc39",
-        "#ffeb3b",
-        "#ffc107",
-        "#ff9800",
-        "#ff5722",
-        "#795548",
-        "#607d8b",
-    ];
-
-    return (
-        <Box
-            sx={{
-                display: "grid",
-                gridTemplateColumns: "repeat(6, 1fr)",
-                gap: 1,
-                mb: 2,
-            }}
-        >
-            {DEFAULT_COLORS.map((color) => (
-                <Box
-                    key={color}
-                    sx={{
-                        width: 40,
-                        height: 40,
-                        borderRadius: "50%",
-                        bgcolor: color,
-                        color: "primary.main",
-                        border: "2px solid",
-                        borderColor:
-                            selectedColor === color
-                                ? "primary.main"
-                                : "divider",
-                        boxShadow:
-                            selectedColor === color ? "0 0 0 2px" : "none",
-                        cursor: "pointer",
-                        "&:hover": {
-                            transform: "scale(1.1)",
-                        },
-                        transition: "all 0.2s",
-                    }}
-                    onClick={() => setColor(color)}
-                />
-            ))}
-        </Box>
-    );
-}
-
-function ColorSelector() {
-    const { color, setColor } = useTagFormContext();
-
-    const theme = useTheme();
-    const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
-    return (
-        <Box
-            sx={{
-                display: "flex",
-                gap: 1,
-                alignItems: "center",
-            }}
-        >
-            {!isMobile && (
-                <TextField
-                    type="color"
-                    value={color}
-                    onChange={(e) => {
-                        setColor(e.target.value);
-                    }}
-                    sx={{ width: 60 }}
-                />
-            )}
-            <TextField
-                label="Hex Color"
-                value={color}
-                onChange={(e) => {
-                    setColor(e.target.value);
-                }}
-                size="small"
-                fullWidth
-            />
-        </Box>
-    );
-}
-
-function SelectedColor() {
-    const { color: selectedColor } = useTagFormContext();
-
-    return (
-        <Box
-            sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-                mb: 2,
-            }}
-        >
-            <Box
-                sx={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: "50%",
-                    bgcolor: selectedColor,
-                    border: "2px solid",
-                    borderColor: "divider",
-                }}
-            />
-            <Typography variant="body2">{selectedColor}</Typography>
-        </Box>
-    );
 }
 
 const TagForm = {

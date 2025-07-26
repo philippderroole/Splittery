@@ -5,13 +5,16 @@ import { useMembers } from "@/providers/member-provider";
 import { useTags } from "@/providers/tag-provider";
 import { Tag } from "@/utils/tag";
 import { CreateMemberWithTagsDto, Member } from "@/utils/user";
-import { Button, TextField } from "@mui/material";
+import { Box, Button, TextField } from "@mui/material";
 import { createContext, ReactNode, useContext, useState } from "react";
+import { ColorSelector } from "./color-selector";
 
 type MemberFormContextType = {
     member: CreateMemberWithTagsDto;
     setMemberName: (name: string) => void;
     setSelectedTags: (tagIds: string[]) => void;
+    color: string;
+    setColor: (color: string) => void;
     onSubmit: () => void;
     onCancel: () => void;
     isPending: boolean;
@@ -115,6 +118,7 @@ function Root({
     const tags = useTags();
 
     const [validationError, setValidationError] = useState<string | null>(null);
+    const [color, setColor] = useState<string>("#327a1cff");
 
     const handleSubmit = async () => {
         if (isPending) return;
@@ -130,21 +134,7 @@ function Root({
             return;
         }
 
-        const result = await onSubmit(newMember);
-
-        if (result instanceof Error) {
-            return;
-        }
-    };
-
-    const handleCancel = () => {
-        reset();
-        onCancel();
-    };
-
-    const reset = () => {
-        setMember({ name: "", tagIds: [] });
-        setValidationError(null);
+        await onSubmit(newMember);
     };
 
     const setMemberName = (name: string) => {
@@ -161,8 +151,10 @@ function Root({
                 member,
                 setMemberName,
                 setSelectedTags,
+                color,
+                setColor,
                 onSubmit: handleSubmit,
-                onCancel: handleCancel,
+                onCancel,
                 isPending,
                 validationError,
                 showTagSelection,
@@ -178,6 +170,8 @@ function FormInputs() {
         member,
         setMemberName,
         setSelectedTags,
+        color,
+        setColor,
         isPending,
         validationError,
         showTagSelection,
@@ -189,12 +183,17 @@ function FormInputs() {
         id: "dummy-tag",
         name: member.name || "New User",
         type: "UserTag",
-        color: "#327a1cff",
+        color: color,
     } as Tag;
 
     const shownTags = [
         dummyTag,
-        ...tags.filter((tag) => tag.type !== "UserTag"),
+        ...tags
+            .filter((tag) => tag.type !== "UserTag")
+            .map((tag) => ({
+                ...tag,
+                isDisabled: tag.type === "AllTag" || tag.type === "UserTag",
+            })),
     ];
     const shownSelectedTags = [dummyTag.id, ...member.tagIds];
 
@@ -220,11 +219,16 @@ function FormInputs() {
                 helperText={validationError !== null && validationError}
             />
             {showTagSelection && (
-                <TagSelection
-                    allTags={shownTags}
-                    selectedTags={shownSelectedTags}
-                    setSelectedTags={handleSetSelectedTags}
-                />
+                <>
+                    <TagSelection
+                        allTags={shownTags}
+                        selectedTags={shownSelectedTags}
+                        setSelectedTags={handleSetSelectedTags}
+                    />
+                    <Box sx={{ paddingTop: "10px" }} />
+
+                    <ColorSelector color={color} setColor={setColor} />
+                </>
             )}
         </>
     );

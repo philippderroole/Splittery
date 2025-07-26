@@ -11,7 +11,7 @@ import { Tag } from "./tag";
 export interface Transaction {
     id: string;
     name: string;
-    date: Date;
+    executedAt: Date;
     amount: Money;
     splitId: string;
     url: string;
@@ -22,7 +22,7 @@ export interface Transaction {
 export interface SerializedTransaction {
     id: string;
     name: string;
-    date: Date;
+    executedAt: Date;
     amount: number;
     splitId: string;
     url: string;
@@ -49,11 +49,9 @@ export interface UpdateTransaction {
 export function deserializeTransaction(
     serialized: SerializedTransaction
 ): Transaction {
-    console.debug("Deserializing transaction:", serialized);
-
     return {
         ...serialized,
-        date: new Date(serialized.date),
+        executedAt: new Date(serialized.executedAt),
         amount: new Money(serialized.amount, Currencies.EUR),
         tags: [],
         entries:

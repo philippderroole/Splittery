@@ -6,14 +6,15 @@ import { useSplit } from "@/providers/split-provider";
 import { CreateTransactionDto } from "@/utils/transaction";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import {
+    Alert,
     DialogActions,
     DialogContent,
     DialogContentText,
     DialogTitle,
     Fab,
 } from "@mui/material";
-import React from "react";
-import TransactionForm from "./transaction-form";
+import React, { useState } from "react";
+import TransactionForm from "../../../../../components/transaction-form";
 
 interface CreateTransactionDialogProps {
     open: boolean;
@@ -25,18 +26,50 @@ export function CreateTransactionDialog(props: CreateTransactionDialogProps) {
 
     const split = useSplit();
 
+    const [transaction, setTransaction] = useState<CreateTransactionDto>({
+        name: "",
+        amount: null,
+        memberId: "",
+        tagIds: [],
+    });
+    const [error, setError] = useState<string | null>(null);
+    const [isPending, setPending] = useState(false);
+
     const handleSubmit = async (transaction: CreateTransactionDto) => {
+        setPending(true);
+
+        console.log("Creating transaction:", transaction);
+
         try {
             await createTransaction(split.id, transaction);
+            reset();
+            onClose();
         } catch (e) {
-            console.error("Error creating transaction:", e);
-            return new Error("Failed to create transaction. Please try again.");
+            setError("Failed to create transaction. Please try again.");
+            setPending(false);
         }
+    };
+
+    const handleCancel = () => {
+        reset();
+        onClose();
+    };
+
+    const reset = () => {
+        setTransaction({ name: "", amount: null, memberId: "", tagIds: [] });
+        setError(null);
+        setPending(false);
     };
 
     return (
         <MobileDialog open={open} onClose={onClose}>
-            <TransactionForm.Root onSubmit={handleSubmit} onCancel={onClose}>
+            <TransactionForm.Root
+                transaction={transaction}
+                setTransaction={setTransaction}
+                onSubmit={handleSubmit}
+                onCancel={handleCancel}
+                isPending={isPending}
+            >
                 <DialogTitle>
                     <TransactionForm.Title
                         content={"Create a new transaction"}
@@ -52,6 +85,11 @@ export function CreateTransactionDialog(props: CreateTransactionDialogProps) {
                     </DialogContentText>
                     <div style={{ marginTop: "16px" }} />
                     <TransactionForm.FormInputs />
+                    {error && (
+                        <Alert severity="error" sx={{ mt: 2 }}>
+                            {error}
+                        </Alert>
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <TransactionForm.CancelButton />

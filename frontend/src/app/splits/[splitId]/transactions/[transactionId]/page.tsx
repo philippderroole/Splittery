@@ -22,7 +22,7 @@ export default function TransactionPage() {
                 </IconButton>
             </Link>
             <TransactionHeader />
-            <EntryList></EntryList>
+            <EntryList />
             <div
                 style={{
                     position: "fixed",
@@ -79,7 +79,7 @@ function TransactionHeader() {
                     </Typography>
                     <Typography variant="body1">{transaction.name}</Typography>
                     <Typography variant="caption">
-                        {getFormattedDateLong(transaction.date)}
+                        {getFormattedDateLong(transaction.executedAt)}
                     </Typography>
                 </Box>
                 <Avatar />

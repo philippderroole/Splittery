@@ -49,10 +49,10 @@ function Root(props: CreateSplitCompoundProps) {
         const newSplit = { ...split, name: split.name.trim() };
 
         const nameError = validateSplitName(newSplit.name);
-        const newErrors = new Map([["name", nameError]]);
-        setValidationErrors(newErrors);
-
-        if (nameError) {
+        const validationErrors = new Map([["name", nameError]]);
+        setValidationErrors(validationErrors);
+        // the validation error is delayed by one render cycle so we use the local variable
+        if (validationErrors) {
             return;
         }
 
