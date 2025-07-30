@@ -1,6 +1,6 @@
 import { Money } from "./money";
 
-export interface TransactionEntry {
+export interface Entry {
     id: string;
     name: string;
     amount: Money;
@@ -20,8 +20,9 @@ export interface CreateEntryDto {
     tagIds: string[];
 }
 
-export interface UpdateEntityDto {
+export interface EditEntityDto {
+    id: string;
     name: string;
-    amount: number;
-    url: string;
+    amount: number | null;
+    tagIds: string[];
 }

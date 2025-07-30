@@ -2,7 +2,7 @@
 
 import { useTags } from "@/providers/tag-provider";
 import { useTransaction } from "@/providers/transaction-provider";
-import { TransactionEntry } from "@/utils/entry";
+import { Entry } from "@/utils/entry";
 import { Money } from "@/utils/money";
 import {
     Box,
@@ -14,7 +14,7 @@ import {
     Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { EditTransactionDialog } from "./edit-transaction-dialog";
+import { EditEntryDialog } from "./edit-entry-dialog";
 
 export default function EntryList() {
     const transaction = useTransaction();
@@ -86,7 +86,7 @@ function RemainingEntryListItem({
 }
 
 interface EntryItemProps {
-    entry: TransactionEntry;
+    entry: Entry;
 }
 
 function EntryListItem(props: EntryItemProps) {
@@ -107,7 +107,8 @@ function EntryListItem(props: EntryItemProps) {
 
     return (
         <>
-            <EditTransactionDialog
+            <EditEntryDialog
+                entry={entry}
                 transaction={transaction}
                 open={open}
                 onClose={closeDialog}

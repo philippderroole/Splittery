@@ -70,46 +70,42 @@ export function EditTransactionDialog({
 
     return (
         <MobileDialog open={open} onClose={handleCancel}>
-            <Box sx={{ minWidth: "360px" }}>
-                <TransactionForm.Root
-                    transaction={transaction}
-                    setTransaction={setTransaction}
-                    onSubmit={handleSubmit}
-                    onCancel={onClose}
-                    isPending={isPending}
-                >
-                    <DialogTitle>
-                        <Box
-                            sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                            }}
-                        >
-                            <TransactionForm.Title
-                                content={"Edit transaction"}
-                            />
-                            <DeleteButton transaction={initalTransaction} />
-                        </Box>
-                    </DialogTitle>
-                    <DialogContent sx={{ paddingBottom: 0 }}>
-                        <DialogContentText>
-                            <TransactionForm.Description content={"Edit"} />
-                        </DialogContentText>
-                        <div style={{ marginTop: "16px" }} />
-                        <TransactionForm.FormInputs />
-                        {error && (
-                            <Alert severity="error" sx={{ mt: 2 }}>
-                                {error}
-                            </Alert>
-                        )}
-                    </DialogContent>
-                    <DialogActions>
-                        <TransactionForm.CancelButton />
-                        <TransactionForm.SubmitButton content={"Edit"} />
-                    </DialogActions>
-                </TransactionForm.Root>
-            </Box>
+            <TransactionForm.Root
+                transaction={transaction}
+                setTransaction={setTransaction}
+                onSubmit={handleSubmit}
+                onCancel={onClose}
+                isPending={isPending}
+            >
+                <DialogTitle>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                        }}
+                    >
+                        <TransactionForm.Title content={"Edit transaction"} />
+                        <DeleteButton transaction={initalTransaction} />
+                    </Box>
+                </DialogTitle>
+                <DialogContent sx={{ paddingBottom: 0 }}>
+                    <DialogContentText>
+                        <TransactionForm.Description content={"Edit"} />
+                    </DialogContentText>
+                    <div style={{ marginTop: "16px" }} />
+                    <TransactionForm.FormInputs />
+                    {error && (
+                        <Alert severity="error" sx={{ mt: 2 }}>
+                            {error}
+                        </Alert>
+                    )}
+                </DialogContent>
+                <DialogActions>
+                    <TransactionForm.CancelButton />
+                    <TransactionForm.SubmitButton content={"Edit"} />
+                </DialogActions>
+            </TransactionForm.Root>
         </MobileDialog>
     );
 }

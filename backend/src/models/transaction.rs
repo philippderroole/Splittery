@@ -15,7 +15,7 @@ pub struct EntryDb {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct Entry {
     pub id: Uuid,
     pub public_id: String,
@@ -55,7 +55,7 @@ pub struct TransactionDb {
     pub updated_at: DateTime<Utc>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
 pub struct Transaction {
     pub id: Uuid,
     pub public_id: String,

@@ -60,7 +60,7 @@ pub struct CreateEntryRequest {
     pub public_tag_ids: Vec<String>,
 }
 
-pub async fn create_transaction_entry(
+pub async fn create_entry(
     State(pool): State<PgPool>,
     Path((split_url, public_transaction_id)): Path<(String, String)>,
     Json(payload): Json<CreateEntryRequest>,
@@ -92,6 +92,44 @@ pub async fn create_transaction_entry(
     }
 
     Ok(Json(EntryResponse::from(entry, public_transaction_id)))
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UpdateEntryRequest {
+    pub name: String,
+    pub amount: i64,
+    #[serde(rename = "tagIds")]
+    pub public_tag_ids: Vec<String>,
+}
+
+pub async fn update_entry(
+    State(pool): State<PgPool>,
+    Path((_split_url, transaction_url, public_entry_id)): Path<(String, String, String)>,
+    Json(payload): Json<UpdateEntryRequest>,
+) -> Result<Json<EntryResponse>, StatusCode> {
+    let transaction_id = transaction_url.parse().unwrap();
+    let entry_id = public_entry_id.parse().unwrap();
+    let tag_ids: Vec<_> = payload
+        .public_tag_ids
+        .into_iter()
+        .map(|id| id.parse().unwrap())
+        .collect();
+
+    let entry = services::update_entry(&pool, entry_id, payload.name, payload.amount)
+        .await
+        .map_err(|e| {
+            log::error!("Failed to update entry: {e}");
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+
+    services::set_tags_for_entry(&pool, entry_id, &tag_ids)
+        .await
+        .map_err(|e| {
+            log::error!("Failed to set tags for entry: {e}");
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+
+    Ok(Json(EntryResponse::from(entry, transaction_id)))
 }
 
 pub async fn delete_entry(

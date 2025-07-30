@@ -8,12 +8,12 @@ function initFormContext<T>() {
         onDeleteClick: () => void;
         onCancelClick: () => void;
         isPending: boolean;
-        item: T;
+        item: unknown;
     };
 
     const FormContext = createContext<FormContextType | null>(null);
 
-    function useFormContext(): FormContextType {
+    function useFormContext<T>(): FormContextType & { item: T } {
         const currentFormContext = useContext(FormContext);
 
         if (!currentFormContext) {
@@ -22,13 +22,14 @@ function initFormContext<T>() {
             );
         }
 
-        return currentFormContext;
+        return currentFormContext as FormContextType & { item: T };
     }
 
     return { FormContext, useFormContext };
 }
 
 const { FormContext, useFormContext } = initFormContext();
+export { useFormContext };
 
 interface FormCompoundProps<T> {
     item: T;

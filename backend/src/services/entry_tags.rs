@@ -83,6 +83,47 @@ pub async fn add_tag_to_entry(
     }
 }
 
+pub async fn set_tags_for_entry(pool: &PgPool, entry_id: Uuid, tag_ids: &Vec<Uuid>) -> Result<()> {
+    let _tags = sqlx::query_as!(
+        TagDb,
+        "
+        SELECT id, public_id, name, color, split_id, type AS \"type: TagType\", created_at, updated_at
+        FROM tags
+        WHERE id = ANY($1) 
+        ",
+        &tag_ids
+    )
+    .fetch_all(pool)
+    .await
+    .map_err(|e| anyhow!("Failed to fetch tags: {}", e))?;
+
+    sqlx::query!(
+        "
+        DELETE FROM entry_tags 
+        WHERE entry_id = $1
+        ",
+        entry_id
+    )
+    .execute(pool)
+    .await?;
+
+    for tag_id in tag_ids {
+        sqlx::query!(
+            "
+            INSERT INTO entry_tags (entry_id, tag_id)
+            VALUES ($1, $2)
+            ON CONFLICT DO NOTHING
+            ",
+            entry_id,
+            tag_id
+        )
+        .execute(pool)
+        .await?;
+    }
+
+    Ok(())
+}
+
 pub async fn remove_tag_from_entry(
     pool: &PgPool,
     _split_id: Uuid,

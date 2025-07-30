@@ -1,6 +1,6 @@
 use axum::{
     Router,
-    routing::{delete, get, post},
+    routing::{delete, get, post, put},
 };
 use sqlx::PgPool;
 
@@ -10,8 +10,9 @@ pub fn entry_routes() -> Router<PgPool> {
     Router::new().nest(
         "/splits/{splitId}/transactions/{transactionId}/entries",
         Router::new()
+            .route("/", post(controllers::create_entry))
             .route("/", get(controllers::get_all_entries_for_transaction))
-            .route("/", post(controllers::create_transaction_entry))
+            .route("/{entryId}", put(controllers::update_entry))
             .route("/{entryId}", delete(controllers::delete_entry)),
     )
 }

@@ -1,39 +1,44 @@
 "use client";
 
-import { createEntry } from "@/actions/entry-service";
+import { editEntry } from "@/actions/entry-service";
 import BaseForm, { useFormContext } from "@/components/base-form";
 import ChipSelector from "@/components/chip-selector";
 import AmountField from "@/components/form-fields/amount-field";
 import NameField from "@/components/form-fields/name-field";
 import MobileDialog from "@/components/mobile-dialog";
 import { useSplit } from "@/providers/split-provider";
-import { useTransaction } from "@/providers/transaction-provider";
-import { CreateEntryDto } from "@/utils/entry";
+import { EditEntityDto as EditEntryDto, Entry } from "@/utils/entry";
+import { Transaction } from "@/utils/transaction";
 import { validateAmount, validateName } from "@/utils/validation";
 import {
     Alert,
+    Box,
     DialogActions,
     DialogContent,
     DialogContentText,
     DialogTitle,
 } from "@mui/material";
 import { useState } from "react";
+import DeleteEntryDialogButton from "./delete-entry-dialog-button";
 
-interface CreateEntryDialogProps {
+interface EditEntryDialogProps {
+    entry: Entry;
+    transaction: Transaction;
     open: boolean;
     onClose: () => void;
 }
 
-export function CreateEntryDialog(props: CreateEntryDialogProps) {
-    const { open, onClose } = props;
-
+export function EditEntryDialog({
+    entry: initalEntry,
+    transaction,
+    open,
+    onClose,
+}: EditEntryDialogProps) {
     const split = useSplit();
-    const transaction = useTransaction();
 
-    const [entry, setEntry] = useState<CreateEntryDto>({
-        name: "",
-        amount: null,
-        tagIds: [],
+    const [entry, setEntry] = useState<EditEntryDto>({
+        ...initalEntry,
+        amount: initalEntry.amount.getAmount(),
     });
     const [error, setError] = useState<string | null>(null);
     const [isPending, setPending] = useState(false);
@@ -46,7 +51,7 @@ export function CreateEntryDialog(props: CreateEntryDialogProps) {
         ])
     );
 
-    const handleSubmit = async (entry: CreateEntryDto) => {
+    const handleSubmit = async (entry: EditEntryDto) => {
         setPending(true);
         setError(null);
 
@@ -58,11 +63,11 @@ export function CreateEntryDialog(props: CreateEntryDialogProps) {
         }
 
         try {
-            await createEntry(split.id, transaction.id, entry);
+            await editEntry(split.id, transaction.id, entry);
             reset();
             onClose();
-        } catch (e) {
-            setError("Failed to create entry. Please try again.");
+        } catch {
+            setError("Failed to edit entry. Please try again.");
             setPending(false);
         }
     };
@@ -74,9 +79,9 @@ export function CreateEntryDialog(props: CreateEntryDialogProps) {
 
     const reset = () => {
         setEntry({
-            name: "",
-            amount: null,
-            tagIds: [],
+            ...initalEntry,
+            amount: initalEntry.amount.getAmount(),
+            tagIds: initalEntry.tagIds,
         });
         setError(null);
         setPending(false);
@@ -102,7 +107,7 @@ export function CreateEntryDialog(props: CreateEntryDialogProps) {
         setEntry({ ...entry, tagIds });
     };
 
-    const validateEntry = (entry: CreateEntryDto) => {
+    const validateEntry = (entry: EditEntryDto) => {
         return new Map<string, string | null>([
             ["name", validateName(entry.name)],
             ["amount", validateAmount(entry.amount)],
@@ -111,20 +116,34 @@ export function CreateEntryDialog(props: CreateEntryDialogProps) {
 
     return (
         <MobileDialog open={open} onClose={handleCancel}>
-            <BaseForm.Root
+            <BaseForm.Root<EditEntryDto>
                 item={entry}
                 onSubmit={handleSubmit}
                 onCancel={onClose}
                 pending={isPending}
             >
                 <DialogTitle>
-                    <BaseForm.Title>Create a new entry</BaseForm.Title>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                        }}
+                    >
+                        <BaseForm.Title>
+                            Edit Entry: {initalEntry.name}
+                        </BaseForm.Title>
+                        <DeleteEntryDialogButton
+                            entry={initalEntry}
+                            transaction={transaction}
+                        />
+                    </Box>
                 </DialogTitle>
                 <DialogContent sx={{ paddingBottom: 0 }}>
                     <DialogContentText>
                         <BaseForm.Description>
-                            Create a new entry for this transaction. Entries are
-                            used to split up transactions into smaller parts.
+                            Edit the details of this entry. Entries are used to
+                            split up transactions into smaller parts.
                         </BaseForm.Description>
                     </DialogContentText>
                     <div style={{ marginTop: "16px" }} />
@@ -142,7 +161,7 @@ export function CreateEntryDialog(props: CreateEntryDialogProps) {
                 </DialogContent>
                 <DialogActions>
                     <BaseForm.CancelButton />
-                    <BaseForm.SubmitButton>Create</BaseForm.SubmitButton>
+                    <BaseForm.SubmitButton>Save</BaseForm.SubmitButton>
                 </DialogActions>
             </BaseForm.Root>
         </MobileDialog>
@@ -162,7 +181,7 @@ function FormInputs({
     setSelectedTags,
     validationErrors,
 }: FormInputsProps) {
-    const { item: entry, isPending } = useFormContext<CreateEntryDto>();
+    const { item: entry, isPending } = useFormContext<EditEntryDto>();
 
     return (
         <>

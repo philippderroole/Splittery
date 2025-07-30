@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use anyhow::{Result, anyhow};
 use sqlx::PgPool;
@@ -33,7 +33,7 @@ pub async fn get_all_transactions(pool: &PgPool, split_id: Uuid) -> Result<Vec<T
     .await
     .map_err(|e| anyhow!("Failed to get transactions with entries and tags: {}", e))?;
 
-    let mut transactions = Vec::new();
+    let mut transactions_set = HashSet::new();
     let mut entries_map = HashMap::new();
     let mut tags_map = HashMap::new();
 
@@ -53,7 +53,7 @@ pub async fn get_all_transactions(pool: &PgPool, split_id: Uuid) -> Result<Vec<T
             entries: Vec::new(), // Will be filled later
         };
 
-        transactions.push(transaction);
+        transactions_set.insert(transaction);
 
         if let (
             Some(entry_id),
@@ -83,8 +83,8 @@ pub async fn get_all_transactions(pool: &PgPool, split_id: Uuid) -> Result<Vec<T
 
             entries_map
                 .entry(transaction_id)
-                .or_insert_with(Vec::new)
-                .push(entry);
+                .or_insert_with(HashSet::new)
+                .insert(entry);
 
             if let (
                 Some(tag_id),
@@ -119,9 +119,11 @@ pub async fn get_all_transactions(pool: &PgPool, split_id: Uuid) -> Result<Vec<T
         }
     }
 
+    let mut transactions: Vec<Transaction> = transactions_set.into_iter().collect();
+
     for transaction in &mut transactions {
         if let Some(entries) = entries_map.get(&transaction.id) {
-            transaction.entries = entries.clone();
+            transaction.entries = entries.iter().cloned().collect();
         }
 
         for entry in &mut transaction.entries {

@@ -57,6 +57,30 @@ pub async fn get_all_entries_for_transaction(
     })
 }
 
+pub async fn update_entry(
+    pool: &PgPool,
+    item_id: Uuid,
+    name: String,
+    amount: i64,
+) -> Result<Entry> {
+    sqlx::query_as!(
+        EntryDb,
+        "
+        UPDATE entries
+        SET name = $2, amount = $3, updated_at = NOW()
+        WHERE id = $1
+        RETURNING id, public_id, name, amount, transaction_id, created_at, updated_at
+        ",
+        item_id,
+        name,
+        amount
+    )
+    .fetch_one(pool)
+    .await
+    .map_err(|e| anyhow!("Failed to update entry: {}", e))
+    .map(|entry| Entry::from(entry, Vec::new()))
+}
+
 pub async fn delete_entry(pool: &PgPool, item_id: Uuid) -> Result<()> {
     let query_result = sqlx::query!(
         "
