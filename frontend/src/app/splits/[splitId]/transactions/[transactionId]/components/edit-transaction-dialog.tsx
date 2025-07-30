@@ -1,9 +1,10 @@
 "use client";
 
-import { createTransaction } from "@/actions/create-transaction-service";
+import { createTransaction } from "@/actions/transaction-service";
 import MobileDialog from "@/components/mobile-dialog";
 import { useSplit } from "@/providers/split-provider";
 import { CreateTransactionDto, Transaction } from "@/utils/transaction";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
     Alert,
     Box,
@@ -11,9 +12,11 @@ import {
     DialogContent,
     DialogContentText,
     DialogTitle,
+    IconButton,
 } from "@mui/material";
 import { useState } from "react";
 import TransactionForm from "../../../../../../components/transaction-form";
+import { DeleteTransactionDialog } from "./delete-transaction-dialog";
 
 interface EditTransactionDialogProps {
     transaction: Transaction;
@@ -31,7 +34,6 @@ export function EditTransactionDialog({
     const [transaction, setTransaction] = useState<CreateTransactionDto>({
         ...initalTransaction,
         amount: initalTransaction.amount.getAmount(),
-        memberId: "",
         tagIds: initalTransaction.tags.map((tag) => tag.id),
     });
     const [error, setError] = useState<string | null>(null);
@@ -44,7 +46,7 @@ export function EditTransactionDialog({
             await createTransaction(split.id, transaction);
             reset();
             onClose();
-        } catch (e) {
+        } catch {
             setError("Failed to create transaction. Please try again.");
             setPending(false);
         }
@@ -77,7 +79,18 @@ export function EditTransactionDialog({
                     isPending={isPending}
                 >
                     <DialogTitle>
-                        <TransactionForm.Title content={"Edit transaction"} />
+                        <Box
+                            sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                            }}
+                        >
+                            <TransactionForm.Title
+                                content={"Edit transaction"}
+                            />
+                            <DeleteButton transaction={initalTransaction} />
+                        </Box>
                     </DialogTitle>
                     <DialogContent sx={{ paddingBottom: 0 }}>
                         <DialogContentText>
@@ -98,5 +111,34 @@ export function EditTransactionDialog({
                 </TransactionForm.Root>
             </Box>
         </MobileDialog>
+    );
+}
+
+interface DeleteButtonProps {
+    transaction: Transaction;
+}
+
+function DeleteButton({ transaction }: DeleteButtonProps) {
+    const [open, setOpen] = useState(false);
+
+    const openDialog = () => {
+        setOpen(true);
+    };
+
+    const handleCancel = () => {
+        setOpen(false);
+    };
+
+    return (
+        <>
+            <IconButton onClick={openDialog}>
+                <DeleteIcon />
+            </IconButton>
+            <DeleteTransactionDialog
+                transaction={transaction}
+                open={open}
+                onClose={handleCancel}
+            />
+        </>
     );
 }

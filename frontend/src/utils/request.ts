@@ -94,7 +94,6 @@ export async function PUT(url: string, init?: RequestInit): Promise<any> {
     return json;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function DELETE(url: string, init?: RequestInit): Promise<void> {
     console.debug("Deleting data from:", url);
 
@@ -118,7 +117,7 @@ export async function DELETE(url: string, init?: RequestInit): Promise<void> {
         throw new Error("Failed to delete data");
     }
 
-    revalidatePath(url);
+    revalidatePath(url.split("/").slice(0, -1).join("/"));
 
     console.debug("Data deleted successfully");
 }

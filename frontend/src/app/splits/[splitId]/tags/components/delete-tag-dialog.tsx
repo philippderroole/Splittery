@@ -14,7 +14,7 @@ import {
     IconButton,
 } from "@mui/material";
 import React, { useState } from "react";
-import DeleteTag from "./delete-tag";
+import DeleteTag from "./delete-tag-form";
 
 interface DeleteTagDialogProps {
     tag: Tag;

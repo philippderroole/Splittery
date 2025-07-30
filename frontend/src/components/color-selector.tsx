@@ -14,39 +14,8 @@ interface ColorSelectorProps {
 export function ColorSelector({ color, setColor }: ColorSelectorProps) {
     return (
         <>
-            {/* <SelectedColorDisplay color={color} /> */}
             <PresetColorPalette color={color} setColor={setColor} />
             <CustomColorInput color={color} setColor={setColor} />
-        </>
-    );
-}
-
-function SelectedColorDisplay({ color: selectedColor }: { color: string }) {
-    return (
-        <>
-            <Typography variant="subtitle1" gutterBottom>
-                Selected Color
-            </Typography>
-            <Box
-                sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    mb: 2,
-                }}
-            >
-                <Box
-                    sx={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: "50%",
-                        bgcolor: selectedColor,
-                        border: "2px solid",
-                        borderColor: "divider",
-                    }}
-                />
-                <Typography variant="body2">{selectedColor}</Typography>
-            </Box>
         </>
     );
 }

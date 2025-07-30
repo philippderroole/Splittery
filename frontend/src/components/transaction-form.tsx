@@ -105,15 +105,15 @@ function Root({
         if (amount === "") {
             newAmount = null;
         } else {
-            newAmount = Number(amount);
+            newAmount = Number(amount) * 100;
         }
 
         setTransaction({ ...transaction, amount: newAmount });
     };
 
     const setPayee = (name: string) => {
-        const member = members.find((user) => user.name === name);
-        setTransaction({ ...transaction, memberId: member?.id || null });
+        const member = members.find((member) => member.name === name)!;
+        setTransaction({ ...transaction, memberId: member.id || null });
     };
 
     const validateTransactionName = (name: string) => {
@@ -196,7 +196,7 @@ function FormInputs() {
         validationErrors,
     } = useTransactionFormContext();
 
-    const users = useMembers();
+    const members = useMembers();
     const tags = useTags();
 
     return (
@@ -234,7 +234,11 @@ function FormInputs() {
                     name="transaction-amount"
                     label="Transaction amount"
                     type="number"
-                    value={transaction.amount == null ? "" : transaction.amount}
+                    value={
+                        transaction.amount == null
+                            ? ""
+                            : transaction.amount / 100
+                    }
                     onChange={(e) => setAmount(e.target.value)}
                     startAdornment={
                         <InputAdornment position="start">-</InputAdornment>
@@ -254,7 +258,11 @@ function FormInputs() {
                 margin="dense"
                 id="transaction-payee"
                 name="transaction-payee"
-                label="Payee/Receiver"
+                label="Payee"
+                value={
+                    members.find((member) => member.id === transaction.memberId)
+                        ?.name || ""
+                }
                 onChange={(e) => setPayee(e.target.value)}
                 aria-label="Transaction payee"
                 fullWidth
@@ -265,7 +273,7 @@ function FormInputs() {
                     validationErrors.get("payee")
                 }
             >
-                {users.map((user) => (
+                {members.map((user) => (
                     <MenuItem key={user.id} value={user.name}>
                         {user.name}
                     </MenuItem>

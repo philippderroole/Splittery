@@ -1,6 +1,6 @@
 "use server";
 
-import { POST } from "@/utils/request";
+import { DELETE, POST } from "@/utils/request";
 import {
     CreateTransactionDto,
     SerializedTransaction,
@@ -15,5 +15,14 @@ export async function createTransaction(
         {
             body: JSON.stringify(transaction),
         }
+    );
+}
+
+export async function deleteTransaction(
+    splitId: string,
+    transactionId: string
+): Promise<void> {
+    await DELETE(
+        `${process.env.INTERNAL_API_URL}/splits/${splitId}/transactions/${transactionId}`
     );
 }

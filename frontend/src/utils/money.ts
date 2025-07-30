@@ -1,16 +1,16 @@
 import { Currency } from "./currency";
 
 export class Money {
-    private amount: number;
+    private cents: number;
     private currency: Currency;
 
     constructor(amount: number, currency: Currency) {
-        this.amount = amount;
+        this.cents = amount;
         this.currency = currency;
     }
 
     getAmount() {
-        return this.amount;
+        return this.cents;
     }
 
     getCurrency() {
@@ -18,20 +18,20 @@ export class Money {
     }
 
     toString() {
-        return this.currency.format(this.amount);
+        return this.currency.format(this.cents / 100);
     }
 
     add(other: Money): Money {
         if (this.currency !== other.currency) {
             throw new Error("Cannot add money with different currencies");
         }
-        return new Money(this.amount + other.amount, this.currency);
+        return new Money(this.cents + other.cents, this.currency);
     }
 
     subtract(other: Money): Money {
         if (this.currency !== other.currency) {
             throw new Error("Cannot subtract money with different currencies");
         }
-        return new Money(this.amount - other.amount, this.currency);
+        return new Money(this.cents - other.cents, this.currency);
     }
 }

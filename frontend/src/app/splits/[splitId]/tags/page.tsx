@@ -22,9 +22,7 @@ export default function TagsPage() {
 
     return (
         <>
-            <Typography variant="h4" sx={{ mb: 2 }}>
-                Tags
-            </Typography>
+            <Typography variant="h4">Tags</Typography>
             <TagsList tags={tags} />
             <div
                 style={{

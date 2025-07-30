@@ -14,6 +14,7 @@ export interface Transaction {
     executedAt: Date;
     amount: Money;
     splitId: string;
+    memberId: string;
     url: string;
     tags: Tag[];
     entries: TransactionEntry[];
@@ -25,6 +26,7 @@ export interface SerializedTransaction {
     executedAt: Date;
     amount: number;
     splitId: string;
+    memberId: string;
     url: string;
     entries?: SerializedEntry[];
 }

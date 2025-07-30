@@ -1,6 +1,6 @@
 "use client";
 
-import { createTransaction } from "@/actions/create-transaction-service";
+import { createTransaction } from "@/actions/transaction-service";
 import MobileDialog from "@/components/mobile-dialog";
 import { useSplit } from "@/providers/split-provider";
 import { CreateTransactionDto } from "@/utils/transaction";
@@ -44,7 +44,7 @@ export function CreateTransactionDialog(props: CreateTransactionDialogProps) {
             await createTransaction(split.id, transaction);
             reset();
             onClose();
-        } catch (e) {
+        } catch {
             setError("Failed to create transaction. Please try again.");
             setPending(false);
         }

@@ -18,6 +18,8 @@ pub struct TransactionResponse {
     pub public_id: String,
     pub name: String,
     pub amount: i64,
+    #[serde(rename = "memberId")]
+    pub public_member_id: String,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub entries: Vec<EntryResponse>,
     #[serde(rename = "executedAt")]
@@ -25,11 +27,12 @@ pub struct TransactionResponse {
 }
 
 impl TransactionResponse {
-    fn from(transaction: Transaction) -> Self {
+    fn from(transaction: Transaction, public_member_id: String) -> Self {
         Self {
             public_id: transaction.public_id.clone(),
             name: transaction.name,
             amount: transaction.amount,
+            public_member_id,
             entries: transaction
                 .entries
                 .into_iter()
@@ -52,12 +55,32 @@ pub async fn get_all_transactions(
             StatusCode::INTERNAL_SERVER_ERROR
         })?;
 
-    let transactions = transactions
-        .into_iter()
-        .map(TransactionResponse::from)
-        .collect::<Vec<TransactionResponse>>();
+    let members = services::get_all_members(&pool, split_id)
+        .await
+        .map_err(|e| {
+            log::error!("Failed to get split members: {e}");
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
 
-    Ok(Json(transactions))
+    let mut response = Vec::new();
+
+    for transaction in transactions {
+        let public_member_id = members
+            .iter()
+            .find(|m| m.id == transaction.member_id)
+            .map(|m| m.public_id.clone())
+            .ok_or_else(|| {
+                log::error!(
+                    "Member not found for transaction: {}",
+                    transaction.public_id
+                );
+                StatusCode::NOT_FOUND
+            })?;
+
+        response.push(TransactionResponse::from(transaction, public_member_id));
+    }
+
+    Ok(Json(response))
 }
 
 #[derive(Debug, Deserialize)]
@@ -89,7 +112,10 @@ pub async fn create_transaction(
                 }
             })?;
 
-    Ok(Json(TransactionResponse::from(transaction)))
+    Ok(Json(TransactionResponse::from(
+        transaction,
+        payload.public_member_id,
+    )))
 }
 
 pub async fn get_transaction(
@@ -111,5 +137,15 @@ pub async fn delete_transaction(
     State(pool): State<PgPool>,
     Path((split_url, transaction_url)): Path<(String, String)>,
 ) -> Result<StatusCode, StatusCode> {
-    unimplemented!();
+    let split_id = split_url.parse().unwrap();
+    let transaction_id = transaction_url.parse().unwrap();
+
+    services::delete_transaction(&pool, split_id, transaction_id)
+        .await
+        .map_err(|e| {
+            log::error!("Failed to delete transaction: {e}");
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?;
+
+    Ok(StatusCode::NO_CONTENT)
 }
