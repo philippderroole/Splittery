@@ -96,7 +96,7 @@ export function CreateMemberDialog(props: CreateUserDialogProps) {
     );
 }
 
-export function CreateMemberDialogButton() {
+export function CreateMemberDialogFAB() {
     const [open, setOpen] = React.useState(false);
 
     const openDialog = () => {
@@ -108,11 +108,18 @@ export function CreateMemberDialogButton() {
     };
 
     return (
-        <>
+        <div
+            style={{
+                position: "fixed",
+                bottom: "6rem",
+                right: "3rem",
+                zIndex: 1200,
+            }}
+        >
             <Fab color="primary" onClick={openDialog}>
                 <GroupAddIcon />
             </Fab>
             <CreateMemberDialog open={open} onClose={closeDialog} />
-        </>
+        </div>
     );
 }

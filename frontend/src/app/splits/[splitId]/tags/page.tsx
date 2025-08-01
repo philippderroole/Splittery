@@ -48,6 +48,7 @@ function TagsList(props: TagsListProps) {
             {tags.map((tag) => (
                 <TagItem key={tag.id} tag={tag} />
             ))}
+            <ListItem sx={{ minHeight: "140px" }} />
         </List>
     );
 }

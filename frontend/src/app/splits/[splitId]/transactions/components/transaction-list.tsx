@@ -50,6 +50,7 @@ export default function TransactionList() {
                     </div>
                 )
             )}
+            <ListItem sx={{ minHeight: "140px" }} />
         </>
     );
 }

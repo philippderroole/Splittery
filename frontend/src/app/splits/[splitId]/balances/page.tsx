@@ -14,7 +14,7 @@ import {
     Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { CreateMemberDialogButton } from "./components/create-member-dialog";
+import { CreateMemberDialogFAB } from "./components/create-member-dialog-fab";
 import { EditMemberDialog } from "./components/edit-member-dialog";
 
 export default function SplitPage() {
@@ -31,17 +31,10 @@ export default function SplitPage() {
                 {members.map((member) => {
                     return <SplitUserItem member={member} key={member.id} />;
                 })}
+                <ListItem sx={{ minHeight: "140px" }} />
             </List>
-            <div
-                style={{
-                    position: "fixed",
-                    bottom: "6rem",
-                    right: "3rem",
-                    zIndex: 1200,
-                }}
-            >
-                <CreateMemberDialogButton />
-            </div>
+
+            <CreateMemberDialogFAB />
         </div>
     );
 }

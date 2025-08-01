@@ -62,6 +62,7 @@ export default function TransactionPage() {
                     selectedTagIds={transaction.tagIds}
                     onClick={openDialog}
                 />
+                <ListItem sx={{ minHeight: "140px" }} />
             </List>
             <CreateEntryDialogFAB />
             <EditTransactionDialog

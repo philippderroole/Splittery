@@ -7,6 +7,7 @@ export default function TransactionGroupListPage() {
     return (
         <>
             <TransactionList />
+
             <div
                 style={{
                     position: "fixed",
