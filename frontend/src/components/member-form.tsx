@@ -4,13 +4,13 @@ import TagSelection from "@/components/tag-selection";
 import { useMembers } from "@/providers/member-provider";
 import { useTags } from "@/providers/tag-provider";
 import { Tag } from "@/utils/tag";
-import { CreateMemberWithTagsDto, Member } from "@/utils/user";
+import { CreateMemberDto, Member } from "@/utils/user";
 import { Box, Button, TextField } from "@mui/material";
 import { createContext, ReactNode, useContext, useState } from "react";
 import { ColorSelector } from "./color-selector";
 
 type MemberFormContextType = {
-    member: CreateMemberWithTagsDto;
+    member: CreateMemberDto;
     setMemberName: (name: string) => void;
     setSelectedTags: (tagIds: string[]) => void;
     color: string;
@@ -94,10 +94,10 @@ const validateMember = (
 };
 
 interface MemberFormCompoundProps {
-    member: CreateMemberWithTagsDto;
-    setMember: (member: CreateMemberWithTagsDto) => void;
+    member: CreateMemberDto;
+    setMember: (member: CreateMemberDto) => void;
     children?: ReactNode;
-    onSubmit: (member: CreateMemberWithTagsDto) => Promise<Error | void>;
+    onSubmit: (member: CreateMemberDto) => Promise<Error | void>;
     onCancel: () => void;
     isPending: boolean;
     showTagSelection?: boolean;

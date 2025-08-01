@@ -33,20 +33,25 @@ pub struct MemberResponse {
     #[serde(rename = "id")]
     pub public_id: String,
     pub name: String,
+    #[serde(rename = "splitId")]
     pub split_id: String,
-    pub saldo: i64,
+    #[serde(rename = "amountSpent")]
+    pub amount_spent: i64,
+    #[serde(rename = "amountShare")]
+    pub amount_share: i64,
     pub r#type: MemberTypeResponse,
     #[serde(rename = "tagIds")]
     pub public_tag_ids: Vec<String>,
 }
 
 impl MemberResponse {
-    fn from(member: Member, public_split_id: &str, saldo: i64) -> Self {
+    fn from(member: Member, public_split_id: &str, amount_spent: i64, amount_share: i64) -> Self {
         Self {
             public_id: member.public_id,
             name: member.name,
             split_id: public_split_id.to_string(),
-            saldo,
+            amount_spent,
+            amount_share,
             r#type: member.r#type.into(),
             public_tag_ids: member.tags.into_iter().map(|tag| tag.public_id).collect(),
         }
@@ -69,15 +74,26 @@ pub async fn get_all_members(
     let mut members_with_tags_response = Vec::new();
 
     for member in members.into_iter() {
-        let saldo = services::get_member_balance(&pool, split_id, member.id)
+        let amount_spent = services::get_member_amount_spent(&pool, split_id, member.id)
             .await
             .map_err(|e| {
                 log::error!("Failed to get member balance, {e}");
                 StatusCode::INTERNAL_SERVER_ERROR
             })?;
 
-        let member_response =
-            MemberResponse::from(member, &public_split_id, saldo.to_i64().unwrap());
+        let amount_share = services::get_member_share(&pool, split_id, member.id)
+            .await
+            .map_err(|e| {
+                log::error!("Failed to get member share, {e}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            })?;
+
+        let member_response = MemberResponse::from(
+            member,
+            &public_split_id,
+            amount_spent.to_i64().unwrap(),
+            amount_share.to_i64().unwrap(),
+        );
 
         members_with_tags_response.push(member_response);
     }
@@ -110,7 +126,7 @@ pub async fn create_member(
             }
         })?;
 
-    let response = MemberResponse::from(member.clone(), &public_split_id, 0);
+    let response = MemberResponse::from(member.clone(), &public_split_id, 0, 0);
 
     controllers::broadcast_split_update(
         &public_split_id,
@@ -161,7 +177,7 @@ pub async fn edit_member(
     controllers::broadcast_split_update(
         &public_split_id,
         &SplitUpdateMessage::MemberEdited {
-            member: MemberResponse::from(member.clone(), &public_split_id, 0),
+            member: MemberResponse::from(member.clone(), &public_split_id, 0, 0),
             tags: member
                 .tags
                 .clone()
@@ -172,7 +188,7 @@ pub async fn edit_member(
     )
     .await;
 
-    Ok(Json(MemberResponse::from(member, &public_split_id, 0)))
+    Ok(Json(MemberResponse::from(member, &public_split_id, 0, 0)))
 }
 
 pub async fn delete_member(

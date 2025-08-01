@@ -3,7 +3,7 @@
 import { createMember } from "@/actions/member-service";
 import MobileDialog from "@/components/mobile-dialog";
 import { useSplit } from "@/providers/split-provider";
-import { CreateMemberWithTagsDto } from "@/utils/user";
+import { CreateMemberDto } from "@/utils/user";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import {
     Alert,
@@ -26,14 +26,14 @@ export function CreateMemberDialog(props: CreateUserDialogProps) {
 
     const split = useSplit();
 
-    const [member, setMember] = useState<CreateMemberWithTagsDto>({
+    const [member, setMember] = useState<CreateMemberDto>({
         name: "",
         tagIds: [],
     });
     const [error, setError] = useState<string | null>(null);
     const [isPending, setPending] = useState(false);
 
-    const handleSubmit = async (member: CreateMemberWithTagsDto) => {
+    const handleSubmit = async (member: CreateMemberDto) => {
         setPending(true);
 
         try {

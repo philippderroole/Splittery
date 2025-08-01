@@ -22,7 +22,7 @@ export default async function SplitLayout({
     const { splitId } = await params;
 
     let split;
-    let splitUsers;
+    let serializedMembers;
     let serializedTransactions;
     let tags;
 
@@ -36,7 +36,7 @@ export default async function SplitLayout({
 
         split = values[0];
         tags = values[1];
-        splitUsers = values[2];
+        serializedMembers = values[2];
         serializedTransactions = values[3];
     } catch (error) {
         console.error("Error fetching split data:", error);
@@ -49,7 +49,7 @@ export default async function SplitLayout({
                 <TransactionsProvider
                     serializedTransactions={serializedTransactions}
                 >
-                    <MembersProvider members={splitUsers}>
+                    <MembersProvider serializedMembers={serializedMembers}>
                         <TagsProvider tags={tags}>
                             <SplitHeader />
                             {children}

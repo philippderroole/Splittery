@@ -3,7 +3,7 @@
 import { editMember } from "@/actions/member-service";
 import MobileDialog from "@/components/mobile-dialog";
 import { useSplit } from "@/providers/split-provider";
-import { CreateMemberWithTagsDto, Member } from "@/utils/user";
+import { CreateMemberDto, Member } from "@/utils/user";
 import {
     Alert,
     DialogActions,
@@ -29,14 +29,14 @@ export function EditMemberDialog({
 
     const initalTagIds = initalMember.tagIds;
 
-    const [member, setMember] = useState<CreateMemberWithTagsDto>({
+    const [member, setMember] = useState<CreateMemberDto>({
         name: initalMember.name,
         tagIds: initalTagIds,
     });
     const [error, setError] = useState<string | null>(null);
     const [isPending, setPending] = useState(false);
 
-    const handleSubmit = async (member: CreateMemberWithTagsDto) => {
+    const handleSubmit = async (member: CreateMemberDto) => {
         setPending(true);
 
         try {

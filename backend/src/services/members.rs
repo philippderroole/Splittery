@@ -226,20 +226,7 @@ pub async fn delete_member(pool: &PgPool, member_id: &Uuid) -> Result<()> {
     }
 }
 
-pub async fn get_member_balance(
-    pool: &PgPool,
-    split_id: Uuid,
-    member_id: Uuid,
-) -> Result<BigDecimal> {
-    let expenses = get_member_expenses(pool, split_id, member_id).await?;
-    let income = get_member_income(pool, split_id, member_id).await?;
-
-    let balance = income - expenses;
-
-    Ok(balance)
-}
-
-pub async fn get_member_expenses(
+pub async fn get_member_amount_spent(
     pool: &PgPool,
     split_id: Uuid,
     member_id: Uuid,
@@ -263,26 +250,25 @@ pub async fn get_member_expenses(
     }
 }
 
-pub async fn get_member_income(
+pub async fn get_member_share(
     pool: &PgPool,
     split_id: Uuid,
     member_id: Uuid,
 ) -> Result<BigDecimal> {
-    let query_result = sqlx::query!(
+    sqlx::query!(
         "
-    SELECT COALESCE(income, 0) AS income
-    FROM member_income_view
-    WHERE split_id = $1 AND member_id = $2
-    ",
+        SELECT COALESCE(income, 0) AS share
+        FROM member_income_view
+        WHERE split_id = $1 AND member_id = $2
+        ",
         split_id,
         member_id
     )
     .fetch_optional(pool)
-    .await;
-
-    match query_result {
-        Ok(Some(result)) => Ok(result.income.unwrap()),
-        Ok(None) => Ok(BigDecimal::from(0)),
-        Err(e) => Err(anyhow!("Failed to get member income: {}", e)),
-    }
+    .await
+    .map(|opt| match opt {
+        Some(result) => result.share.unwrap_or_else(|| BigDecimal::from(0)),
+        None => BigDecimal::from(0),
+    })
+    .map_err(|e| anyhow!("Failed to get member share: {}", e))
 }

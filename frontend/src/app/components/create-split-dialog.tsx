@@ -4,7 +4,7 @@ import { createMember } from "@/actions/member-service";
 import { createSplit } from "@/actions/split-service";
 import MobileDialog from "@/components/mobile-dialog";
 import { CreateSplitDto } from "@/utils/split";
-import { CreateMemberDto, CreateMemberWithTagsDto } from "@/utils/user";
+import { CreateMemberDto } from "@/utils/user";
 import FiberNewIcon from "@mui/icons-material/FiberNew";
 import LoginIcon from "@mui/icons-material/Login";
 import {
@@ -34,7 +34,7 @@ export function CreateSplitDialog(props: CreateSplitDialogProps) {
     const { open, onClose } = props;
 
     const [split, setSplit] = useState<CreateSplitDto>({ name: "" });
-    const [member, setMember] = useState<CreateMemberWithTagsDto>({
+    const [member, setMember] = useState<CreateMemberDto>({
         name: "",
         tagIds: [],
     });
@@ -205,8 +205,8 @@ function Step1({ split, setSplit, nextStep, prevStep }: Step1Props) {
 }
 
 interface Step2Props {
-    member: CreateMemberWithTagsDto;
-    setMember: (member: CreateMemberWithTagsDto) => void;
+    member: CreateMemberDto;
+    setMember: (member: CreateMemberDto) => void;
     nextStep: () => Promise<void>;
     prevStep: () => void;
     error: string | null;

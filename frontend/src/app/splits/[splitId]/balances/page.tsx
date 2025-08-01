@@ -2,8 +2,6 @@
 
 import { useMembers } from "@/providers/member-provider";
 import { useTags } from "@/providers/tag-provider";
-import { Currencies } from "@/utils/currencies";
-import { Money } from "@/utils/money";
 import { Member } from "@/utils/user";
 import {
     Avatar,
@@ -77,7 +75,12 @@ function SplitUserItem({ member }: SplitUserItemProps) {
             <ListItemButton onClick={handleOpen}>
                 <ListItem
                     disablePadding
-                    secondaryAction={<SaldoItem user={member} />}
+                    secondaryAction={
+                        <>
+                            <ExpenseItem member={member} />
+                            <ShareItem member={member} />
+                        </>
+                    }
                 >
                     <ListItemAvatar>
                         <Avatar
@@ -118,18 +121,29 @@ function SplitUserItem({ member }: SplitUserItemProps) {
     );
 }
 
-function SaldoItem(props: { user: Member }) {
-    const { user } = props;
-
+function ExpenseItem({ member }: { member: Member }) {
     return (
         <Box
             sx={{
                 textAlign: "right",
-                paddingRight: 4,
             }}
         >
             <Typography variant="body1">
-                {new Money(user.saldo, Currencies.EUR).toString()}
+                {member.amountSpent.toString()}
+            </Typography>
+        </Box>
+    );
+}
+
+function ShareItem({ member }: { member: Member }) {
+    return (
+        <Box
+            sx={{
+                textAlign: "right",
+            }}
+        >
+            <Typography variant="body1">
+                {member.amountShare.toString()}
             </Typography>
         </Box>
     );

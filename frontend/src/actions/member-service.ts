@@ -1,16 +1,12 @@
 "use server";
 
 import { POST, PUT } from "@/utils/request";
-import {
-    CreateMemberWithTagsDto,
-    EditMemberDto,
-    SerializedUser,
-} from "@/utils/user";
+import { CreateMemberDto, EditMemberDto, SerializedMember } from "@/utils/user";
 
 export async function createMember(
-    user: CreateMemberWithTagsDto,
+    user: CreateMemberDto,
     splitId: string
-): Promise<SerializedUser> {
+): Promise<SerializedMember> {
     return await POST(
         `${process.env.INTERNAL_API_URL}/splits/${splitId}/members`,
         {
@@ -23,7 +19,7 @@ export async function editMember(
     splitId: string,
     memberId: string,
     member: EditMemberDto
-): Promise<SerializedUser> {
+): Promise<SerializedMember> {
     return await PUT(
         `${process.env.INTERNAL_API_URL}/splits/${splitId}/members/${memberId}`,
         {

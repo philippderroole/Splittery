@@ -1,38 +1,45 @@
 "use client";
 
 import { useSplitSocket } from "@/hooks/useSplitSocket";
-import { Member } from "@/utils/user";
+import {
+    deserializeMember,
+    deserializeMembers,
+    Member,
+    SerializedMember,
+} from "@/utils/user";
 import React, { createContext, useContext, useState } from "react";
 import { useSplit } from "./split-provider";
 
 const MemberContext = createContext<Member[]>([] as Member[]);
 
 export interface MembersProviderProps {
-    members: Member[];
+    serializedMembers: SerializedMember[];
     children: React.ReactNode;
 }
 
 export function MembersProvider({
-    members: initalMembers,
+    serializedMembers: initalSerializedMembers,
     children,
 }: MembersProviderProps) {
+    const initalMembers: Member[] = deserializeMembers(initalSerializedMembers);
+
     const [members, setMembers] = useState<Member[]>(initalMembers);
 
     const split = useSplit();
 
     useSplitSocket(split.id, ["MemberCreated"], (payload: unknown) => {
-        const memberPayload = payload as { member: Member };
-        setMembers([...members, memberPayload.member]);
+        const memberPayload = payload as { member: SerializedMember };
+        const member = deserializeMember(memberPayload.member);
+        setMembers([...members, member]);
     });
 
     useSplitSocket(split.id, ["MemberEdited"], (payload: unknown) => {
-        const memberPayload = payload as { member: Member };
+        const memberPayload = payload as { member: SerializedMember };
+        const member = deserializeMember(memberPayload.member);
 
-        const oldMembers = members.filter(
-            (m) => m.id !== memberPayload.member.id
-        );
+        const oldMembers = members.filter((m) => m.id !== member.id);
 
-        setMembers([...oldMembers, memberPayload.member]);
+        setMembers([...oldMembers, member]);
     });
 
     return (

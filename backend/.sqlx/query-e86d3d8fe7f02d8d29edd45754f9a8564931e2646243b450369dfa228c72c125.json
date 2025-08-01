@@ -1,11 +1,11 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n    SELECT COALESCE(income, 0) AS income\n    FROM member_income_view\n    WHERE split_id = $1 AND member_id = $2\n    ",
+  "query": "\n        SELECT COALESCE(income, 0) AS share\n        FROM member_income_view\n        WHERE split_id = $1 AND member_id = $2\n        ",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
-        "name": "income",
+        "name": "share",
         "type_info": "Numeric"
       }
     ],
@@ -19,5 +19,5 @@
       null
     ]
   },
-  "hash": "108198e5613fcc400eabc76c68b973ec053aebd9a9ff18492f5dd031ded4e891"
+  "hash": "e86d3d8fe7f02d8d29edd45754f9a8564931e2646243b450369dfa228c72c125"
 }
