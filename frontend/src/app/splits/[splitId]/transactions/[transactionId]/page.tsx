@@ -1,5 +1,6 @@
 "use client";
 
+import { useMembers } from "@/providers/member-provider";
 import { useSplit } from "@/providers/split-provider";
 import { useTags } from "@/providers/tag-provider";
 import { useTransaction } from "@/providers/transaction-provider";
@@ -78,7 +79,9 @@ interface TransactionHeaderProps {
 
 function TransactionHeader({ onClick }: TransactionHeaderProps) {
     const transaction = useTransaction();
+    const members = useMembers();
 
+    const payer = members.find((member) => member.id === transaction.memberId)!;
     return (
         <>
             <Button
@@ -103,6 +106,9 @@ function TransactionHeader({ onClick }: TransactionHeaderProps) {
                         justifyContent: "start",
                     }}
                 >
+                    <Typography variant="caption" color="textSecondary">
+                        {payer.name} payed
+                    </Typography>
                     <Typography variant="h4">
                         {transaction.amount.toString()}
                     </Typography>

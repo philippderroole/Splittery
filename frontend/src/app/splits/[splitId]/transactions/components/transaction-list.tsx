@@ -1,6 +1,7 @@
 "use client";
 
 import { TagChips } from "@/components/tag-chips";
+import { useMembers } from "@/providers/member-provider";
 import { useSplit } from "@/providers/split-provider";
 import { useTransactions } from "@/providers/transactions-provider";
 import { getFormattedDay } from "@/utils/date-formatter";
@@ -61,6 +62,9 @@ function TransactionListItem(props: TransactionProps) {
     const { transaction } = props;
 
     const split = useSplit();
+    const members = useMembers();
+
+    const payer = members.find((member) => member.id === transaction.memberId);
 
     return (
         <Link
@@ -72,7 +76,14 @@ function TransactionListItem(props: TransactionProps) {
         >
             <ListItem
                 secondaryAction={
-                    <Typography>{transaction.amount.toString()}</Typography>
+                    <>
+                        <Typography textAlign={"right"}>
+                            {transaction.amount.toString()}
+                        </Typography>
+                        <Typography variant="caption" color="textSecondary">
+                            payed by {payer?.name}
+                        </Typography>
+                    </>
                 }
             >
                 <ListItemIcon>
