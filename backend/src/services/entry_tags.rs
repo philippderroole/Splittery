@@ -1,49 +1,23 @@
 use anyhow::{Result, anyhow};
-use serde::Serialize;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::{TagDb, TagType};
+use crate::models::{Tag, TagDb, TagType};
 
-#[derive(Serialize)]
-pub struct EntryTagResponse {
-    #[serde(rename = "id")]
-    pub public_id: String,
-    pub name: String,
-    pub color: String,
-    #[serde(rename = "splitId")]
-    pub public_split_id: String,
-    pub r#type: TagType,
-}
-
-impl EntryTagResponse {
-    fn from(tag: TagDb, public_split_id: String) -> Self {
-        Self {
-            public_id: tag.public_id,
-            name: tag.name,
-            color: tag.color,
-            public_split_id,
-            r#type: tag.r#type,
-        }
-    }
-}
-
-pub async fn get_all_entry_tags(
+pub async fn get_tags_for_entry(
     pool: &PgPool,
-    split_id: Uuid,
     transaction_id: Uuid,
     entry_id: Uuid,
-) -> Result<Vec<EntryTagResponse>> {
-    let tags = sqlx::query_as!(
+) -> Result<Vec<Tag>> {
+    let tags_db = sqlx::query_as!(
         TagDb,
         "
         SELECT tags.id, tags.public_id, tags.name, color, tags.split_id, type AS \"type: TagType\", tags.created_at, tags.updated_at
         FROM tags
         JOIN entry_tags ON tags.id = entry_tags.tag_id
         JOIN entries ON entry_tags.entry_id = entries.id
-        WHERE tags.split_id = $1 AND entries.transaction_id = $2 AND entry_tags.entry_id = $3
+        WHERE entries.transaction_id = $1 AND entry_tags.entry_id = $2
         ",
-        split_id,
         transaction_id,
         entry_id,
     )
@@ -51,10 +25,7 @@ pub async fn get_all_entry_tags(
     .await
     .map_err(|e| anyhow!("Failed to get tags: {}", e))?;
 
-    let tags = tags
-        .into_iter()
-        .map(|tag| EntryTagResponse::from(tag, split_id.to_string()))
-        .collect();
+    let tags = tags_db.into_iter().map(Tag::from).collect();
 
     Ok(tags)
 }

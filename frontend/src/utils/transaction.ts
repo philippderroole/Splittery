@@ -1,7 +1,6 @@
 import { Currencies } from "./currencies";
 import { CreateEntryDto, EditEntityDto, Entry, SerializedEntry } from "./entry";
 import { Money } from "./money";
-import { Tag } from "./tag";
 
 export interface Transaction {
     id: string;
@@ -11,7 +10,7 @@ export interface Transaction {
     splitId: string;
     memberId: string;
     url: string;
-    tags: Tag[];
+    tagIds: string[];
     entries: Entry[];
 }
 
@@ -24,6 +23,7 @@ export interface SerializedTransaction {
     memberId: string;
     url: string;
     entries?: SerializedEntry[];
+    tagIds: string[];
 }
 
 export interface CreateTransactionDto {
@@ -50,7 +50,6 @@ export function deserializeTransaction(
         ...serialized,
         executedAt: new Date(serialized.executedAt),
         amount: new Money(serialized.amount, Currencies.EUR),
-        tags: [],
         entries:
             serialized.entries?.map((entry) => ({
                 ...entry,

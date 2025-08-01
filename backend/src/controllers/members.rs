@@ -81,7 +81,7 @@ pub async fn get_all_members(
                 StatusCode::INTERNAL_SERVER_ERROR
             })?;
 
-        let amount_share = services::get_member_share(&pool, split_id, member.id)
+        let amount_share = services::get_member_share(&pool, member.id)
             .await
             .map_err(|e| {
                 log::error!("Failed to get member share, {e}");

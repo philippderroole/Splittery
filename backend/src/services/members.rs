@@ -250,18 +250,13 @@ pub async fn get_member_amount_spent(
     }
 }
 
-pub async fn get_member_share(
-    pool: &PgPool,
-    split_id: Uuid,
-    member_id: Uuid,
-) -> Result<BigDecimal> {
+pub async fn get_member_share(pool: &PgPool, member_id: Uuid) -> Result<BigDecimal> {
     sqlx::query!(
         "
-        SELECT COALESCE(income, 0) AS share
-        FROM member_income_view
-        WHERE split_id = $1 AND member_id = $2
+        SELECT total_share AS share
+        FROM member_shares
+        WHERE member_id = $1
         ",
-        split_id,
         member_id
     )
     .fetch_optional(pool)

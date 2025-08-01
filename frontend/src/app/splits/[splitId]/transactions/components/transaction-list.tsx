@@ -1,11 +1,19 @@
 "use client";
 
+import { TagChips } from "@/components/tag-chips";
+import { useSplit } from "@/providers/split-provider";
 import { useTransactions } from "@/providers/transactions-provider";
 import { getFormattedDay } from "@/utils/date-formatter";
 import { Transaction } from "@/utils/transaction";
-import { Typography } from "@mui/material";
+import {
+    Avatar,
+    Link,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    Typography,
+} from "@mui/material";
 import dayjs from "dayjs";
-import { default as TransactionGroup } from "./transaction-list-item";
 
 export default function TransactionList() {
     const transactions = useTransactions();
@@ -33,7 +41,7 @@ export default function TransactionList() {
                             {getFormattedDay(dayjs(day))}
                         </Typography>
                         {transactions.map((transaction) => (
-                            <TransactionGroup
+                            <TransactionListItem
                                 key={transaction.id}
                                 transaction={transaction}
                             />
@@ -42,5 +50,40 @@ export default function TransactionList() {
                 )
             )}
         </>
+    );
+}
+
+interface TransactionProps {
+    transaction: Transaction;
+}
+
+function TransactionListItem(props: TransactionProps) {
+    const { transaction } = props;
+
+    const split = useSplit();
+
+    return (
+        <Link
+            href={`/splits/${split.id}/transactions/${transaction.id}`}
+            style={{
+                textDecoration: "none",
+                color: "inherit",
+            }}
+        >
+            <ListItem
+                secondaryAction={
+                    <Typography>{transaction.amount.toString()}</Typography>
+                }
+            >
+                <ListItemIcon>
+                    <Avatar />
+                </ListItemIcon>
+                <ListItemText
+                    secondary={<TagChips selectedTagIds={transaction.tagIds} />}
+                >
+                    <Typography variant="body1">{transaction.name}</Typography>
+                </ListItemText>
+            </ListItem>
+        </Link>
     );
 }

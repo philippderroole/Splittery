@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT COALESCE(income, 0) AS share\n        FROM member_income_view\n        WHERE split_id = $1 AND member_id = $2\n        ",
+  "query": "\n        SELECT total_share AS share\n        FROM member_shares\n        WHERE member_id = $1\n        ",
   "describe": {
     "columns": [
       {
@@ -11,13 +11,12 @@
     ],
     "parameters": {
       "Left": [
-        "Uuid",
         "Uuid"
       ]
     },
     "nullable": [
-      null
+      true
     ]
   },
-  "hash": "e86d3d8fe7f02d8d29edd45754f9a8564931e2646243b450369dfa228c72c125"
+  "hash": "e76c4fdfea48bf0fe050813d26dd229c744d97619f5fbb483be2cc5a45198f57"
 }

@@ -34,7 +34,7 @@ export function EditTransactionDialog({
     const [transaction, setTransaction] = useState<CreateTransactionDto>({
         ...initalTransaction,
         amount: initalTransaction.amount.getAmount(),
-        tagIds: initalTransaction.tags.map((tag) => tag.id),
+        tagIds: initalTransaction.tagIds,
     });
     const [error, setError] = useState<string | null>(null);
     const [isPending, setPending] = useState(false);
@@ -62,7 +62,7 @@ export function EditTransactionDialog({
             ...initalTransaction,
             amount: initalTransaction.amount.getAmount(),
             memberId: "",
-            tagIds: initalTransaction.tags.map((tag) => tag.id),
+            tagIds: initalTransaction.tagIds,
         });
         setError(null);
         setPending(false);

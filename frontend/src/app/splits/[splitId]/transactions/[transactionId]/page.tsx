@@ -1,43 +1,32 @@
 "use client";
 
-import EntryList from "@/app/splits/[splitId]/transactions/[transactionId]/components/entry-list";
 import { useSplit } from "@/providers/split-provider";
+import { useTags } from "@/providers/tag-provider";
 import { useTransaction } from "@/providers/transaction-provider";
 import { getFormattedDateLong } from "@/utils/date-formatter";
+import { Entry } from "@/utils/entry";
+import { Money } from "@/utils/money";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-import { Avatar, Box, Button, IconButton, Typography } from "@mui/material";
+import {
+    Avatar,
+    Box,
+    Button,
+    Chip,
+    IconButton,
+    List,
+    ListItem,
+    ListItemButton,
+    ListItemText,
+    Typography,
+} from "@mui/material";
 import Link from "next/link";
 import { useState } from "react";
-import CreateEntryDialogButton from "./components/create-entry-dialog-button";
+import CreateEntryDialogFAB from "./components/create-entry-dialog-button";
+import { EditEntryDialog } from "./components/edit-entry-dialog";
 import { EditTransactionDialog } from "./components/edit-transaction-dialog";
 
 export default function TransactionPage() {
     const split = useSplit();
-
-    return (
-        <>
-            <Link href={`/splits/${split.id}/transactions`}>
-                <IconButton>
-                    <ArrowBackIosIcon />
-                </IconButton>
-            </Link>
-            <TransactionHeader />
-            <EntryList />
-            <div
-                style={{
-                    position: "fixed",
-                    bottom: "6rem",
-                    right: "3rem",
-                    zIndex: 1200,
-                }}
-            >
-                <CreateEntryDialogButton />
-            </div>
-        </>
-    );
-}
-
-function TransactionHeader() {
     const transaction = useTransaction();
 
     const [open, setOpen] = useState(false);
@@ -50,10 +39,50 @@ function TransactionHeader() {
         setOpen(false);
     };
 
+    const remainingAmount: Money = transaction.entries.reduce(
+        (acc, entry) => acc.subtract(entry.amount),
+        transaction.amount
+    );
+
+    return (
+        <>
+            <Link href={`/splits/${split.id}/transactions`}>
+                <IconButton>
+                    <ArrowBackIosIcon />
+                </IconButton>
+            </Link>
+            <TransactionHeader onClick={openDialog} />
+            <List>
+                {transaction.entries.map((entry) => (
+                    <EntryListItem key={entry.id} entry={entry}></EntryListItem>
+                ))}
+                <RemainingEntryListItem
+                    remainingAmount={remainingAmount}
+                    selectedTagIds={transaction.tagIds}
+                    onClick={openDialog}
+                />
+            </List>
+            <CreateEntryDialogFAB />
+            <EditTransactionDialog
+                open={open}
+                onClose={closeDialog}
+                transaction={transaction}
+            />
+        </>
+    );
+}
+
+interface TransactionHeaderProps {
+    onClick?: () => void;
+}
+
+function TransactionHeader({ onClick }: TransactionHeaderProps) {
+    const transaction = useTransaction();
+
     return (
         <>
             <Button
-                onClick={openDialog}
+                onClick={onClick}
                 sx={{
                     width: "100%",
                     display: "flex",
@@ -84,11 +113,119 @@ function TransactionHeader() {
                 </Box>
                 <Avatar />
             </Button>
-            <EditTransactionDialog
+        </>
+    );
+}
+
+interface RemainingEntryListItemProps {
+    remainingAmount: Money;
+    selectedTagIds: string[];
+    onClick?: () => void;
+}
+
+function RemainingEntryListItem({
+    remainingAmount,
+    selectedTagIds,
+    onClick,
+}: RemainingEntryListItemProps) {
+    const tags = useTags();
+
+    return (
+        <ListItemButton onClick={onClick}>
+            <ListItem
+                disablePadding
+                secondaryAction={
+                    <Typography>{remainingAmount.toString()}</Typography>
+                }
+            >
+                <ListItemText
+                    primary="Remaining"
+                    secondary={
+                        <Box sx={{ display: "flex", gap: "2px" }}>
+                            {selectedTagIds.map((id) => {
+                                const tag = tags.find((tag) => tag.id === id)!;
+                                return (
+                                    <Chip
+                                        key={id}
+                                        label={tag.name}
+                                        size="small"
+                                        variant="filled"
+                                        sx={{
+                                            backgroundColor: tag.color,
+                                            mt: 0.5,
+                                        }}
+                                    />
+                                );
+                            })}
+                        </Box>
+                    }
+                />
+            </ListItem>
+        </ListItemButton>
+    );
+}
+
+interface EntryItemProps {
+    entry: Entry;
+}
+
+function EntryListItem(props: EntryItemProps) {
+    const { entry } = props;
+
+    const tags = useTags();
+    const transaction = useTransaction();
+
+    const [open, setOpen] = useState(false);
+
+    const openDialog = () => {
+        setOpen(true);
+    };
+
+    const closeDialog = () => {
+        setOpen(false);
+    };
+
+    return (
+        <>
+            <EditEntryDialog
+                entry={entry}
+                transaction={transaction}
                 open={open}
                 onClose={closeDialog}
-                transaction={transaction}
             />
+            <ListItemButton onClick={openDialog}>
+                <ListItem
+                    disablePadding
+                    secondaryAction={
+                        <Typography>{entry.amount.toString()}</Typography>
+                    }
+                >
+                    <ListItemText
+                        primary={entry.name}
+                        secondary={
+                            <Box sx={{ display: "flex", gap: "2px" }}>
+                                {entry.tagIds.map((id) => {
+                                    const tag = tags.find(
+                                        (tag) => tag.id === id
+                                    )!;
+                                    return (
+                                        <Chip
+                                            key={id}
+                                            label={tag.name}
+                                            size="small"
+                                            variant="filled"
+                                            sx={{
+                                                backgroundColor: tag.color,
+                                                mt: 0.5,
+                                            }}
+                                        />
+                                    );
+                                })}
+                            </Box>
+                        }
+                    />
+                </ListItem>
+            </ListItemButton>
         </>
     );
 }

@@ -16,7 +16,6 @@ pub struct EntryResponse {
     #[serde(rename = "transactionId")]
     pub public_transaction_id: String,
     pub amount: i64,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
     #[serde(rename = "tagIds")]
     pub public_tag_ids: Vec<String>,
 }
@@ -33,12 +32,12 @@ impl EntryResponse {
     }
 }
 
-pub async fn get_all_entries_for_transaction(
+pub async fn get_entries_for_transaction(
     State(pool): State<PgPool>,
     Path((_split_url, public_transaction_id)): Path<(String, String)>,
 ) -> Result<Json<Vec<EntryResponse>>, StatusCode> {
     let entries =
-        services::get_all_entries_for_transaction(&pool, public_transaction_id.parse().unwrap())
+        services::get_entries_for_transaction(&pool, public_transaction_id.parse().unwrap())
             .await
             .map_err(|e| {
                 log::error!("Failed to get entries for transaction: {e}");

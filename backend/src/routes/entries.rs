@@ -11,7 +11,7 @@ pub fn entry_routes() -> Router<PgPool> {
         "/splits/{splitId}/transactions/{transactionId}/entries",
         Router::new()
             .route("/", post(controllers::create_entry))
-            .route("/", get(controllers::get_all_entries_for_transaction))
+            .route("/", get(controllers::get_entries_for_transaction))
             .route("/{entryId}", put(controllers::update_entry))
             .route("/{entryId}", delete(controllers::delete_entry)),
     )

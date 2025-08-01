@@ -2,7 +2,10 @@ use anyhow::{Result, anyhow};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::models::{Entry, EntryDb};
+use crate::{
+    models::{Entry, EntryDb},
+    services,
+};
 
 pub async fn create_entry(
     pool: &PgPool,
@@ -30,14 +33,18 @@ pub async fn create_entry(
     .await
     .map_err(|e| anyhow!("Failed to create entry: {}", e))?;
 
-    Ok(Entry::from(entry, Vec::new()))
+    let tags = services::get_tags_for_entry(pool, transaction_id, id)
+        .await
+        .map_err(|e| anyhow!("Failed to get tags for entry: {}", e))?;
+
+    Ok(Entry::from(entry, tags))
 }
 
-pub async fn get_all_entries_for_transaction(
+pub async fn get_entries_for_transaction(
     pool: &PgPool,
     transaction_id: Uuid,
 ) -> Result<Vec<Entry>> {
-    sqlx::query_as!(
+    let entries_db = sqlx::query_as!(
         EntryDb,
         "
         SELECT id, public_id, name, amount, transaction_id, created_at, updated_at
@@ -48,13 +55,18 @@ pub async fn get_all_entries_for_transaction(
     )
     .fetch_all(pool)
     .await
-    .map_err(|e| anyhow!("Failed to get entries: {}", e))
-    .map(|entries| {
-        entries
-            .into_iter()
-            .map(|entry| Entry::from(entry, Vec::new()))
-            .collect::<Vec<Entry>>()
-    })
+    .map_err(|e| anyhow!("Failed to get entries: {}", e))?;
+
+    let mut entries = Vec::new();
+
+    for entry_db in entries_db {
+        let tags = services::get_tags_for_entry(pool, entry_db.transaction_id, entry_db.id)
+            .await
+            .map_err(|e| anyhow!("Failed to get tags for entry: {}", e))?;
+        entries.push(Entry::from(entry_db, tags));
+    }
+
+    Ok(entries)
 }
 
 pub async fn update_entry(

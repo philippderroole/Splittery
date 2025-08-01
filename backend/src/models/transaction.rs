@@ -67,10 +67,11 @@ pub struct Transaction {
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
     pub entries: Vec<Entry>,
+    pub tags: Vec<Tag>,
 }
 
 impl Transaction {
-    pub fn from(db_transaction: TransactionDb, entries: Vec<Entry>) -> Self {
+    pub fn from(db_transaction: TransactionDb, tags: Vec<Tag>, entries: Vec<Entry>) -> Self {
         Self {
             id: db_transaction.id,
             public_id: db_transaction.public_id,
@@ -82,6 +83,7 @@ impl Transaction {
             created_at: db_transaction.created_at,
             updated_at: db_transaction.updated_at,
             entries,
+            tags,
         }
     }
 }

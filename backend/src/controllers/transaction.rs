@@ -22,6 +22,8 @@ pub struct TransactionResponse {
     pub public_member_id: String,
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub entries: Vec<EntryResponse>,
+    #[serde(rename = "tagIds")]
+    pub public_tag_ids: Vec<String>,
     #[serde(rename = "executedAt")]
     pub executed_at: String,
 }
@@ -38,6 +40,11 @@ impl TransactionResponse {
                 .into_iter()
                 .map(|entry| EntryResponse::from(entry, transaction.public_id.clone()))
                 .collect(),
+            public_tag_ids: transaction
+                .tags
+                .into_iter()
+                .map(|tag| tag.public_id)
+                .collect(),
             executed_at: transaction.executed_at.to_rfc3339(),
         }
     }
@@ -48,7 +55,7 @@ pub async fn get_all_transactions(
     Path(split_url): Path<String>,
 ) -> Result<Json<Vec<TransactionResponse>>, StatusCode> {
     let split_id = split_url.parse().unwrap();
-    let transactions = services::get_all_transactions(&pool, split_id)
+    let transactions = services::get_transactions_for_split(&pool, split_id)
         .await
         .map_err(|e| {
             log::error!("Failed to get transactions: {e}");
@@ -89,6 +96,8 @@ pub struct CreateTransactionRequest {
     pub amount: i64,
     #[serde(rename = "memberId")]
     pub public_member_id: String,
+    #[serde(rename = "tagIds")]
+    pub public_tag_ids: Vec<String>,
 }
 
 pub async fn create_transaction(
@@ -98,19 +107,31 @@ pub async fn create_transaction(
 ) -> Result<Json<TransactionResponse>, StatusCode> {
     let split_id = split_url.parse().unwrap();
     let member_id = payload.public_member_id.parse().unwrap();
-    let transaction =
-        services::create_transaction(&pool, split_id, member_id, payload.name, payload.amount)
-            .await
-            .map_err(|e| match e {
-                CreateTransactionError::TransactionMemberNotFound => {
-                    log::error!("Transaction member not found: {e}");
-                    StatusCode::NOT_FOUND
-                }
-                CreateTransactionError::UnexpectedError(e) => {
-                    log::error!("Unexpected error creating transaction: {e}");
-                    StatusCode::INTERNAL_SERVER_ERROR
-                }
-            })?;
+    let tag_ids = payload
+        .public_tag_ids
+        .into_iter()
+        .map(|id| id.parse().unwrap())
+        .collect();
+
+    let transaction = services::create_transaction(
+        &pool,
+        split_id,
+        member_id,
+        payload.name,
+        payload.amount,
+        tag_ids,
+    )
+    .await
+    .map_err(|e| match e {
+        CreateTransactionError::TransactionMemberNotFound => {
+            log::error!("Transaction member not found: {e}");
+            StatusCode::NOT_FOUND
+        }
+        CreateTransactionError::UnexpectedError(e) => {
+            log::error!("Unexpected error creating transaction: {e}");
+            StatusCode::INTERNAL_SERVER_ERROR
+        }
+    })?;
 
     Ok(Json(TransactionResponse::from(
         transaction,

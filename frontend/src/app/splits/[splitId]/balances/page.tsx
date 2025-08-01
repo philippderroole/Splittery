@@ -1,12 +1,11 @@
 "use client";
 
+import { TagChips } from "@/components/tag-chips";
 import { useMembers } from "@/providers/member-provider";
-import { useTags } from "@/providers/tag-provider";
 import { Member } from "@/utils/user";
 import {
     Avatar,
     Box,
-    Chip,
     List,
     ListItem,
     ListItemAvatar,
@@ -53,8 +52,6 @@ interface SplitUserItemProps {
 }
 
 function SplitUserItem({ member }: SplitUserItemProps) {
-    const tags = useTags();
-
     const [open, setOpen] = useState(false);
 
     const handleOpen = () => {
@@ -90,30 +87,7 @@ function SplitUserItem({ member }: SplitUserItemProps) {
                     </ListItemAvatar>
                     <ListItemText
                         primary={member.name}
-                        secondary={
-                            <Box sx={{ display: "flex", gap: "2px" }}>
-                                {member.tagIds.map((tagId) => {
-                                    const tag = tags.find(
-                                        (t) => t.id === tagId
-                                    );
-                                    if (!tag) {
-                                        return null;
-                                    }
-                                    return (
-                                        <Chip
-                                            key={tag.id}
-                                            label={tag.name}
-                                            size="small"
-                                            variant="filled"
-                                            sx={{
-                                                backgroundColor: tag.color,
-                                                mt: 0.5,
-                                            }}
-                                        />
-                                    );
-                                })}
-                            </Box>
-                        }
+                        secondary={<TagChips selectedTagIds={member.tagIds} />}
                     />
                 </ListItem>
             </ListItemButton>

@@ -12,15 +12,6 @@ export async function getTransactions(
     );
 }
 
-export async function getTransaction(
-    splitId: string,
-    transactionId: string
-): Promise<SerializedTransaction> {
-    return await GET(
-        `${process.env.INTERNAL_API_URL}/splits/${splitId}/transactions/${transactionId}`
-    );
-}
-
 export async function getEntriesForTransaction(
     splitId: string,
     transactionId: string
