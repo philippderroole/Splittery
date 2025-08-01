@@ -5,5 +5,5 @@ import { Typography } from "@mui/material";
 export default function SplitHeader() {
     const split = useSplit();
 
-    return <Typography variant="h2">Split {split.name}</Typography>;
+    return <Typography variant="h3">{split.name}</Typography>;
 }

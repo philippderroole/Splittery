@@ -1,13 +1,11 @@
 "use client";
 
 import TransactionList from "@/app/splits/[splitId]/transactions/components/transaction-list";
-import { Typography } from "@mui/material";
 import { CreateTransactionDialogButton } from "./components/create-transaction-dialog";
 
 export default function TransactionGroupListPage() {
     return (
         <>
-            <Typography variant="h4">Transactions</Typography>
             <TransactionList />
             <div
                 style={{

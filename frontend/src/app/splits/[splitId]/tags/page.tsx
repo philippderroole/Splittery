@@ -10,7 +10,6 @@ import {
     ListItemButton,
     ListItemIcon,
     ListItemText,
-    Typography,
 } from "@mui/material";
 import React from "react";
 import { CreateTagDialogButton } from "./components/create-tag-dialog";
@@ -22,7 +21,6 @@ export default function TagsPage() {
 
     return (
         <>
-            <Typography variant="h4">Tags</Typography>
             <TagsList tags={tags} />
             <div
                 style={{

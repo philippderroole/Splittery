@@ -1,7 +1,6 @@
 "use client";
 
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
-import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { BottomNavigation, BottomNavigationAction } from "@mui/material";
@@ -38,11 +37,11 @@ export default function NavTabs() {
                 label="Transactions"
                 href={`${basePath}/transactions`}
             />
-            <BottomNavigationLink
+            {/* <BottomNavigationLink
                 icon={<CurrencyExchangeIcon />}
                 label="Settle"
                 href={`${basePath}/settle`}
-            />
+            /> */}
         </BottomNavigation>
     );
 }

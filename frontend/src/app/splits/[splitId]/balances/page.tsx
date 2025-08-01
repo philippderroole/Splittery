@@ -27,7 +27,6 @@ export default function SplitPage() {
                 flexDirection: "column",
             }}
         >
-            <Typography variant="h4">Balances</Typography>
             <List sx={{ width: "100%", padding: 0 }}>
                 {members.map((member) => {
                     return <SplitUserItem member={member} key={member.id} />;
