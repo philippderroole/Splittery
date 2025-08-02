@@ -11,7 +11,14 @@ export function TagChips({ selectedTagIds }: TagChipsProps) {
     const tags = useTags();
 
     return (
-        <Box sx={{ display: "flex", gap: "2px" }}>
+        <Box
+            sx={{
+                display: "flex",
+                gap: "2px",
+                flexWrap: "wrap",
+                maxWidth: "calc(100% - 80px)",
+            }}
+        >
             {selectedTagIds.map((tagId) => {
                 const tag = tags.find((t) => t.id === tagId)!;
                 return (

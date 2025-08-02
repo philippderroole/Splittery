@@ -1,5 +1,6 @@
 "use client";
 
+import { TagChips } from "@/components/tag-chips";
 import { useMembers } from "@/providers/member-provider";
 import { useSplit } from "@/providers/split-provider";
 import { useTags } from "@/providers/tag-provider";
@@ -12,7 +13,6 @@ import {
     Avatar,
     Box,
     Button,
-    Chip,
     IconButton,
     List,
     ListItem,
@@ -31,6 +31,10 @@ export default function TransactionPage() {
     const transaction = useTransaction();
 
     const [open, setOpen] = useState(false);
+
+    if (!transaction) {
+        return <Typography>Transaction not found</Typography>;
+    }
 
     const openDialog = () => {
         setOpen(true);
@@ -135,8 +139,6 @@ function RemainingEntryListItem({
     selectedTagIds,
     onClick,
 }: RemainingEntryListItemProps) {
-    const tags = useTags();
-
     return (
         <ListItemButton onClick={onClick}>
             <ListItem
@@ -147,25 +149,7 @@ function RemainingEntryListItem({
             >
                 <ListItemText
                     primary="Remaining"
-                    secondary={
-                        <Box sx={{ display: "flex", gap: "2px" }}>
-                            {selectedTagIds.map((id) => {
-                                const tag = tags.find((tag) => tag.id === id)!;
-                                return (
-                                    <Chip
-                                        key={id}
-                                        label={tag.name}
-                                        size="small"
-                                        variant="filled"
-                                        sx={{
-                                            backgroundColor: tag.color,
-                                            mt: 0.5,
-                                        }}
-                                    />
-                                );
-                            })}
-                        </Box>
-                    }
+                    secondary={<TagChips selectedTagIds={selectedTagIds} />}
                 />
             </ListItem>
         </ListItemButton>
@@ -209,27 +193,7 @@ function EntryListItem(props: EntryItemProps) {
                 >
                     <ListItemText
                         primary={entry.name}
-                        secondary={
-                            <Box sx={{ display: "flex", gap: "2px" }}>
-                                {entry.tagIds.map((id) => {
-                                    const tag = tags.find(
-                                        (tag) => tag.id === id
-                                    )!;
-                                    return (
-                                        <Chip
-                                            key={id}
-                                            label={tag.name}
-                                            size="small"
-                                            variant="filled"
-                                            sx={{
-                                                backgroundColor: tag.color,
-                                                mt: 0.5,
-                                            }}
-                                        />
-                                    );
-                                })}
-                            </Box>
-                        }
+                        secondary={<TagChips selectedTagIds={entry.tagIds} />}
                     />
                 </ListItem>
             </ListItemButton>

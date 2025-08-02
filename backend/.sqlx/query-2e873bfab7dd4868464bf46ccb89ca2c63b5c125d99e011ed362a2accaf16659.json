@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT tags.id, tags.public_id, tags.name, color, tags.split_id, type AS \"type: TagType\", tags.created_at, tags.updated_at\n        FROM tags\n        JOIN entry_tags ON tags.id = entry_tags.tag_id\n        JOIN entries ON entry_tags.entry_id = entries.id\n        WHERE entries.transaction_id = $1 AND entry_tags.entry_id = $2\n        ",
+  "query": "\n        UPDATE transactions\n        SET name = $1, amount = $2, updated_at = NOW()\n        WHERE split_id = $3 AND id = $4\n        RETURNING id, public_id, name, amount, member_id, split_id, executed_at, created_at, updated_at\n        ",
   "describe": {
     "columns": [
       {
@@ -20,43 +20,39 @@
       },
       {
         "ordinal": 3,
-        "name": "color",
-        "type_info": "Varchar"
+        "name": "amount",
+        "type_info": "Int8"
       },
       {
         "ordinal": 4,
-        "name": "split_id",
+        "name": "member_id",
         "type_info": "Uuid"
       },
       {
         "ordinal": 5,
-        "name": "type: TagType",
-        "type_info": {
-          "Custom": {
-            "name": "tag_type",
-            "kind": {
-              "Enum": [
-                "alltag",
-                "usertag",
-                "customtag"
-              ]
-            }
-          }
-        }
+        "name": "split_id",
+        "type_info": "Uuid"
       },
       {
         "ordinal": 6,
-        "name": "created_at",
+        "name": "executed_at",
         "type_info": "Timestamptz"
       },
       {
         "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 8,
         "name": "updated_at",
         "type_info": "Timestamptz"
       }
     ],
     "parameters": {
       "Left": [
+        "Varchar",
+        "Int8",
         "Uuid",
         "Uuid"
       ]
@@ -69,8 +65,9 @@
       false,
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "71c4e3164a44f3cd309ef8f697bbf953fe3426a0afb79abcf1f964a79d28f06b"
+  "hash": "2e873bfab7dd4868464bf46ccb89ca2c63b5c125d99e011ed362a2accaf16659"
 }

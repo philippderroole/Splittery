@@ -3,7 +3,7 @@
 import { Button } from "@mui/material";
 import { createContext, ReactNode, useContext, useState } from "react";
 
-function initFormContext<T>() {
+function initFormContext() {
     type FormContextType = {
         onDeleteClick: () => void;
         onCancelClick: () => void;

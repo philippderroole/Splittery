@@ -11,9 +11,8 @@ use sqlx::PgPool;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::{RwLock, broadcast};
-use uuid::Uuid;
 
-use crate::controllers::{MemberResponse, TagResponse};
+use crate::controllers::{EntryResponse, MemberResponse, TagResponse, TransactionResponse};
 
 // Shared broadcaster for split updates
 type SplitBroadcast = Arc<broadcast::Sender<String>>;
@@ -86,9 +85,29 @@ pub enum SplitUpdateMessage {
         member: MemberResponse,
         tags: Vec<TagResponse>,
     },
-    MemberEdited {
+    MemberUpdated {
         member: MemberResponse,
         tags: Vec<TagResponse>,
+    },
+    TransactionCreated {
+        transaction: TransactionResponse,
+    },
+    TransactionUpdated {
+        transaction: TransactionResponse,
+    },
+    TransactionDeleted {
+        #[serde(rename = "transactionId")]
+        transaction_id: String,
+    },
+    EntryCreated {
+        entry: EntryResponse,
+    },
+    EntryUpdated {
+        entry: EntryResponse,
+    },
+    EntryDeleted {
+        #[serde(rename = "entryId")]
+        entry_id: String,
     },
 }
 
@@ -104,8 +123,8 @@ pub async fn ensure_split_broadcaster(split_url: &str) -> SplitBroadcast {
         .clone()
 }
 
-pub async fn broadcast_split_update(split_url: &str, msg: &SplitUpdateMessage) {
-    let broadcast_tx = ensure_split_broadcaster(split_url).await;
+pub async fn broadcast_split_update(public_split_id: &str, msg: &SplitUpdateMessage) {
+    let broadcast_tx = ensure_split_broadcaster(public_split_id).await;
 
     if let Ok(json) = serde_json::to_string(msg) {
         let _ = broadcast_tx.send(json);

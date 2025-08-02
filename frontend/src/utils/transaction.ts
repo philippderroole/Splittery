@@ -1,5 +1,5 @@
 import { Currencies } from "./currencies";
-import { CreateEntryDto, EditEntityDto, Entry, SerializedEntry } from "./entry";
+import { deserializeEntries, Entry, SerializedEntry } from "./entry";
 import { Money } from "./money";
 
 export interface Transaction {
@@ -33,14 +33,13 @@ export interface CreateTransactionDto {
     tagIds: string[];
 }
 
-export interface UpdateTransaction {
+export interface UpdateTransactionDto {
     id: string;
     name: string;
-    date: Date;
-    amount: number;
+    amount: number | null;
     splitId: string;
-    url: string;
-    items: (CreateEntryDto | EditEntityDto)[];
+    memberId: string;
+    tagIds: string[];
 }
 
 export function deserializeTransaction(
@@ -50,11 +49,7 @@ export function deserializeTransaction(
         ...serialized,
         executedAt: new Date(serialized.executedAt),
         amount: new Money(serialized.amount, Currencies.EUR),
-        entries:
-            serialized.entries?.map((entry) => ({
-                ...entry,
-                amount: new Money(entry.amount, Currencies.EUR),
-            })) || [],
+        entries: deserializeEntries(serialized.entries || []),
     };
 }
 

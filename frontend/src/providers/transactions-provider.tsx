@@ -1,7 +1,9 @@
 "use client";
 
 import { useSplitSocket } from "@/hooks/useSplitSocket";
+import { deserializeEntry, SerializedEntry } from "@/utils/entry";
 import {
+    deserializeTransaction,
     deserializeTransactions,
     SerializedTransaction,
     Transaction,
@@ -26,21 +28,104 @@ export function TransactionsProvider({
         initialSerializedTransactions
     );
 
-    const [transactionState, setTransactionState] =
+    const [transactions, setTransactions] =
         useState<Transaction[]>(initialTransactions);
 
     const split = useSplit();
 
-    useSplitSocket(
-        split.id, // Replace with the actual split ID or context if needed
-        ["TransactionChanged", "TransactionDeleted"],
-        (payload: unknown) => {
-            setTransactionState(payload as Transaction[]);
-        }
-    );
+    useSplitSocket(split.id, ["TransactionCreated"], (payload: unknown) => {
+        const transactionPayload = payload as {
+            transaction: SerializedTransaction;
+        };
+
+        const newTransaction = deserializeTransaction(
+            transactionPayload.transaction
+        );
+
+        setTransactions([...transactions, newTransaction]);
+    });
+
+    useSplitSocket(split.id, ["TransactionUpdated"], (payload: unknown) => {
+        const transactionPayload = payload as {
+            transaction: SerializedTransaction;
+        };
+
+        const updatedTransaction = deserializeTransaction(
+            transactionPayload.transaction
+        );
+
+        const oldTransactions = transactions.filter(
+            (t) => t.id !== updatedTransaction.id
+        );
+
+        setTransactions([...oldTransactions, updatedTransaction]);
+    });
+
+    useSplitSocket(split.id, ["TransactionDeleted"], (payload: unknown) => {
+        const transactionPayload = payload as { transactionId: string };
+
+        const remainingTransactions = transactions.filter(
+            (t) => t.id !== transactionPayload.transactionId
+        );
+
+        setTransactions(remainingTransactions);
+    });
+
+    useSplitSocket(split.id, ["EntryCreated"], (payload: unknown) => {
+        const entryPayload = payload as { entry: SerializedEntry };
+        const newEntry = deserializeEntry(entryPayload.entry);
+
+        const updatedTransaction = transactions.find(
+            (t) => t.id === newEntry.transactionId
+        )!;
+        updatedTransaction.entries.push(newEntry);
+
+        const oldTransactions = transactions.filter(
+            (t) => t.id !== updatedTransaction.id
+        );
+
+        setTransactions([...oldTransactions, updatedTransaction]);
+    });
+
+    useSplitSocket(split.id, ["EntryUpdated"], (payload: unknown) => {
+        const entryPayload = payload as { entry: SerializedEntry };
+        const updatedEntry = deserializeEntry(entryPayload.entry);
+
+        const updatedTransaction = transactions.find(
+            (t) => t.id === updatedEntry.transactionId
+        )!;
+
+        const oldEntries = updatedTransaction.entries.filter(
+            (e) => e.id !== updatedEntry.id
+        );
+
+        updatedTransaction.entries = [...oldEntries, updatedEntry];
+
+        const oldTransactions = transactions.filter(
+            (t) => t.id !== updatedTransaction.id
+        );
+
+        setTransactions([...oldTransactions, updatedTransaction]);
+    });
+
+    useSplitSocket(split.id, ["EntryDeleted"], (payload: unknown) => {
+        const entryPayload = payload as { entryId: string };
+
+        const updatedTransactions = transactions.map((transaction) => {
+            const remainingEntries = transaction.entries.filter(
+                (e) => e.id !== entryPayload.entryId
+            );
+            return {
+                ...transaction,
+                entries: remainingEntries,
+            };
+        });
+
+        setTransactions(updatedTransactions);
+    });
 
     return (
-        <TransactionContext.Provider value={transactionState}>
+        <TransactionContext.Provider value={transactions}>
             {children}
         </TransactionContext.Provider>
     );

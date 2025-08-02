@@ -33,7 +33,7 @@ export function MembersProvider({
         setMembers([...members, member]);
     });
 
-    useSplitSocket(split.id, ["MemberEdited"], (payload: unknown) => {
+    useSplitSocket(split.id, ["MemberUpdated"], (payload: unknown) => {
         const memberPayload = payload as { member: SerializedMember };
         const member = deserializeMember(memberPayload.member);
 

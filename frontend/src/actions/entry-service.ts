@@ -16,7 +16,7 @@ export async function createEntry(
     );
 }
 
-export async function editEntry(
+export async function updateEntry(
     splitId: string,
     transactionId: string,
     entry: EditEntityDto

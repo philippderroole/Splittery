@@ -30,7 +30,7 @@ export function TagsProvider({
         setTagsState([...tagsState, ...newTags]);
     });
 
-    useSplitSocket(split.id, ["MemberEdited"], (payload: unknown) => {
+    useSplitSocket(split.id, ["MemberUpdated"], (payload: unknown) => {
         const memberPayload = payload as { tags: Tag[] };
 
         const oldTags = tagsState.filter(

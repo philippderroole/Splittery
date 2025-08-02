@@ -61,7 +61,7 @@ export function CreateEntryDialog(props: CreateEntryDialogProps) {
             await createEntry(split.id, transaction.id, entry);
             reset();
             onClose();
-        } catch (e) {
+        } catch {
             setError("Failed to create entry. Please try again.");
             setPending(false);
         }

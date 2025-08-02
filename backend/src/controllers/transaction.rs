@@ -7,12 +7,12 @@ use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
 use crate::{
-    controllers::EntryResponse,
-    models::{Transaction, TransactionDb},
+    controllers::{self, EntryResponse, SplitUpdateMessage},
+    models::Transaction,
     services::{self, CreateTransactionError},
 };
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct TransactionResponse {
     #[serde(rename = "id")]
     pub public_id: String,
@@ -38,7 +38,7 @@ impl TransactionResponse {
             entries: transaction
                 .entries
                 .into_iter()
-                .map(|entry| EntryResponse::from(entry, transaction.public_id.clone()))
+                .map(|entry| EntryResponse::from(entry, &transaction.public_id))
                 .collect(),
             public_tag_ids: transaction
                 .tags
@@ -133,33 +133,65 @@ pub async fn create_transaction(
         }
     })?;
 
-    Ok(Json(TransactionResponse::from(
-        transaction,
-        payload.public_member_id,
-    )))
-}
+    let response = TransactionResponse::from(transaction.clone(), payload.public_member_id.clone());
 
-pub async fn get_transaction(
-    State(pool): State<PgPool>,
-    Path((split_url, transaction_url)): Path<(String, String)>,
-) -> Result<Json<TransactionDb>, StatusCode> {
-    unimplemented!();
+    controllers::broadcast_split_update(
+        &split_url,
+        &SplitUpdateMessage::TransactionCreated {
+            transaction: response.clone(),
+        },
+    )
+    .await;
+
+    Ok(Json(response))
 }
 
 pub async fn update_transaction(
     State(pool): State<PgPool>,
-    Path((split_url, transaction_url)): Path<(String, String)>,
+    Path((public_split_id, public_transaction_id)): Path<(String, String)>,
     Json(payload): Json<CreateTransactionRequest>,
-) -> Result<Json<TransactionDb>, StatusCode> {
-    unimplemented!();
+) -> Result<Json<TransactionResponse>, StatusCode> {
+    let split_id = public_split_id.parse().unwrap();
+    let transaction_id = public_transaction_id.parse().unwrap();
+    let tag_ids = payload
+        .public_tag_ids
+        .into_iter()
+        .map(|id| id.parse().unwrap())
+        .collect();
+
+    let transaction = services::update_transaction(
+        &pool,
+        split_id,
+        transaction_id,
+        payload.name,
+        payload.amount,
+        tag_ids,
+    )
+    .await
+    .map_err(|e| {
+        log::error!("Failed to update transaction: {e}");
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?;
+
+    let response = TransactionResponse::from(transaction.clone(), payload.public_member_id.clone());
+
+    controllers::broadcast_split_update(
+        &public_split_id,
+        &SplitUpdateMessage::TransactionUpdated {
+            transaction: response.clone(),
+        },
+    )
+    .await;
+
+    Ok(Json(response))
 }
 
 pub async fn delete_transaction(
     State(pool): State<PgPool>,
-    Path((split_url, transaction_url)): Path<(String, String)>,
+    Path((public_split_id, public_transaction_id)): Path<(String, String)>,
 ) -> Result<StatusCode, StatusCode> {
-    let split_id = split_url.parse().unwrap();
-    let transaction_id = transaction_url.parse().unwrap();
+    let split_id = public_split_id.parse().unwrap();
+    let transaction_id = public_transaction_id.parse().unwrap();
 
     services::delete_transaction(&pool, split_id, transaction_id)
         .await
@@ -167,6 +199,14 @@ pub async fn delete_transaction(
             log::error!("Failed to delete transaction: {e}");
             StatusCode::INTERNAL_SERVER_ERROR
         })?;
+
+    controllers::broadcast_split_update(
+        &public_split_id,
+        &SplitUpdateMessage::TransactionDeleted {
+            transaction_id: public_transaction_id,
+        },
+    )
+    .await;
 
     Ok(StatusCode::NO_CONTENT)
 }

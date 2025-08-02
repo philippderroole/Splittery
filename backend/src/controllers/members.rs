@@ -176,7 +176,7 @@ pub async fn edit_member(
 
     controllers::broadcast_split_update(
         &public_split_id,
-        &SplitUpdateMessage::MemberEdited {
+        &SplitUpdateMessage::MemberUpdated {
             member: MemberResponse::from(member.clone(), &public_split_id, 0, 0),
             tags: member
                 .tags

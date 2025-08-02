@@ -8,11 +8,13 @@ import { Box, Chip } from "@mui/material";
 interface ChipSelectorProps {
     selectedTagIds: string[];
     setSelectedTagIds: (tagIds: string[]) => void;
+    pending?: boolean;
 }
 
 export default function ChipSelector({
     selectedTagIds,
     setSelectedTagIds,
+    pending = false,
 }: ChipSelectorProps) {
     const tags = useTags();
 
@@ -72,6 +74,7 @@ export default function ChipSelector({
                         onDelete={() => {
                             selected ? removeTag(tag) : addTag(tag); // eslint-disable-line @typescript-eslint/no-unused-expressions
                         }}
+                        disabled={pending}
                     />
                 );
             })}

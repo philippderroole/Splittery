@@ -5,7 +5,6 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
-use uuid::Uuid;
 
 use crate::{
     models::{Tag, TagType},
@@ -37,11 +36,14 @@ impl EntryTagResponse {
 
 pub async fn get_all_entry_tags(
     State(pool): State<PgPool>,
-    Path((public_split_id, public_transaction_id, public_entry_id)): Path<(String, String, String)>,
+    Path((public_split_id, _public_transaction_id, public_entry_id)): Path<(
+        String,
+        String,
+        String,
+    )>,
 ) -> Result<Json<Vec<EntryTagResponse>>, StatusCode> {
-    let transaction_id = public_transaction_id.parse().unwrap();
     let entry_id = public_entry_id.parse().unwrap();
-    let tags = services::get_tags_for_entry(&pool, transaction_id, entry_id)
+    let tags = services::get_tags_for_entry(&pool, entry_id)
         .await
         .map_err(|e| {
             log::error!("Failed to get entry tags: {e}");
@@ -63,14 +65,18 @@ pub struct AddTagToEntryRequest {
 
 pub async fn add_tag_to_entry(
     State(pool): State<PgPool>,
-    Path((public_split_id, public_transaction_id, public_entry_id)): Path<(String, String, String)>,
+    Path((public_split_id, _public_transaction_id, public_entry_id)): Path<(
+        String,
+        String,
+        String,
+    )>,
     Json(request): Json<AddTagToEntryRequest>,
 ) -> Result<StatusCode, StatusCode> {
     let split_id: uuid::Uuid = public_split_id.parse().unwrap();
-    let transaction_id = public_transaction_id.parse().unwrap();
     let entry_id = public_entry_id.parse().unwrap();
     let tag_id = request.public_tag_id.parse().unwrap();
-    services::add_tag_to_entry(&pool, split_id, transaction_id, entry_id, tag_id)
+
+    services::add_tag_to_entry(&pool, split_id, entry_id, tag_id)
         .await
         .map_err(|e| {
             log::error!("Failed to add tag to member: {e}");

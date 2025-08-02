@@ -1,6 +1,6 @@
 "use client";
 
-import { editEntry } from "@/actions/entry-service";
+import { updateEntry } from "@/actions/entry-service";
 import BaseForm, { useFormContext } from "@/components/base-form";
 import ChipSelector from "@/components/chip-selector";
 import AmountField from "@/components/form-fields/amount-field";
@@ -63,8 +63,7 @@ export function EditEntryDialog({
         }
 
         try {
-            await editEntry(split.id, transaction.id, entry);
-            reset();
+            await updateEntry(split.id, transaction.id, entry);
             onClose();
         } catch {
             setError("Failed to edit entry. Please try again.");
@@ -135,7 +134,7 @@ export function EditEntryDialog({
                         </BaseForm.Title>
                         <DeleteEntryDialogButton
                             entry={initalEntry}
-                            transaction={transaction}
+                            onSubmit={onClose}
                         />
                     </Box>
                 </DialogTitle>
@@ -200,6 +199,7 @@ function FormInputs({
             <ChipSelector
                 selectedTagIds={entry.tagIds}
                 setSelectedTagIds={setSelectedTags}
+                pending={isPending}
             />
         </>
     );

@@ -4,11 +4,7 @@ use uuid::Uuid;
 
 use crate::models::{Tag, TagDb, TagType};
 
-pub async fn get_tags_for_entry(
-    pool: &PgPool,
-    transaction_id: Uuid,
-    entry_id: Uuid,
-) -> Result<Vec<Tag>> {
+pub async fn get_tags_for_entry(pool: &PgPool, entry_id: Uuid) -> Result<Vec<Tag>> {
     let tags_db = sqlx::query_as!(
         TagDb,
         "
@@ -16,9 +12,8 @@ pub async fn get_tags_for_entry(
         FROM tags
         JOIN entry_tags ON tags.id = entry_tags.tag_id
         JOIN entries ON entry_tags.entry_id = entries.id
-        WHERE entries.transaction_id = $1 AND entry_tags.entry_id = $2
+        WHERE entry_tags.entry_id = $1
         ",
-        transaction_id,
         entry_id,
     )
     .fetch_all(pool)
@@ -33,7 +28,6 @@ pub async fn get_tags_for_entry(
 pub async fn add_tag_to_entry(
     pool: &PgPool,
     _split_id: Uuid,
-    _transaction_id: Uuid,
     entry_id: Uuid,
     tag_id: Uuid,
 ) -> Result<()> {

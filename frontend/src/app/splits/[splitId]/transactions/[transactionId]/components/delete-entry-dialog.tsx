@@ -19,13 +19,15 @@ import { useState } from "react";
 interface DeleteEntryDialogProps {
     entry: Entry;
     open: boolean;
-    onClose: () => void;
+    onSubmit: () => void;
+    onCancel: () => void;
 }
 
 export function DeleteEntryDialog({
     entry,
     open,
-    onClose,
+    onSubmit,
+    onCancel,
 }: DeleteEntryDialogProps) {
     const split = useSplit();
     const transaction = useTransaction();
@@ -38,7 +40,7 @@ export function DeleteEntryDialog({
 
         try {
             await deleteEntry(split.id, transaction.id, entry.id);
-            onClose();
+            onSubmit();
         } catch {
             setError("Failed to delete entry. Please try again.");
             setPending(false);
@@ -46,7 +48,7 @@ export function DeleteEntryDialog({
     };
 
     const handleCancel = () => {
-        onClose();
+        onCancel();
     };
 
     return (

@@ -3,10 +3,14 @@ export type MessageType =
     | "SplitDeleted"
     | "TagChanged"
     | "TagDeleted"
-    | "TransactionChanged"
+    | "TransactionCreated"
+    | "TransactionUpdated"
     | "TransactionDeleted"
     | "MemberCreated"
-    | "MemberEdited";
+    | "MemberUpdated"
+    | "EntryCreated"
+    | "EntryUpdated"
+    | "EntryDeleted";
 export interface WebSocketMessage {
     type: MessageType;
     payload: unknown;

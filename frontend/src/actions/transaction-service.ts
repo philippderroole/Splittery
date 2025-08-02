@@ -5,7 +5,7 @@ import {
     CreateTransactionDto,
     SerializedTransaction,
     Transaction,
-    UpdateTransaction,
+    UpdateTransactionDto,
 } from "@/utils/transaction";
 
 export async function createTransaction(
@@ -21,11 +21,11 @@ export async function createTransaction(
 }
 
 export async function updateTransaction(
-    transaction: UpdateTransaction,
-    splitId: string
+    splitId: string,
+    transaction: UpdateTransactionDto
 ): Promise<Transaction> {
     return await PUT(
-        `${process.env.INTERNAL_API_URL}/splits/${splitId}/transactions/${transaction.url}`,
+        `${process.env.INTERNAL_API_URL}/splits/${splitId}/transactions/${transaction.id}`,
         {
             body: JSON.stringify(transaction),
         }

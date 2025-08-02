@@ -112,6 +112,56 @@ pub async fn create_transaction(
     Ok(Transaction::from(transaction_db?, tags, Vec::new()))
 }
 
+pub async fn update_transaction(
+    pool: &PgPool,
+    split_id: Uuid,
+    transaction_id: Uuid,
+    name: String,
+    amount: i64,
+    tag_ids: Vec<Uuid>,
+) -> Result<Transaction, anyhow::Error> {
+    if tag_ids.is_empty() {
+        return Err(anyhow!("No tags provided for transaction"));
+    }
+
+    let transaction_db = sqlx::query_as!(
+        TransactionDb,
+        "
+        UPDATE transactions
+        SET name = $1, amount = $2, updated_at = NOW()
+        WHERE split_id = $3 AND id = $4
+        RETURNING id, public_id, name, amount, member_id, split_id, executed_at, created_at, updated_at
+        ",
+        name,
+        amount,
+        split_id,
+        transaction_id
+    )
+    .fetch_one(pool)
+    .await
+    .map_err(|e| anyhow!("Failed to update transaction: {}", e))?;
+
+    services::set_tags_for_transaction(pool, transaction_id, &tag_ids)
+        .await
+        .map_err(|e| anyhow!("Failed to set tags for transaction: {}", e))?;
+
+    let tags = services::get_tags_for_transaction(pool, split_id, transaction_id)
+        .await
+        .map_err(|e| anyhow!("Failed to get tags for transaction: {}", e))?;
+
+    let entries = services::get_entries_for_transaction(pool, transaction_id)
+        .await
+        .map_err(|e| {
+            anyhow!(
+                "Failed to get entries for transaction {}: {}",
+                transaction_id,
+                e
+            )
+        })?;
+
+    Ok(Transaction::from(transaction_db, tags, entries))
+}
+
 pub async fn delete_transaction(
     pool: &PgPool,
     split_id: Uuid,

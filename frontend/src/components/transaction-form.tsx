@@ -1,19 +1,8 @@
 "use client";
 
-import TagSelection from "@/components/tag-selection";
 import { useMembers } from "@/providers/member-provider";
-import { useTags } from "@/providers/tag-provider";
 import { CreateTransactionDto } from "@/utils/transaction";
-import {
-    Button,
-    FormControl,
-    FormHelperText,
-    InputAdornment,
-    InputLabel,
-    MenuItem,
-    OutlinedInput,
-    TextField,
-} from "@mui/material";
+import { Button } from "@mui/material";
 import { createContext, ReactNode, useContext, useState } from "react";
 
 type TransactionFormContextType = {
@@ -185,110 +174,6 @@ function Root({
     );
 }
 
-function FormInputs() {
-    const {
-        transaction,
-        setName,
-        setAmount,
-        setPayee,
-        setSelectedTags,
-        isPending,
-        validationErrors,
-    } = useTransactionFormContext();
-
-    const members = useMembers();
-    const tags = useTags();
-
-    return (
-        <>
-            <TextField
-                autoFocus
-                required
-                margin="dense"
-                id="transaction-name"
-                name="transaction-name"
-                label="Transaction name"
-                type="text"
-                value={transaction.name}
-                onChange={(e) => setName(e.target.value)}
-                aria-label="Transaction name"
-                fullWidth
-                disabled={isPending}
-                error={validationErrors.get("name") !== null}
-                helperText={
-                    validationErrors.get("name") !== null &&
-                    validationErrors.get("name")
-                }
-            />
-            <FormControl
-                required
-                fullWidth
-                margin="dense"
-                id="amount"
-                error={validationErrors.get("amount") !== null}
-                disabled={isPending}
-            >
-                <InputLabel htmlFor="amount">Amount</InputLabel>
-                <OutlinedInput
-                    id="transaction-amount"
-                    name="transaction-amount"
-                    label="Transaction amount"
-                    type="number"
-                    value={
-                        transaction.amount == null
-                            ? ""
-                            : transaction.amount / 100
-                    }
-                    onChange={(e) => setAmount(e.target.value)}
-                    startAdornment={
-                        <InputAdornment position="start">-</InputAdornment>
-                    }
-                    endAdornment={
-                        <InputAdornment position="end">€</InputAdornment>
-                    }
-                />
-                <FormHelperText>
-                    {validationErrors.get("amount") !== null &&
-                        validationErrors.get("amount")}
-                </FormHelperText>
-            </FormControl>
-            <TextField
-                required
-                select
-                margin="dense"
-                id="transaction-payee"
-                name="transaction-payee"
-                label="Payee"
-                value={
-                    members.find((member) => member.id === transaction.memberId)
-                        ?.name || ""
-                }
-                onChange={(e) => setPayee(e.target.value)}
-                aria-label="Transaction payee"
-                fullWidth
-                disabled={isPending}
-                error={validationErrors.get("payee") !== null}
-                helperText={
-                    validationErrors.get("payee") !== null &&
-                    validationErrors.get("payee")
-                }
-            >
-                {members.map((user) => (
-                    <MenuItem key={user.id} value={user.name}>
-                        {user.name}
-                    </MenuItem>
-                ))}
-            </TextField>
-            <TagSelection
-                allTags={tags}
-                selectedTags={transaction.tagIds}
-                setSelectedTags={setSelectedTags}
-                disabled={isPending}
-            />
-        </>
-    );
-}
-
 interface SubmitButtonProps {
     content: ReactNode;
 }
@@ -343,7 +228,6 @@ const TransactionForm = {
     Root,
     Title,
     Description,
-    FormInputs,
     CancelButton,
     SubmitButton,
 };
