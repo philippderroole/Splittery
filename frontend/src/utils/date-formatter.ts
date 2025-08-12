@@ -16,7 +16,7 @@ export function getFormattedDateLong(date: Date | Dayjs) {
         return dayjsdate.format(FAR_AWAY_DATE_FORMAT);
     }
 
-    return dayjs().calendar(dayjs(date), {
+    return dayjsdate.calendar(today, {
         sameDay: `[Today], ${TIME_FORMAT}`,
         nextDay: `[Tomorrow], ${TIME_FORMAT}`,
         nextWeek: `${DATE_FORMAT}, ${TIME_FORMAT}`,
@@ -38,12 +38,14 @@ export function getFormattedDay(date: Date | Dayjs): string {
         return dayjsdate.format(FAR_AWAY_DATE_FORMAT);
     }
 
-    return dayjs().calendar(dayjsdate, {
+    const result = dayjsdate.calendar(today, {
         sameDay: `[Today]`,
         nextDay: `[Tomorrow]`,
         nextWeek: `${DATE_FORMAT}`,
         lastDay: `[Yesterday]`,
         lastWeek: `${DATE_FORMAT}`,
-        sameElse: DATE_FORMAT,
+        sameElse: `${DATE_FORMAT}`,
     });
+
+    return result;
 }

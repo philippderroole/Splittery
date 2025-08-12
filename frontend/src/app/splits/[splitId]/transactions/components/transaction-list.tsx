@@ -25,10 +25,10 @@ export default function TransactionList() {
                 new Date(b.executedAt).getTime() -
                 new Date(a.executedAt).getTime()
         )
-        .reduce<Map<string, Transaction[]>>((acc, group) => {
-            const date = dayjs(group.executedAt).format("MM-DD-YYYY");
+        .reduce<Map<string, Transaction[]>>((acc, transaction) => {
+            const date = dayjs(transaction.executedAt).format("MM-DD-YYYY");
 
-            acc.set(date, acc.get(date)?.concat(group) || [group]);
+            acc.set(date, [...(acc.get(date) || []), transaction]);
 
             return acc;
         }, new Map<string, Transaction[]>());
