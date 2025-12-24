@@ -1,5 +1,5 @@
 # Use the official Rust image as the base image
-FROM rust:slim as builder
+FROM rust:slim AS builder
 
 # Create a new directory for the application
 RUN mkdir -p /usr/src/splittery_backend
@@ -14,7 +14,7 @@ ENV SQLX_OFFLINE=true
 RUN cargo install --path .
 
 # Use Debian Bullseye slim as the base image
-FROM debian:12-slim
+FROM debian:13.2-slim
 
 # Copy the binary from the builder image to the new image
 COPY --from=builder /usr/local/cargo/bin/splittery_backend /usr/local/bin/splittery_backend
