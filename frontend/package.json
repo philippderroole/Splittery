@@ -16,7 +16,7 @@
     "@mui/material": "^7.3.6",
     "@stomp/stompjs": "^7.2.1",
     "dayjs": "^1.11.19",
-    "next": "^16.1.5",
+    "next": "^16.1.7",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "server-only": "^0.0.1",
