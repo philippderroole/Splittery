@@ -14,23 +14,12 @@ config:
       bypassProxy: ''
 items:
   - info:
-      name: register
+      name: getAllSplits
       type: http
-      seq: 2
+      seq: 3
     http:
-      method: POST
-      url: '{{URL}}/auth/password/register'
-      headers:
-        - name: Content-Type
-          value: application/json
-      body:
-        type: json
-        data: |-
-          {
-            "username": "philipp",
-            "email": "philipp.rolli.pr@gmail.com",
-            "password": "123"
-          }
+      method: GET
+      url: '{{URL}}/splits'
       auth: inherit
     settings:
       encodeUrl: true
@@ -38,27 +27,91 @@ items:
       followRedirects: true
       maxRedirects: 5
   - info:
-      name: login
-      type: http
-      seq: 3
-    http:
-      method: POST
-      url: '{{URL}}/auth/password/login'
-      body:
-        type: json
-        data: |-
-          {
-            "username": "philipp",
-            "email": "philipp.rolli.pr@gmail.com",
-            "password": "123"
-          }
+      name: auth
+      type: folder
+      seq: 4
+    request:
       auth: inherit
-    settings:
-      encodeUrl: true
-      timeout: 0
-      followRedirects: true
-      maxRedirects: 5
+    items:
+      - info:
+          name: login
+          type: http
+          seq: 4
+        http:
+          method: POST
+          url: '{{URL}}/auth/password/login'
+          body:
+            type: json
+            data: |-
+              {
+                "username": "philipp",
+                "email": "philipp.rolli.pr@gmail.com",
+                "password": "123"
+              }
+        settings:
+          encodeUrl: true
+          timeout: 0
+          followRedirects: true
+          maxRedirects: 5
+      - info:
+          name: logout
+          type: http
+          seq: 4
+        http:
+          method: POST
+          url: '{{URL}}/auth/logout'
+          auth: inherit
+        settings:
+          encodeUrl: true
+          timeout: 0
+          followRedirects: true
+          maxRedirects: 5
+      - info:
+          name: refresh
+          type: http
+          seq: 4
+        http:
+          method: POST
+          url: '{{URL}}/auth/refresh'
+          body:
+            type: json
+            data: |-
+              {
+                "refresh_token": "XPHUQhzBTqdTpTjSTv6FS7nYoQie8vckrYfaKh7SwF2E5Gzz52lDBysFODnpWSdb"
+              }
+          auth: inherit
+        settings:
+          encodeUrl: true
+          timeout: 0
+          followRedirects: true
+          maxRedirects: 5
+      - info:
+          name: register
+          type: http
+          seq: 2
+        http:
+          method: POST
+          url: '{{URL}}/auth/password/register'
+          headers:
+            - name: Content-Type
+              value: application/json
+          body:
+            type: json
+            data: |-
+              {
+                "username": "philipp",
+                "email": "philipp.rolli.pr@gmail.com",
+                "password": "123"
+              }
+        settings:
+          encodeUrl: true
+          timeout: 0
+          followRedirects: true
+          maxRedirects: 5
 request:
+  auth:
+    type: bearer
+    token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI5NzM5MjNhNS1jMzQ0LTQ0YTItYjZjOS03MWJiMTIxNWVhMWIiLCJzaWQiOiJjOTA3NzhkYS02ZjNjLTQ5MTctYmZmYi0xNTdjN2JlNWI5MzEiLCJleHAiOjE3ODAyNjk1MzAsImlhdCI6MTc4MDI2NTkzMH0.i98wsl-6ugonSz-LQs797Aj0_dixX6ywe8VL4L3T6-Q
   variables:
     - name: URL
       value: 127.0.0.1:8000/api/v1
@@ -68,5 +121,5 @@ extensions:
     ignore:
       - node_modules
       - .git
-    exportedAt: '2026-05-30T08:41:33.559Z'
+    exportedAt: '2026-06-01T12:03:25.829Z'
     exportedUsing: Bruno
