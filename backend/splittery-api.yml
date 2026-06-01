@@ -1,0 +1,72 @@
+opencollection: 1.0.0
+info:
+  name: Splittery
+config:
+  proxy:
+    inherit: true
+    config:
+      protocol: http
+      hostname: ''
+      port: ''
+      auth:
+        username: ''
+        password: ''
+      bypassProxy: ''
+items:
+  - info:
+      name: register
+      type: http
+      seq: 2
+    http:
+      method: POST
+      url: '{{URL}}/auth/password/register'
+      headers:
+        - name: Content-Type
+          value: application/json
+      body:
+        type: json
+        data: |-
+          {
+            "username": "philipp",
+            "email": "philipp.rolli.pr@gmail.com",
+            "password": "123"
+          }
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+  - info:
+      name: login
+      type: http
+      seq: 3
+    http:
+      method: POST
+      url: '{{URL}}/auth/password/login'
+      body:
+        type: json
+        data: |-
+          {
+            "username": "philipp",
+            "email": "philipp.rolli.pr@gmail.com",
+            "password": "123"
+          }
+      auth: inherit
+    settings:
+      encodeUrl: true
+      timeout: 0
+      followRedirects: true
+      maxRedirects: 5
+request:
+  variables:
+    - name: URL
+      value: 127.0.0.1:8000/api/v1
+bundled: true
+extensions:
+  bruno:
+    ignore:
+      - node_modules
+      - .git
+    exportedAt: '2026-05-30T08:41:33.559Z'
+    exportedUsing: Bruno

@@ -1,6 +1,15 @@
 import { useState } from "react";
+import { redirect } from "react-router";
 import reactLogo from "../../assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
+
+export async function loader() {
+    const mockCondition = true;
+    if (mockCondition) {
+        return redirect("/register");
+    }
+    return null;
+}
 
 export default function HomePage() {
     const [greetMsg, setGreetMsg] = useState("");

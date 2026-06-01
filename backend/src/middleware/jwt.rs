@@ -1,78 +1,113 @@
 use axum::{
-    extract::{Request, State},
-    http::{header::AUTHORIZATION, StatusCode},
+    Extension,
+    extract::Request,
+    http::{StatusCode, header::AUTHORIZATION},
     middleware::Next,
     response::Response,
 };
-use jsonwebtoken::{decode, DecodingKey, Validation};
-use sqlx::PgPool;
+use jsonwebtoken::{DecodingKey, Validation, decode};
+use sqlx::{PgPool, Pool, Postgres};
 use uuid::Uuid;
-
-// Extract the user ID from the request
-#[derive(Clone)]
-pub struct CurrentUser {
-    pub id: Uuid,
-    pub email: String,
-}
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 pub struct Claims {
-    pub sub: String, // User ID
-    pub email: String,
-    // Other fields can be added as needed
+    // User ID
+    pub sub: String,
+    // Session ID for token revocation
+    pub sid: String,
+    pub exp: i64,
+    pub iat: i64,
 }
 
 // Authentication middleware
 pub async fn auth_middleware(
-    State(pool): State<PgPool>,
-    mut request: Request,
+    Extension(pool): Extension<PgPool>,
+    request: Request,
     next: Next,
-) -> Result<Response, StatusCode> {
-    let auth_header = request
+) -> anyhow::Result<Response, StatusCode> {
+    let token = request
         .headers()
         .get(AUTHORIZATION)
         .and_then(|header| header.to_str().ok())
-        .ok_or(StatusCode::UNAUTHORIZED)?;
+        .and_then(|token| token.strip_prefix("Bearer "))
+        .ok_or_else(|| {
+            log::warn!("Missing or invalid Authorization header");
+            StatusCode::UNAUTHORIZED
+        })?;
 
-    if !auth_header.starts_with("Bearer ") {
-        return Err(StatusCode::UNAUTHORIZED);
-    }
+    let claims = decode_jwt(token).map_err(|e| {
+        log::warn!("Failed to decode JWT: {}", e);
+        StatusCode::UNAUTHORIZED
+    })?;
 
-    let token = &auth_header[7..]; // Remove "Bearer " prefix
-
-    // JWT secret (should match the one in auth_user.rs)
-    const JWT_SECRET: &str = "your-secret-key";
-
-    // Decode and validate JWT token
-    let claims = decode::<Claims>(
-        token,
-        &DecodingKey::from_secret(JWT_SECRET.as_ref()),
-        &Validation::default(),
-    )
-    .map_err(|_| StatusCode::UNAUTHORIZED)?
-    .claims;
-
-    // Parse user ID from claims
-    let user_id = Uuid::parse_str(&claims.sub).map_err(|_| StatusCode::UNAUTHORIZED)?;
-
-    // Verify user still exists in database
-    let user_exists = sqlx::query!("SELECT id FROM users WHERE id = $1", user_id)
-        .fetch_optional(&pool)
-        .await
-        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
-        .is_some();
-
-    if !user_exists {
-        return Err(StatusCode::UNAUTHORIZED);
-    }
-
-    // Add user to request extensions for handlers to access
-    let current_user = CurrentUser {
-        id: user_id,
-        email: claims.email,
-    };
-
-    request.extensions_mut().insert(current_user);
+    validate_user_exists(pool.clone(), &claims).await?;
+    validate_session(pool, &claims).await?;
 
     Ok(next.run(request).await)
+}
+
+pub fn decode_jwt(token: &str) -> anyhow::Result<Claims> {
+    let jwt_secret = dotenvy::var("JWT_SECRET")?;
+
+    let claims = decode::<Claims>(
+        token,
+        &DecodingKey::from_secret(jwt_secret.as_ref()),
+        &Validation::default(),
+    )?
+    .claims;
+
+    Ok(claims)
+}
+
+async fn validate_user_exists(
+    pool: Pool<Postgres>,
+    claims: &Claims,
+) -> anyhow::Result<(), StatusCode> {
+    let user_id = Uuid::parse_str(&claims.sub).map_err(|e| {
+        log::error!("Failed to parse user ID: {}", e);
+        StatusCode::UNAUTHORIZED
+    })?;
+
+    let _user = sqlx::query!("SELECT id FROM users WHERE id = $1", user_id)
+        .fetch_optional(&pool)
+        .await
+        .map_err(|e| {
+            log::error!("Failed to query user from database: {}", e);
+            StatusCode::INTERNAL_SERVER_ERROR
+        })?
+        .ok_or_else(|| {
+            log::warn!("User not found");
+            StatusCode::UNAUTHORIZED
+        })?;
+
+    Ok(())
+}
+
+async fn validate_session(pool: Pool<Postgres>, claims: &Claims) -> anyhow::Result<(), StatusCode> {
+    let session_id = Uuid::parse_str(&claims.sid).map_err(|e| {
+        log::error!("Failed to parse session ID: {}", e);
+        StatusCode::UNAUTHORIZED
+    })?;
+
+    let session = sqlx::query!(
+        "SELECT id, revoked_at FROM sessions WHERE id = $1",
+        session_id
+    )
+    .fetch_optional(&pool)
+    .await
+    .map_err(|e| {
+        log::error!("Failed to query session from database: {}", e);
+        StatusCode::INTERNAL_SERVER_ERROR
+    })?
+    .ok_or_else(|| {
+        log::warn!("Session not found");
+        StatusCode::UNAUTHORIZED
+    })?;
+
+    if session.revoked_at.is_some() {
+        log::warn!("Session has been revoked");
+        return Err(StatusCode::UNAUTHORIZED);
+    }
+
+    Ok(())
 }

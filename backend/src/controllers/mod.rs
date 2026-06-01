@@ -1,3 +1,4 @@
+pub mod auth;
 pub mod entries;
 pub mod entry_tags;
 pub mod member_tags;
@@ -8,6 +9,7 @@ pub mod transaction;
 pub mod users;
 pub mod ws;
 
+pub use auth::*;
 pub use entries::*;
 pub use entry_tags::*;
 pub use member_tags::*;

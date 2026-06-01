@@ -1,10 +1,10 @@
+use axum::Extension;
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 
 mod controllers;
 mod middleware;
 mod models;
-mod responses;
 mod routes;
 mod services;
 
@@ -28,6 +28,7 @@ async fn main() -> anyhow::Result<()> {
 
     let app = create_routes()
         .layer(CorsLayer::very_permissive())
+        .layer(Extension(pool.clone()))
         .with_state(pool);
 
     let listener = TcpListener::bind("0.0.0.0:8000").await?;

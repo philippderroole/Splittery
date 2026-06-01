@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT id, public_id, email, username, password_hash, created_at, updated_at\n        FROM users\n        ",
+  "query": "\n        SELECT id, public_id, username, email, email_verified, created_at, updated_at\n        FROM users\n        ",
   "describe": {
     "columns": [
       {
@@ -15,18 +15,23 @@
       },
       {
         "ordinal": 2,
-        "name": "email",
-        "type_info": "Varchar"
-      },
-      {
-        "ordinal": 3,
         "name": "username",
         "type_info": "Varchar"
       },
       {
+        "ordinal": 3,
+        "name": "email",
+        "type_info": {
+          "Custom": {
+            "name": "citext",
+            "kind": "Simple"
+          }
+        }
+      },
+      {
         "ordinal": 4,
-        "name": "password_hash",
-        "type_info": "Varchar"
+        "name": "email_verified",
+        "type_info": "Bool"
       },
       {
         "ordinal": 5,
@@ -52,5 +57,5 @@
       false
     ]
   },
-  "hash": "3e1d14aa44d60061300856ab053fac200a3eaf50cb6cd544225f3578999e97a2"
+  "hash": "e4c666c61fd25411607aeaabf0e077ab7eab0a8f08311da0c80a016ab612d9be"
 }
