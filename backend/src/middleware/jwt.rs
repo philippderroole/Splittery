@@ -1,44 +1,31 @@
-use axum::{
-    Extension,
-    extract::Request,
-    http::{StatusCode, header::AUTHORIZATION},
-    middleware::Next,
-    response::Response,
-};
+use axum::{Extension, extract::Request, http::StatusCode, middleware::Next, response::Response};
+use axum_extra::extract::CookieJar;
 use jsonwebtoken::{DecodingKey, Validation, decode};
 use sqlx::{PgPool, Pool, Postgres};
 use uuid::Uuid;
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 pub struct Claims {
-    // User ID
     pub sub: String,
-    // Session ID for token revocation
     pub sid: String,
     pub exp: i64,
     pub iat: i64,
 }
 
-// Authentication middleware
 pub async fn auth_middleware(
     Extension(pool): Extension<PgPool>,
+    jar: CookieJar,
     request: Request,
     next: Next,
 ) -> anyhow::Result<Response, StatusCode> {
-    let token = request
-        .headers()
-        .get(AUTHORIZATION)
-        .and_then(|header| header.to_str().ok())
-        .and_then(|token| token.strip_prefix("Bearer "))
+    let claims = jar
+        .get("access_token")
+        .map(|cookie| decode_jwt(cookie.value()).ok())
+        .flatten()
         .ok_or_else(|| {
-            log::warn!("Missing or invalid Authorization header");
+            log::warn!("Invalid or missing access token in cookies");
             StatusCode::UNAUTHORIZED
         })?;
-
-    let claims = decode_jwt(token).map_err(|e| {
-        log::warn!("Failed to decode JWT: {}", e);
-        StatusCode::UNAUTHORIZED
-    })?;
 
     validate_user_exists(pool.clone(), &claims).await?;
     validate_session(pool, &claims).await?;

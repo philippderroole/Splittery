@@ -1,5 +1,6 @@
 use sqlx::PgPool;
 
+pub mod access_token;
 mod login;
 mod logout;
 mod refresh;
