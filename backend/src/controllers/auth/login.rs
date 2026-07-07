@@ -31,16 +31,16 @@ pub async fn login_user(
 
     let access_cookie = Cookie::build(("access_token", access_token.token))
         .http_only(true)
-        .secure(true) // Recommended for production
+        .secure(true)
         .same_site(SameSite::Strict)
         .path("/")
         .build();
 
     let refresh_cookie = Cookie::build(("refresh_token", refresh_token.token))
         .http_only(true)
-        .secure(true) // Recommended for production
+        .secure(true)
         .same_site(SameSite::Strict)
-        .path("/")
+        .path("/auth/refresh")
         .build();
 
     let jar = jar.add(access_cookie);
