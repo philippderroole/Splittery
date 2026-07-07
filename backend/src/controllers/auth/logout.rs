@@ -1,9 +1,9 @@
-use std::str::FromStr;
-
-use axum::http::HeaderMap;
-use axum::http::header::AUTHORIZATION;
+use ::cookie::time::Duration;
 use axum::{extract::State, http::StatusCode};
+use axum_extra::extract::CookieJar;
+use axum_extra::extract::cookie::{Cookie, SameSite};
 use sqlx::PgPool;
+use std::str::FromStr;
 use uuid::Uuid;
 
 use crate::middleware::jwt::decode_jwt;
@@ -12,15 +12,14 @@ use crate::services::{self};
 #[axum::debug_handler]
 pub async fn logout(
     State(pool): State<PgPool>,
-    headers: HeaderMap,
-) -> anyhow::Result<(), StatusCode> {
-    let claims = headers
-        .get(AUTHORIZATION)
-        .and_then(|header| header.to_str().ok())
-        .and_then(|token| token.strip_prefix("Bearer "))
-        .and_then(|token| decode_jwt(token).ok())
+    jar: CookieJar,
+) -> anyhow::Result<CookieJar, StatusCode> {
+    let claims = jar
+        .get("access_token")
+        .map(|cookie| decode_jwt(cookie.value()).ok())
+        .flatten()
         .ok_or_else(|| {
-            log::warn!("Invalid session ID in Authorization header");
+            log::warn!("Invalid or missing access token in cookies");
             StatusCode::UNAUTHORIZED
         })?;
 
@@ -29,8 +28,30 @@ pub async fn logout(
         StatusCode::UNAUTHORIZED
     })?;
 
-    services::logout(&pool, sid).await.map_err(|e| {
+    let _ = services::logout(&pool, sid).await.map_err(|e| {
         log::error!("Unexpected error during logout: {e}");
         StatusCode::INTERNAL_SERVER_ERROR
-    })
+    });
+
+    let jar = jar.add(
+        Cookie::build(("access_token", ""))
+            .http_only(true)
+            .secure(true)
+            .same_site(SameSite::Strict)
+            .path("/api/v1")
+            .max_age(Duration::seconds(0))
+            .build(),
+    );
+
+    let jar = jar.add(
+        Cookie::build(("refresh_token", ""))
+            .http_only(true)
+            .secure(true)
+            .same_site(SameSite::Strict)
+            .path("/api/v1/auth/refresh")
+            .max_age(Duration::seconds(0))
+            .build(),
+    );
+
+    Ok(jar)
 }

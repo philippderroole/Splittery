@@ -2037,6 +2037,7 @@ dependencies = [
  "bcrypt",
  "bigdecimal",
  "chrono",
+ "cookie",
  "dotenvy",
  "env_logger",
  "jsonwebtoken",

@@ -1,43 +1,27 @@
 use std::str::FromStr;
 
-use axum::{
-    Json,
-    extract::State,
-    http::{HeaderMap, StatusCode, header::AUTHORIZATION},
-};
-use axum_extra::extract::{
-    CookieJar,
-    cookie::{Cookie, SameSite},
-};
+use axum::{extract::State, http::StatusCode};
+use axum_extra::extract::CookieJar;
 use jsonwebtoken::{DecodingKey, Validation, decode};
-use serde::Deserialize;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::services::RefreshError;
+use crate::{controllers::create_refresh_cookie, services::RefreshError};
 use crate::{
     middleware::jwt::Claims,
     services::{self},
 };
 
-#[derive(Debug, Deserialize)]
-pub struct RefreshTokenRequest {
-    refresh_token: String,
-}
-
 pub async fn refresh_token(
     State(pool): State<PgPool>,
-    headers: HeaderMap,
     jar: CookieJar,
-    Json(payload): Json<RefreshTokenRequest>,
 ) -> anyhow::Result<CookieJar, StatusCode> {
-    let claims = headers
-        .get(AUTHORIZATION)
-        .and_then(|header| header.to_str().ok())
-        .and_then(|token| token.strip_prefix("Bearer "))
-        .and_then(|token| decode_jwt_for_refresh(token).ok())
+    let claims = jar
+        .get("access_token")
+        .map(|cookie| decode_jwt_for_refresh(cookie.value()).ok())
+        .flatten()
         .ok_or_else(|| {
-            log::warn!("Invalid session ID in Authorization header");
+            log::warn!("Invalid or missing access token in cookies");
             StatusCode::UNAUTHORIZED
         })?;
 
@@ -46,7 +30,12 @@ pub async fn refresh_token(
         StatusCode::UNAUTHORIZED
     })?;
 
-    let refresh_token = services::refresh_token(&pool, sid, &payload.refresh_token)
+    let refresh_token_cookie = jar.get("refresh_token").ok_or_else(|| {
+        log::warn!("Missing refresh token in cookies");
+        StatusCode::UNAUTHORIZED
+    })?;
+
+    let refresh_token = services::refresh_token(&pool, sid, &refresh_token_cookie.value())
         .await
         .map_err(|e| match e {
             RefreshError::Unexpected(e) => {
@@ -56,12 +45,7 @@ pub async fn refresh_token(
             _ => StatusCode::UNAUTHORIZED,
         })?;
 
-    let refresh_cookie = Cookie::build(("refresh_token", refresh_token.token))
-        .http_only(true)
-        .secure(true) // Recommended for production
-        .same_site(SameSite::Strict)
-        .path("/")
-        .build();
+    let refresh_cookie = create_refresh_cookie(refresh_token);
 
     let jar = jar.add(refresh_cookie);
 
