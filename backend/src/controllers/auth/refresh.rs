@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use axum::{
     Json,
     extract::State,
@@ -29,7 +31,22 @@ pub async fn refresh_token(
     jar: CookieJar,
     Json(payload): Json<RefreshTokenRequest>,
 ) -> anyhow::Result<CookieJar, StatusCode> {
-    let refresh_token = services::refresh_token(&pool, &payload.refresh_token)
+    let claims = headers
+        .get(AUTHORIZATION)
+        .and_then(|header| header.to_str().ok())
+        .and_then(|token| token.strip_prefix("Bearer "))
+        .and_then(|token| decode_jwt_for_refresh(token).ok())
+        .ok_or_else(|| {
+            log::warn!("Invalid session ID in Authorization header");
+            StatusCode::UNAUTHORIZED
+        })?;
+
+    let sid = Uuid::from_str(&claims.sid).map_err(|e| {
+        log::error!("Invalid session ID: {}", e);
+        StatusCode::UNAUTHORIZED
+    })?;
+
+    let refresh_token = services::refresh_token(&pool, sid, &payload.refresh_token)
         .await
         .map_err(|e| match e {
             RefreshError::Unexpected(e) => {
