@@ -12,7 +12,7 @@ pub struct Claims {
     pub iat: i64,
 }
 
-pub async fn auth_middleware(
+pub async fn validate_access_token(
     Extension(pool): Extension<PgPool>,
     jar: CookieJar,
     request: Request,

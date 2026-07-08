@@ -16,6 +16,10 @@ pub async fn register_user(
     pool: &PgPool,
     payload: CreateUserRequest,
 ) -> anyhow::Result<User, RegisterError> {
+    let mut tx = pool.begin().await.map_err(|e| {
+        RegisterError::Unexpected(anyhow::anyhow!("Failed to start transaction: {}", e))
+    })?;
+
     let user = sqlx::query_as!(
         User,
         "
@@ -28,7 +32,7 @@ pub async fn register_user(
         payload.email,
         payload.username,
     )
-    .fetch_one(pool)
+    .fetch_one(&mut *tx)
     .await
     .map_err(|e| {
         if let sqlx::Error::Database(db_err) = &e {
@@ -57,10 +61,14 @@ pub async fn register_user(
         user.id,
         password_hash.to_string()
     )
-    .fetch_one(pool)
+    .fetch_one(&mut *tx)
     .await
     .map_err(|e| {
         RegisterError::Unexpected(anyhow::anyhow!("Failed to create user identity: {}", e))
+    })?;
+
+    tx.commit().await.map_err(|e| {
+        RegisterError::Unexpected(anyhow::anyhow!("Failed to commit transaction: {}", e))
     })?;
 
     Ok(user)

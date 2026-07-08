@@ -2,7 +2,7 @@ use chrono::Utc;
 use cookie::{Cookie, SameSite};
 use jsonwebtoken::{EncodingKey, Header, encode};
 
-use crate::middleware::jwt::Claims;
+use crate::middleware::token_validation::Claims;
 
 pub struct AccessToken {
     pub token: String,

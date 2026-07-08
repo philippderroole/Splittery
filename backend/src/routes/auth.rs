@@ -1,7 +1,7 @@
 use axum::{Router, middleware, routing::post};
 use sqlx::PgPool;
 
-use crate::{controllers, middleware::jwt::auth_middleware};
+use crate::{controllers, middleware::token_validation::validate_access_token};
 
 pub fn auth_routes() -> Router<PgPool> {
     let protected_routes = Router::new()
@@ -22,7 +22,7 @@ pub fn auth_routes() -> Router<PgPool> {
                 )
                 .route("/logout", post(controllers::logout)),
         )
-        .layer(middleware::from_fn(auth_middleware));
+        .layer(middleware::from_fn(validate_access_token));
 
     let public_routes = Router::new().nest(
         "/auth",
