@@ -4,7 +4,7 @@ use jsonwebtoken::{DecodingKey, Validation, decode};
 use sqlx::{PgPool, Pool, Postgres};
 use uuid::Uuid;
 
-#[derive(Debug, serde::Deserialize, serde::Serialize)]
+#[derive(Debug, serde::Deserialize, serde::Serialize, Clone)]
 pub struct Claims {
     pub sub: String,
     pub sid: String,
@@ -15,7 +15,7 @@ pub struct Claims {
 pub async fn validate_access_token(
     Extension(pool): Extension<PgPool>,
     jar: CookieJar,
-    request: Request,
+    mut request: Request,
     next: Next,
 ) -> anyhow::Result<Response, StatusCode> {
     let claims = jar
@@ -30,6 +30,25 @@ pub async fn validate_access_token(
     validate_user_exists(pool.clone(), &claims).await?;
     validate_session(pool, &claims).await?;
 
+    request.extensions_mut().insert(claims);
+    Ok(next.run(request).await)
+}
+
+pub async fn validate_access_token_for_refresh(
+    Extension(pool): Extension<PgPool>,
+    jar: CookieJar,
+    mut request: Request,
+    next: Next,
+) -> anyhow::Result<Response, StatusCode> {
+    let claims = jar
+        .get("access_token")
+        .map(|cookie| decode_jwt_for_refresh(cookie.value()).ok())
+        .flatten()
+        .ok_or(StatusCode::UNAUTHORIZED)?;
+
+    validate_session(pool, &claims).await?;
+
+    request.extensions_mut().insert(claims);
     Ok(next.run(request).await)
 }
 
@@ -40,6 +59,22 @@ pub fn decode_jwt(token: &str) -> anyhow::Result<Claims> {
         token,
         &DecodingKey::from_secret(jwt_secret.as_ref()),
         &Validation::default(),
+    )?
+    .claims;
+
+    Ok(claims)
+}
+
+fn decode_jwt_for_refresh(token: &str) -> anyhow::Result<Claims> {
+    let jwt_secret = dotenvy::var("JWT_SECRET")?;
+
+    let mut validation = Validation::default();
+    validation.validate_exp = false;
+
+    let claims = decode::<Claims>(
+        token,
+        &DecodingKey::from_secret(jwt_secret.as_ref()),
+        &validation,
     )?
     .claims;
 
