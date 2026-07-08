@@ -3,10 +3,7 @@ use axum_extra::extract::cookie::CookieJar;
 use serde::Deserialize;
 use sqlx::PgPool;
 
-use crate::{
-    controllers::{access_cookie_builder, refresh_cookie_builder},
-    services::{self, LoginError},
-};
+use crate::services::{self, LoginError};
 
 #[derive(Debug, Deserialize)]
 pub struct LoginRequest {
@@ -32,11 +29,8 @@ pub async fn login_user(
                 }
             })?;
 
-    let access_cookie = access_cookie_builder(access_token).build();
-    let refresh_cookie = refresh_cookie_builder(refresh_token).build();
-
-    let jar = jar.add(access_cookie);
-    let jar = jar.add(refresh_cookie);
+    let jar = jar.add(access_token);
+    let jar = jar.add(refresh_token);
 
     Ok(jar)
 }
