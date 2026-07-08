@@ -8,7 +8,7 @@ use uuid::Uuid;
 
 use crate::services::RefreshError;
 use crate::{
-    middleware::jwt::Claims,
+    middleware::token_validation::Claims,
     services::{self},
 };
 

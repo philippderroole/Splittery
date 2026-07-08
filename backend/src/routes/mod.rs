@@ -17,7 +17,7 @@ use transactions::transaction_routes;
 use users::user_routes;
 use websocket::websocket_routes;
 
-use crate::middleware::jwt::auth_middleware;
+use crate::middleware::token_validation::validate_access_token;
 use crate::routes::{auth::auth_routes, members::members_routes};
 
 pub fn create_routes() -> Router<PgPool> {
@@ -29,7 +29,7 @@ pub fn create_routes() -> Router<PgPool> {
         .merge(entry_routes())
         .merge(tags_routes())
         .merge(members_routes())
-        .layer(middleware::from_fn(auth_middleware));
+        .layer(middleware::from_fn(validate_access_token));
 
     let public_routes = Router::new().merge(auth_routes());
 

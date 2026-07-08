@@ -4,7 +4,7 @@ use sqlx::PgPool;
 use std::str::FromStr;
 use uuid::Uuid;
 
-use crate::middleware::jwt::decode_jwt;
+use crate::middleware::token_validation::decode_jwt;
 use crate::services::access_token::AccessToken;
 use crate::services::{self, RefreshToken};
 
