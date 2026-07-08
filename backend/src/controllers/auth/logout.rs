@@ -1,12 +1,13 @@
 use ::cookie::time::Duration;
 use axum::{extract::State, http::StatusCode};
 use axum_extra::extract::CookieJar;
-use axum_extra::extract::cookie::{Cookie, SameSite};
 use sqlx::PgPool;
 use std::str::FromStr;
 use uuid::Uuid;
 
+use crate::controllers::access_cookie_builder;
 use crate::middleware::jwt::decode_jwt;
+use crate::services::access_token::AccessToken;
 use crate::services::{self};
 
 #[axum::debug_handler]
@@ -33,25 +34,13 @@ pub async fn logout(
         StatusCode::INTERNAL_SERVER_ERROR
     });
 
-    let jar = jar.add(
-        Cookie::build(("access_token", ""))
-            .http_only(true)
-            .secure(true)
-            .same_site(SameSite::Strict)
-            .path("/api/v1")
-            .max_age(Duration::seconds(0))
-            .build(),
-    );
+    let access_token = access_cookie_builder(AccessToken {
+        token: String::new(),
+    })
+    .max_age(Duration::seconds(-1))
+    .build();
 
-    let jar = jar.add(
-        Cookie::build(("refresh_token", ""))
-            .http_only(true)
-            .secure(true)
-            .same_site(SameSite::Strict)
-            .path("/api/v1/auth/refresh")
-            .max_age(Duration::seconds(0))
-            .build(),
-    );
+    let jar = jar.add(access_token);
 
     Ok(jar)
 }
