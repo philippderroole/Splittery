@@ -1,10 +1,10 @@
 use axum::{Json, extract::State, http::StatusCode};
-use axum_extra::extract::cookie::{Cookie, CookieJar, SameSite};
+use axum_extra::extract::cookie::CookieJar;
 use serde::Deserialize;
 use sqlx::PgPool;
 
 use crate::{
-    controllers::create_refresh_cookie,
+    controllers::{access_cookie_builder, refresh_cookie_builder},
     services::{self, LoginError},
 };
 
@@ -32,14 +32,8 @@ pub async fn login_user(
                 }
             })?;
 
-    let access_cookie = Cookie::build(("access_token", access_token.token))
-        .http_only(true)
-        .secure(true)
-        .same_site(SameSite::Strict)
-        .path("/api/v1")
-        .build();
-
-    let refresh_cookie = create_refresh_cookie(refresh_token);
+    let access_cookie = access_cookie_builder(access_token).build();
+    let refresh_cookie = refresh_cookie_builder(refresh_token).build();
 
     let jar = jar.add(access_cookie);
     let jar = jar.add(refresh_cookie);

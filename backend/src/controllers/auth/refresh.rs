@@ -6,7 +6,8 @@ use jsonwebtoken::{DecodingKey, Validation, decode};
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use crate::{controllers::create_refresh_cookie, services::RefreshError};
+use crate::controllers::auth::refresh_cookie_builder;
+use crate::services::RefreshError;
 use crate::{
     middleware::jwt::Claims,
     services::{self},
@@ -45,7 +46,7 @@ pub async fn refresh_token(
             _ => StatusCode::UNAUTHORIZED,
         })?;
 
-    let refresh_cookie = create_refresh_cookie(refresh_token);
+    let refresh_cookie = refresh_cookie_builder(refresh_token).build();
 
     let jar = jar.add(refresh_cookie);
 
