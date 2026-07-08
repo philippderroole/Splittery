@@ -1,6 +1,7 @@
 use axum::{Router, middleware, routing::post};
 use sqlx::PgPool;
 
+use crate::middleware::token_validation::validate_access_token_for_refresh;
 use crate::{controllers, middleware::token_validation::validate_access_token};
 
 pub fn auth_routes() -> Router<PgPool> {
@@ -25,16 +26,21 @@ pub fn auth_routes() -> Router<PgPool> {
         .layer(middleware::from_fn(validate_access_token));
 
     let public_routes = Router::new().nest(
-        "/auth",
+        "/auth/password",
         Router::new()
-            .nest(
-                "/password",
-                Router::new()
-                    .route("/register", post(controllers::register_user))
-                    .route("/login", post(controllers::login_user)),
-            )
-            .route("/refresh", post(controllers::refresh_token)),
+            .route("/register", post(controllers::register_user))
+            .route("/login", post(controllers::login_user)),
     );
 
-    Router::new().merge(public_routes).merge(protected_routes)
+    let refresh_routes = Router::new()
+        .nest(
+            "/auth",
+            Router::new().route("/refresh", post(controllers::refresh_token)),
+        )
+        .layer(middleware::from_fn(validate_access_token_for_refresh));
+
+    Router::new()
+        .merge(public_routes)
+        .merge(protected_routes)
+        .merge(refresh_routes)
 }
