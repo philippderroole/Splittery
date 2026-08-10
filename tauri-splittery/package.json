@@ -1,35 +1,36 @@
 {
-  "name": "tauri-splittery",
-  "private": true,
-  "version": "0.1.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "tauri": "tauri"
-  },
-  "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@mui/material": "^9.0.1",
-    "@react-router/fs-routes": "^7.15.1",
-    "@react-router/node": "^7.15.1",
-    "@tauri-apps/api": "^2",
-    "@tauri-apps/plugin-http": "^2.5.9",
-    "@tauri-apps/plugin-opener": "^2",
-    "isbot": "^5",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-router": "^7.15.1"
-  },
-  "devDependencies": {
-    "@react-router/dev": "7.15.1",
-    "@tauri-apps/cli": "^2",
-    "@types/react": "^19.1.8",
-    "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-react": "^4.6.0",
-    "typescript": "~5.8.3",
-    "vite": "^7.3.3"
-  }
+    "name": "tauri-splittery",
+    "private": true,
+    "version": "0.1.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview",
+        "tauri": "tauri"
+    },
+    "dependencies": {
+        "@emotion/react": "^11.14.0",
+        "@emotion/styled": "^11.14.1",
+        "@mui/icons-material": "^9.3.1",
+        "@mui/material": "^9.3.1",
+        "@react-router/fs-routes": "^8.3.0",
+        "@react-router/node": "^8.3.0",
+        "@mui/x-date-pickers": "^9.11.0",
+        "@tauri-apps/api": "^2.11.1",
+        "@tauri-apps/plugin-dialog": "^2.7.2",
+        "@tauri-apps/plugin-sql": "^2.4.0",
+        "dayjs": "^1.11.21",
+        "react": "^19.2.8",
+        "react-dom": "^19.2.8",
+        "react-router-dom": "^7.18.2"
+    },
+    "devDependencies": {
+        "@tauri-apps/cli": "^2.11.4",
+        "@types/react": "^19.2.18",
+        "@types/react-dom": "^19.2.4",
+        "@vitejs/plugin-react": "6.0.5",
+        "typescript": "~7.0.2",
+        "vite": "^8.2.1"
+    }
 }
