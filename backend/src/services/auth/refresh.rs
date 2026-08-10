@@ -46,10 +46,8 @@ pub async fn refresh_token(
         .verify_password(refresh_token.as_bytes(), &parsed_hash)
         .map_err(|_| RefreshError::InvalidRefreshToken)?;
 
-    let new_refresh_token = RefreshToken::generate().map_err(|e| RefreshError::Unexpected(e))?;
-    let new_hash = new_refresh_token
-        .hash()
-        .map_err(|e| RefreshError::Unexpected(e))?;
+    let new_refresh_token = RefreshToken::generate().map_err(RefreshError::Unexpected)?;
+    let new_hash = new_refresh_token.hash().map_err(RefreshError::Unexpected)?;
 
     sqlx::query!(
         "

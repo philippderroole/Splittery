@@ -102,7 +102,7 @@ pub async fn set_tags_for_member(
 
     if tags
         .iter()
-        .any(|tag| tag.r#type == TagType::UserTag && tag.name != member.name)
+        .any(|tag| tag.r#type == TagType::User && tag.name != member.name)
     {
         return Err(anyhow!("Cannot set foreign tag for member"));
     }

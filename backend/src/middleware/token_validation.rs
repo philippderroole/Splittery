@@ -20,8 +20,7 @@ pub async fn validate_access_token(
 ) -> anyhow::Result<Response, StatusCode> {
     let claims = jar
         .get("access_token")
-        .map(|cookie| decode_jwt(cookie.value()).ok())
-        .flatten()
+        .and_then(|cookie| decode_jwt(cookie.value()).ok())
         .ok_or_else(|| {
             log::warn!("Invalid or missing access token in cookies");
             StatusCode::UNAUTHORIZED
@@ -42,8 +41,7 @@ pub async fn validate_access_token_for_refresh(
 ) -> anyhow::Result<Response, StatusCode> {
     let claims = jar
         .get("access_token")
-        .map(|cookie| decode_jwt_for_refresh(cookie.value()).ok())
-        .flatten()
+        .and_then(|cookie| decode_jwt_for_refresh(cookie.value()).ok())
         .ok_or(StatusCode::UNAUTHORIZED)?;
 
     validate_session(pool, &claims).await?;

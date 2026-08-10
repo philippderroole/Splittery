@@ -35,10 +35,10 @@ pub async fn register_user(
     .fetch_one(&mut *tx)
     .await
     .map_err(|e| {
-        if let sqlx::Error::Database(db_err) = &e {
-            if db_err.code() == Some("23505".into()) {
-                return RegisterError::AlreadyExists;
-            }
+        if let sqlx::Error::Database(db_err) = &e
+            && db_err.code() == Some("23505".into())
+        {
+            return RegisterError::AlreadyExists;
         }
         RegisterError::Unexpected(anyhow::anyhow!("Failed to register user: {}", e))
     })?;

@@ -60,7 +60,7 @@ pub async fn login_user(
         LoginError::Unexpected(anyhow::anyhow!("Failed to parse password hash: {}", e))
     })?;
     Argon2::default()
-        .verify_password(&password.as_bytes(), &parsed_hash)
+        .verify_password(password.as_bytes(), &parsed_hash)
         .map_err(|e| {
             log::info!("Password verification failed: {}", e);
             LoginError::InvalidPassword
@@ -93,7 +93,7 @@ pub async fn login_user(
     .map_err(|e| LoginError::Unexpected(anyhow::anyhow!("Failed to create session: {}", e)))?;
 
     let access_token = AccessToken::generate(session.id.to_string(), user.id.to_string())
-        .map_err(|e| LoginError::Unexpected(e))?;
+        .map_err(LoginError::Unexpected)?;
 
     Ok((access_token, refresh_token))
 }

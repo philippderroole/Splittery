@@ -6,9 +6,9 @@ use uuid::Uuid;
 #[derive(Debug, Clone, Serialize, Deserialize, Type, PartialEq, Eq, Hash)]
 #[sqlx(type_name = "tag_type", rename_all = "lowercase")]
 pub enum TagType {
-    AllTag,
-    UserTag,
-    CustomTag,
+    All,
+    User,
+    Custom,
 }
 
 #[derive(Debug, Clone, sqlx::FromRow)]

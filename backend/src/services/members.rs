@@ -126,7 +126,7 @@ pub async fn create_member(
         split_id,
         &member.name,
         "#ff5858ff",
-        crate::models::TagType::UserTag,
+        crate::models::TagType::User,
     )
     .await
     .map_err(|e| CreateMemberError::UnexpectedError(anyhow!(e)))?;
@@ -205,7 +205,7 @@ pub async fn edit_member(
         .await
         .map_err(|e| anyhow!("Failed to get member tags: {}", e))?
         .into_iter()
-        .find(|tag| tag.r#type == TagType::UserTag)
+        .find(|tag| tag.r#type == TagType::User)
         .ok_or_else(|| anyhow!("Member tag not found"))?;
 
     services::edit_tag(pool, split_id, member_tag.id, &name, &member_tag.color)
