@@ -27,7 +27,7 @@ pub async fn create_split(pool: &PgPool, name: String) -> Result<Split> {
     .await
     .map_err(|e| anyhow!("Failed to create split: {}", e))?;
 
-    let _tag = services::create_tag(pool, id, &String::from("all"), &all_color, TagType::AllTag)
+    let _tag = services::create_tag(pool, id, &String::from("all"), &all_color, TagType::All)
         .await
         .map_err(|e| anyhow!("Failed to create tag: {}", e))?;
 

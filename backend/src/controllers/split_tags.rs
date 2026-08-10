@@ -60,15 +60,14 @@ pub async fn create_tag(
     Json(tag): Json<CreateTagRequest>,
 ) -> Result<Json<TagResponse>, StatusCode> {
     let split_id = split_url.parse().unwrap();
-    let tag = match services::create_tag(&pool, split_id, &tag.name, &tag.color, TagType::CustomTag)
-        .await
-    {
-        Ok(tag) => tag,
-        Err(e) => {
-            log::error!("Failed to create tag, {e}");
-            return Err(StatusCode::INTERNAL_SERVER_ERROR);
-        }
-    };
+    let tag =
+        match services::create_tag(&pool, split_id, &tag.name, &tag.color, TagType::Custom).await {
+            Ok(tag) => tag,
+            Err(e) => {
+                log::error!("Failed to create tag, {e}");
+                return Err(StatusCode::INTERNAL_SERVER_ERROR);
+            }
+        };
 
     Ok(Json(TagResponse::from(tag)))
 }

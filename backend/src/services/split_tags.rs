@@ -184,7 +184,7 @@ pub async fn delete_tag(
         GetTagError::UnexpectedError(e) => DeleteTagError::UnexpectedError(e),
     })?;
 
-    if !delete_non_custom && tag.r#type != TagType::CustomTag {
+    if !delete_non_custom && tag.r#type != TagType::Custom {
         return Err(DeleteTagError::NonCustomTagDeletionNotAllowed);
     }
 

@@ -20,7 +20,7 @@ impl AccessToken {
             &Header::default(),
             &Claims {
                 sub: user_id,
-                sid: sid,
+                sid,
                 iat: now.timestamp(),
                 exp: exp.timestamp(),
             },
@@ -56,5 +56,11 @@ impl From<AccessToken> for Cookie<'static> {
                     .num_seconds(),
             ))
             .build()
+    }
+}
+
+impl From<AccessToken> for String {
+    fn from(access_token: AccessToken) -> Self {
+        access_token.token
     }
 }

@@ -60,3 +60,9 @@ impl From<RefreshToken> for Cookie<'static> {
             .build()
     }
 }
+
+impl From<RefreshToken> for String {
+    fn from(refresh_token: RefreshToken) -> Self {
+        refresh_token.token
+    }
+}

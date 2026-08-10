@@ -16,7 +16,7 @@ pub async fn refresh_token(
         StatusCode::UNAUTHORIZED
     })?;
 
-    let refresh_token = services::refresh_token(&pool, sid, &refresh_token_cookie.value())
+    let refresh_token = services::refresh_token(&pool, sid, refresh_token_cookie.value())
         .await
         .map_err(|e| match e {
             RefreshError::Unexpected(e) => {
