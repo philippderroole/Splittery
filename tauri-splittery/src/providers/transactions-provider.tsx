@@ -12,7 +12,7 @@ import React, { useContext, useState } from "react";
 import { useSplit } from "./split-provider";
 
 const TransactionContext = React.createContext<Transaction[]>(
-    [] as Transaction[]
+    [] as Transaction[],
 );
 
 export interface TransactionProviderProps {
@@ -25,7 +25,7 @@ export function TransactionsProvider({
     children,
 }: TransactionProviderProps) {
     const initialTransactions: Transaction[] = deserializeTransactions(
-        initialSerializedTransactions
+        initialSerializedTransactions,
     );
 
     const [transactions, setTransactions] =
@@ -39,7 +39,7 @@ export function TransactionsProvider({
         };
 
         const newTransaction = deserializeTransaction(
-            transactionPayload.transaction
+            transactionPayload.transaction,
         );
 
         setTransactions([...transactions, newTransaction]);
@@ -51,11 +51,11 @@ export function TransactionsProvider({
         };
 
         const updatedTransaction = deserializeTransaction(
-            transactionPayload.transaction
+            transactionPayload.transaction,
         );
 
         const oldTransactions = transactions.filter(
-            (t) => t.id !== updatedTransaction.id
+            (t) => t.id !== updatedTransaction.id,
         );
 
         setTransactions([...oldTransactions, updatedTransaction]);
@@ -65,7 +65,7 @@ export function TransactionsProvider({
         const transactionPayload = payload as { transactionId: string };
 
         const remainingTransactions = transactions.filter(
-            (t) => t.id !== transactionPayload.transactionId
+            (t) => t.id !== transactionPayload.transactionId,
         );
 
         setTransactions(remainingTransactions);
@@ -76,12 +76,12 @@ export function TransactionsProvider({
         const newEntry = deserializeEntry(entryPayload.entry);
 
         const updatedTransaction = transactions.find(
-            (t) => t.id === newEntry.transactionId
+            (t) => t.id === newEntry.transactionId,
         )!;
         updatedTransaction.entries.push(newEntry);
 
         const oldTransactions = transactions.filter(
-            (t) => t.id !== updatedTransaction.id
+            (t) => t.id !== updatedTransaction.id,
         );
 
         setTransactions([...oldTransactions, updatedTransaction]);
@@ -92,17 +92,17 @@ export function TransactionsProvider({
         const updatedEntry = deserializeEntry(entryPayload.entry);
 
         const updatedTransaction = transactions.find(
-            (t) => t.id === updatedEntry.transactionId
+            (t) => t.id === updatedEntry.transactionId,
         )!;
 
         const oldEntries = updatedTransaction.entries.filter(
-            (e) => e.id !== updatedEntry.id
+            (e) => e.id !== updatedEntry.id,
         );
 
         updatedTransaction.entries = [...oldEntries, updatedEntry];
 
         const oldTransactions = transactions.filter(
-            (t) => t.id !== updatedTransaction.id
+            (t) => t.id !== updatedTransaction.id,
         );
 
         setTransactions([...oldTransactions, updatedTransaction]);
@@ -113,7 +113,7 @@ export function TransactionsProvider({
 
         const updatedTransactions = transactions.map((transaction) => {
             const remainingEntries = transaction.entries.filter(
-                (e) => e.id !== entryPayload.entryId
+                (e) => e.id !== entryPayload.entryId,
             );
             return {
                 ...transaction,
@@ -136,7 +136,7 @@ export function useTransactions() {
 
     if (!context) {
         throw new Error(
-            "useTransactions must be used within a TransactionsProvider"
+            "useTransactions must be used within a TransactionsProvider",
         );
     }
     return context;

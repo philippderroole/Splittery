@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { createMember } from "../../../actions/member-service";
-import { createSplit } from "../../../actions/split-service";
+import { createSplit } from "../../../commands/create_split";
 import MemberForm from "../../../components/member-form";
 import MobileDialog from "../../../components/mobile-dialog";
 import SplitForm from "../../../components/split-form";

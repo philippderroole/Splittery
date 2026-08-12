@@ -1,4 +1,10 @@
-use axum::{Extension, extract::Request, http::StatusCode, middleware::Next, response::Response};
+use axum::{
+    Extension,
+    extract::Request,
+    http::{HeaderMap, StatusCode, header::AUTHORIZATION},
+    middleware::Next,
+    response::Response,
+};
 use axum_extra::extract::CookieJar;
 use jsonwebtoken::{DecodingKey, Validation, decode};
 use sqlx::{PgPool, Pool, Postgres};
@@ -18,13 +24,15 @@ pub async fn validate_access_token(
     mut request: Request,
     next: Next,
 ) -> anyhow::Result<Response, StatusCode> {
-    let claims = jar
-        .get("access_token")
-        .and_then(|cookie| decode_jwt(cookie.value()).ok())
-        .ok_or_else(|| {
-            log::warn!("Invalid or missing access token in cookies");
-            StatusCode::UNAUTHORIZED
-        })?;
+    let token: String = extract_access_token(&jar, request.headers()).ok_or_else(|| {
+        log::warn!("Invalid or missing access token in request");
+        StatusCode::UNAUTHORIZED
+    })?;
+
+    let claims = decode_jwt(&token).map_err(|e| {
+        log::warn!("Failed to decode access token: {e}");
+        StatusCode::UNAUTHORIZED
+    })?;
 
     validate_user_exists(pool.clone(), &claims).await?;
     validate_session(pool, &claims).await?;
@@ -39,11 +47,9 @@ pub async fn validate_access_token_for_refresh(
     mut request: Request,
     next: Next,
 ) -> anyhow::Result<Response, StatusCode> {
-    let claims = jar
-        .get("access_token")
-        .and_then(|cookie| decode_jwt_for_refresh(cookie.value()).ok())
-        .ok_or(StatusCode::UNAUTHORIZED)?;
+    let token = extract_access_token(&jar, request.headers()).ok_or(StatusCode::UNAUTHORIZED)?;
 
+    let claims = decode_jwt_for_refresh(&token).map_err(|_| StatusCode::UNAUTHORIZED)?;
     validate_session(pool, &claims).await?;
 
     request.extensions_mut().insert(claims);
@@ -130,4 +136,22 @@ async fn validate_session(pool: Pool<Postgres>, claims: &Claims) -> anyhow::Resu
     }
 
     Ok(())
+}
+
+fn extract_access_token(jar: &CookieJar, headers: &HeaderMap) -> Option<String> {
+    headers
+        .get(AUTHORIZATION)
+        .and_then(|value| value.to_str().ok())
+        .and_then(|value| {
+            value
+                .strip_prefix("Bearer ")
+                .or_else(|| value.strip_prefix("bearer "))
+        })
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(str::to_owned)
+        .or_else(|| {
+            jar.get("access_token")
+                .map(|cookie| cookie.value().to_string())
+        })
 }

@@ -5,6 +5,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/login/LoginPage";
 import RegisterPage from "./pages/register/RegisterPage";
 import SplitOverviewPage from "./pages/split-overview/SplitOverviewPage";
+import { SplitsProvider } from "./providers/splits-provider";
 
 export default function App() {
     return (
@@ -25,7 +26,15 @@ export default function App() {
                         <Route path="/" element={<LoginPage />} />
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<RegisterPage />} />
-                        <Route path="/splits" element={<SplitOverviewPage />} />
+
+                        <Route
+                            path="/splits"
+                            element={
+                                <SplitsProvider>
+                                    <SplitOverviewPage />
+                                </SplitsProvider>
+                            }
+                        />
                     </Routes>
                 </Box>
             </BrowserRouter>

@@ -1,7 +1,5 @@
 import React, { useContext, useState } from "react";
-import { useSplitSocket } from "../hooks/useSplitSocket";
 import { Tag } from "../utils/tag";
-import { useSplit } from "./split-provider";
 
 const TagsContext = React.createContext<Tag[]>([]);
 
@@ -14,33 +12,7 @@ export function TagsProvider({
     tags: initialTags,
     children,
 }: TagsProviderProps) {
-    const [tagsState, setTagsState] = useState<Tag[]>(initialTags);
-
-    const split = useSplit();
-
-    useSplitSocket(split.id, ["MemberCreated"], (payload: unknown) => {
-        const memberPayload = payload as { tags: Tag[] };
-
-        const newTags = memberPayload.tags.filter(
-            (tag) =>
-                !tagsState.some((existingTag) => existingTag.id === tag.id),
-        );
-
-        setTagsState([...tagsState, ...newTags]);
-    });
-
-    useSplitSocket(split.id, ["MemberUpdated"], (payload: unknown) => {
-        const memberPayload = payload as { tags: Tag[] };
-
-        const oldTags = tagsState.filter(
-            (tag) =>
-                !memberPayload.tags.some(
-                    (memberTag) => memberTag.id === tag.id,
-                ),
-        );
-
-        setTagsState([...oldTags, ...memberPayload.tags]);
-    });
+    const [tagsState, _setTagsState] = useState<Tag[]>(initialTags);
 
     return (
         <TagsContext.Provider value={tagsState}>

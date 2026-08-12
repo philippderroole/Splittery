@@ -1,29 +1,14 @@
 import { Box, Button, Link, TextField, Typography } from "@mui/material";
 import { useState } from "react";
+import { login } from "../../commands/login";
 
 export default function RegisterPage() {
-    const apiUrl = import.meta.env.VITE_API_URL;
     const [email, setEmail] = useState("");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
-    async function handleRegister(
-        username: string,
-        email: string,
-        password: string,
-    ) {
-        await fetch(`${apiUrl}/auth/password/register`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                username: username,
-                email: email,
-                password: password,
-            }),
-        })
-            .then((response) => response.json())
+    async function handleRegister() {
+        await login(email, password)
             .then((data) => {
                 console.log(data);
             })
@@ -80,7 +65,7 @@ export default function RegisterPage() {
             <Button
                 variant="contained"
                 sx={{ width: "100%", height: "3rem", textTransform: "none" }}
-                onClick={() => handleRegister(username, email, password)}
+                onClick={() => handleRegister()}
             >
                 Register
             </Button>
