@@ -21,19 +21,20 @@ pub fn auth_routes() -> Router<PgPool> {
                         .route("/finish", post(controllers::finish_oidc_auth))
                         .route("/link", post(controllers::link_oidc_account)),
                 )
-                .route("/logout", post(controllers::logout)),
+                .route("/web/logout", post(controllers::web_logout))
+                .route("/tauri/logout", post(controllers::tauri_logout)),
         )
         .layer(middleware::from_fn(validate_access_token));
 
     let public_routes = Router::new()
         .nest(
-            "/auth/tauri",
+            "/auth/tauri/password",
             Router::new()
                 .route("/login", post(controllers::password_tauri_login))
                 .route("/register", post(controllers::password_tauri_register)),
         )
         .nest(
-            "/auth/password",
+            "/auth/web/password",
             Router::new()
                 .route("/register", post(controllers::password_web_register))
                 .route("/login", post(controllers::password_web_login)),

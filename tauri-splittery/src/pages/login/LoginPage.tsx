@@ -1,9 +1,9 @@
 import { Box, Button, Link, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { login } from "../../commands/login";
 
 export default function LoginPage() {
-    const apiUrl = import.meta.env.VITE_API_URL;
     const navigate = useNavigate();
 
     const [email, setEmail] = useState("");
@@ -11,18 +11,8 @@ export default function LoginPage() {
     const [password, setPassword] = useState("");
 
     async function handleLogin() {
-        await fetch(`${apiUrl}/auth/password/login`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                email: email,
-                username: username,
-                password: password,
-            }),
-        })
-            .then((_) => {
+        await login(email, password)
+            .then(() => {
                 navigate("/splits");
             })
             .catch((error) => {

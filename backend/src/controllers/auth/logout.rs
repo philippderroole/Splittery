@@ -7,7 +7,7 @@ use crate::services::access_token::AccessToken;
 use crate::services::{self, RefreshToken};
 
 #[axum::debug_handler]
-pub async fn logout(
+pub async fn web_logout(
     State(pool): State<PgPool>,
     SessionId(sid): SessionId,
     jar: CookieJar,
@@ -24,4 +24,17 @@ pub async fn logout(
     let jar = jar.add(refresh_token);
 
     Ok(jar)
+}
+
+#[axum::debug_handler]
+pub async fn tauri_logout(
+    State(pool): State<PgPool>,
+    SessionId(sid): SessionId,
+) -> anyhow::Result<(), StatusCode> {
+    let _ = services::logout(&pool, sid).await.map_err(|e| {
+        log::error!("Unexpected error during logout: {e}");
+        StatusCode::INTERNAL_SERVER_ERROR
+    });
+
+    Ok(())
 }

@@ -1,32 +1,29 @@
-import React, { useContext, useState } from "react";
-import { useSplitSocket } from "../hooks/useSplitSocket";
+import React, { createContext, useContext } from "react";
 import { Split } from "../utils/split";
+import { useSplits } from "./splits-provider";
 
-const SplitContext = React.createContext<Split>({} as Split);
+const SplitContext = createContext({
+    split: {} as Split,
+});
 
 export interface SplitProviderProps {
-    split: Split;
+    splitId: string;
     children: React.ReactNode;
 }
 
-export function SplitProvider({
-    split: initialSplit,
-    children,
-}: SplitProviderProps) {
-    const [splitState, setSplitState] = useState<Split>(initialSplit);
+export function SplitProvider({ splitId, children }: SplitProviderProps) {
+    const { splits } = useSplits();
 
-    useSplitSocket(
-        initialSplit.id,
-        ["SplitChanged", "SplitDeleted"],
-        (payload: unknown) => {
-            setSplitState(payload as Split);
-        },
-    );
+    const split = splits.find((s) => s.id === splitId);
+
+    if (!split) {
+        throw new Error(`Split with id ${splitId} not found`);
+    }
+
+    const value = { split };
 
     return (
-        <SplitContext.Provider value={splitState}>
-            {children}
-        </SplitContext.Provider>
+        <SplitContext.Provider value={value}>{children}</SplitContext.Provider>
     );
 }
 
