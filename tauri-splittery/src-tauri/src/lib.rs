@@ -4,7 +4,7 @@ mod auth;
 mod splits;
 
 use crate::auth::{login, register};
-use crate::splits::get_splits;
+use crate::splits::{create_split, get_splits};
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
