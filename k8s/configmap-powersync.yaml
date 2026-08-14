@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: powersync-config
+    namespace: powersync
+data:
+    service.yaml: |
+        _type: self-hosted
+        telemetry:
+          disable_telemetry_sharing: true
+        replication:
+          connections:
+            - type: postgresql
+              uri: !env PS_DATA_SOURCE_URI
+              sslmode: disable
+        storage:
+          type: mongodb
+          uri: !env PS_MONGO_URI
+        port: !env PS_PORT
+        sync_config:
+          path: sync-config.yaml
+        client_auth:
+          jwks_uri: !env PS_JWKS_URL
+          audience: ["powersync-dev", "powersync"]
+        api:
+          tokens:
+            - use_a_better_token_in_production
+        system:
+          logging:
+            level: info
+            format: text
+    sync-config.yaml: |
+        config:
+          edition: 3
+        streams:
+          global:
+            auto_subscribe: true
+            queries:
+              - SELECT * FROM lists
+              - SELECT * FROM todos

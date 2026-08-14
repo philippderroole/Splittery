@@ -32,6 +32,20 @@ spec:
                   volumeMounts:
                       - name: data
                         mountPath: /var/lib/postgresql/data
+                  readinessProbe:
+                      exec:
+                          command:
+                              - sh
+                              - -c
+                              - pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+                      initialDelaySeconds: 5
+                      periodSeconds: 5
+                      timeoutSeconds: 5
+                  livenessProbe:
+                      tcpSocket:
+                          port: 5432
+                      initialDelaySeconds: 15
+                      periodSeconds: 10
     volumeClaimTemplates:
         - metadata:
               name: data
