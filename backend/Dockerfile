@@ -16,6 +16,8 @@ RUN cargo install --path .
 # Use Debian Bullseye slim as the base image
 FROM debian:13.2-slim
 
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 # Copy the binary from the builder image to the new image
 COPY --from=builder /usr/local/cargo/bin/splittery_backend /usr/local/bin/splittery_backend
 
