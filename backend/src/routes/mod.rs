@@ -31,7 +31,9 @@ pub fn create_routes() -> Router<PgPool> {
         .merge(members_routes())
         .layer(middleware::from_fn(validate_access_token));
 
-    let public_routes = Router::new().merge(auth_routes());
+    let public_routes = Router::new()
+        .merge(auth_routes())
+        .merge(Router::new().route("/health", axum::routing::get(|| async { "OK" })));
 
     Router::new().nest(
         "/api/v1",

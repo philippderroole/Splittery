@@ -12,6 +12,7 @@ pub fn run() {
         .plugin(tauri_plugin_keyring_store::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_powersync::init())
         .setup(|app| {
             #[cfg(debug_assertions)]
             {
