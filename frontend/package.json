@@ -2,11 +2,12 @@
   "name": "splittery-frontend",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "lint": "tsc --noEmit"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -16,20 +17,19 @@
     "@mui/material": "^7.3.6",
     "@stomp/stompjs": "^7.2.1",
     "dayjs": "^1.11.19",
-    "next": "^16.1.7",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "server-only": "^0.0.1",
+    "react-router-dom": "^7.18.2",
     "sockjs-client": "^1.6.1"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.3",
     "@types/node": "^25.0.3",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@types/sockjs-client": "^1.5.4",
     "eslint": "^9.39.2",
-    "eslint-config-next": "16.1.1",
+    "@vitejs/plugin-react": "^6.0.5",
+    "vite": "^8.2.1",
     "typescript": "^5.9.3"
   }
 }

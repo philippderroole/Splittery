@@ -13,7 +13,7 @@ import {
     DialogContentText,
     DialogTitle,
 } from "@mui/material";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 interface DeleteTransactionDialogProps {
@@ -28,7 +28,7 @@ export function DeleteTransactionDialog({
     onClose,
 }: DeleteTransactionDialogProps) {
     const split = useSplit();
-    const router = useRouter();
+    const navigate = useNavigate();
 
     const [error, setError] = useState<string | null>(null);
     const [isPending, setPending] = useState(false);
@@ -38,7 +38,7 @@ export function DeleteTransactionDialog({
 
         try {
             await deleteTransaction(split.id, transaction.id);
-            router.push(`/splits/${split.id}/transactions`);
+            navigate(`/splits/${split.id}/transactions`);
         } catch {
             setError("Failed to delete transaction. Please try again.");
             setPending(false);
