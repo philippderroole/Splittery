@@ -46,8 +46,11 @@ impl From<AccessToken> for Cookie<'static> {
     fn from(access_token: AccessToken) -> Self {
         Cookie::build(("access_token", access_token.token))
             .http_only(true)
-            .secure(true)
-            .same_site(SameSite::Strict)
+            .same_site(
+                cfg!(debug_assertions)
+                    .then(|| SameSite::None)
+                    .unwrap_or(SameSite::Strict),
+            )
             .path("/api/v1/")
             .max_age(cookie::time::Duration::seconds(
                 access_token
