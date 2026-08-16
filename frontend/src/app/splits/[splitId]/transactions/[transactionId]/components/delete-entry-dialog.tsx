@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteEntry } from "@/actions/entry-service";
+import { deleteEntry } from "@/service/entry-service";
 import BaseForm from "@/components/base-form";
 import MobileDialog from "@/components/mobile-dialog";
 import { useSplit } from "@/providers/split-provider";

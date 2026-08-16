@@ -1,6 +1,5 @@
 "use client";
 
-import { createTransaction } from "@/actions/transaction-service";
 import BaseForm from "@/components/base-form";
 import AmountField from "@/components/form-fields/amount-field";
 import NameField from "@/components/form-fields/name-field";
@@ -9,6 +8,7 @@ import TagSelection from "@/components/tag-selection";
 import { useMembers } from "@/providers/member-provider";
 import { useSplit } from "@/providers/split-provider";
 import { useTags } from "@/providers/tag-provider";
+import { createTransaction } from "@/service/transaction-service";
 import { CreateTransactionDto } from "@/utils/transaction";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import {

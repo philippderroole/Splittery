@@ -1,4 +1,18 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function parseResponseBody<T>(res: Response): Promise<T | null> {
+    const text = await res.text();
+
+    if (!text) {
+        return null;
+    }
+
+    try {
+        return JSON.parse(text) as T;
+    } catch {
+        return text as unknown as T;
+    }
+}
+
 export async function GET(url: string, init?: RequestInit): Promise<any> {
     console.debug("Getting data from:", url);
 
@@ -6,6 +20,7 @@ export async function GET(url: string, init?: RequestInit): Promise<any> {
         ...init,
         method: "GET",
         body: undefined,
+        credentials: "include",
     });
 
     if (!res.ok) {
@@ -19,7 +34,7 @@ export async function GET(url: string, init?: RequestInit): Promise<any> {
         throw new Error("Failed to fetch data");
     }
 
-    const json = await res.json();
+    const json = await parseResponseBody(res);
 
     console.debug("Fetched data: ", json);
 
@@ -37,6 +52,7 @@ export async function POST(url: string, init?: RequestInit): Promise<any> {
             ...init?.headers,
             "Content-Type": "application/json",
         },
+        credentials: "include",
     });
 
     if (!res.ok) {
@@ -50,7 +66,7 @@ export async function POST(url: string, init?: RequestInit): Promise<any> {
         throw new Error("Failed to post data");
     }
 
-    const json = await res.json();
+    const json = await parseResponseBody(res);
 
     console.debug("Received response: ", json);
 
@@ -68,6 +84,7 @@ export async function PUT(url: string, init?: RequestInit): Promise<any> {
             ...init?.headers,
             "Content-Type": "application/json",
         },
+        credentials: "include",
     });
 
     if (!res.ok) {
@@ -81,7 +98,7 @@ export async function PUT(url: string, init?: RequestInit): Promise<any> {
         throw new Error("Failed to put data");
     }
 
-    const json = await res.json();
+    const json = await parseResponseBody(res);
 
     console.debug("Received response: ", json);
 
@@ -98,6 +115,7 @@ export async function DELETE(url: string, init?: RequestInit): Promise<void> {
             ...init?.headers,
             "Content-Type": "application/json",
         },
+        credentials: "include",
     });
 
     if (!res.ok) {

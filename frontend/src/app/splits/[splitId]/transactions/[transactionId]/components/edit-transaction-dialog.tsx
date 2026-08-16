@@ -1,6 +1,6 @@
 "use client";
 
-import { updateTransaction } from "@/actions/transaction-service";
+import { updateTransaction } from "@/service/transaction-service";
 import BaseForm from "@/components/base-form";
 import AmountField from "@/components/form-fields/amount-field";
 import NameField from "@/components/form-fields/name-field";

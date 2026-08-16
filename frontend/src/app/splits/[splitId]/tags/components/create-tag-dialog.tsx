@@ -1,6 +1,6 @@
 "use client";
 
-import { createTag } from "@/actions/tags/create-tag-service";
+import { createTag } from "@/service/tags/create-tag-service";
 import MobileDialog from "@/components/mobile-dialog";
 import { useSplit } from "@/providers/split-provider";
 import { CreateTagDto } from "@/utils/tag";

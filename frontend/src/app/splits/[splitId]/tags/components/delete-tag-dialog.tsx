@@ -1,6 +1,6 @@
 "use client";
 
-import { deleteTag } from "@/actions/tags/delete-tag-service";
+import { deleteTag } from "@/service/tags/delete-tag-service";
 import { useSplit } from "@/providers/split-provider";
 import { Tag } from "@/utils/tag";
 import { Delete as DeleteIcon } from "@mui/icons-material";
