@@ -1,56 +1,104 @@
-import "server-only";
-
+import { Box, CircularProgress, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import NavTabs from "@/app/splits/[splitId]/components/nav-tabs";
 import SplitHeader from "@/app/splits/[splitId]/components/split-header";
 import { MembersProvider } from "@/providers/member-provider";
+import { SplitProvider } from "@/providers/split-provider";
 import { TagsProvider } from "@/providers/tag-provider";
 import { TransactionsProvider } from "@/providers/transactions-provider";
 import { getMembers } from "@/service/member-service";
 import { getSplit } from "@/service/split-service";
 import { getTags } from "@/service/tag-service";
 import { getTransactions } from "@/service/transaction-service";
-import { notFound } from "next/navigation";
-import { SplitProvider } from "../../../providers/split-provider";
+import { Split } from "@/utils/split";
+import { SerializedTransaction } from "@/utils/transaction";
+import { Tag } from "@/utils/tag";
+import { SerializedMember } from "@/utils/user";
 
-export default async function SplitLayout({
+type SplitLayoutData = {
+    split: Split;
+    members: SerializedMember[];
+    transactions: SerializedTransaction[];
+    tags: Tag[];
+};
+
+export default function SplitLayout({
     children,
-    params,
 }: {
     children: React.ReactNode;
-    params: Promise<{ splitId: string }>;
 }) {
-    const { splitId } = await params;
+    const { splitId } = useParams();
+    const [data, setData] = useState<SplitLayoutData | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
-    let split;
-    let serializedMembers;
-    let serializedTransactions;
-    let tags;
+    useEffect(() => {
+        if (!splitId) {
+            setError("Split not found");
+            return;
+        }
 
-    try {
-        const values = await Promise.all([
-            getSplit(splitId),
-            getTags(splitId),
-            getMembers(splitId),
-            getTransactions(splitId),
-        ]);
+        const currentSplitId: string = splitId;
 
-        split = values[0];
-        tags = values[1];
-        serializedMembers = values[2];
-        serializedTransactions = values[3];
-    } catch (error) {
-        console.error("Error fetching split data:", error);
-        notFound();
+        let cancelled = false;
+
+        async function loadSplit() {
+            try {
+                const [split, tags, members, transactions] = await Promise.all([
+                    getSplit(currentSplitId),
+                    getTags(currentSplitId),
+                    getMembers(currentSplitId),
+                    getTransactions(currentSplitId),
+                ]);
+
+                if (!cancelled) {
+                    setData({ split, tags, members, transactions });
+                }
+            } catch (loadError) {
+                console.error("Error fetching split data:", loadError);
+                if (!cancelled) {
+                    setError("Split not found");
+                }
+            }
+        }
+
+        setData(null);
+        setError(null);
+        loadSplit();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [splitId]);
+
+    if (error) {
+        return (
+            <Box sx={{ p: 4 }}>
+                <Typography variant="h4">{error}</Typography>
+            </Box>
+        );
+    }
+
+    if (!data) {
+        return (
+            <Box
+                sx={{
+                    minHeight: "100dvh",
+                    display: "grid",
+                    placeItems: "center",
+                }}
+            >
+                <CircularProgress />
+            </Box>
+        );
     }
 
     return (
         <div>
-            <SplitProvider split={split}>
-                <TransactionsProvider
-                    serializedTransactions={serializedTransactions}
-                >
-                    <MembersProvider serializedMembers={serializedMembers}>
-                        <TagsProvider tags={tags}>
+            <SplitProvider split={data.split}>
+                <TransactionsProvider serializedTransactions={data.transactions}>
+                    <MembersProvider serializedMembers={data.members}>
+                        <TagsProvider tags={data.tags}>
                             <SplitHeader />
                             {children}
                         </TagsProvider>

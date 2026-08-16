@@ -4,13 +4,13 @@ import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { BottomNavigation, BottomNavigationAction } from "@mui/material";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, useLocation, useParams } from "react-router-dom";
 import React from "react";
 
 export default function NavTabs() {
-    const pathname = usePathname();
-    const basePath = pathname.split("/").slice(0, 3).join("/");
+    const pathname = useLocation().pathname;
+    const { splitId } = useParams();
+    const basePath = `/splits/${splitId}`;
 
     const tabPaths = [
         `${basePath}/balances`,
@@ -53,5 +53,5 @@ interface LinkTabProps {
 }
 
 function BottomNavigationLink(props: LinkTabProps) {
-    return <BottomNavigationAction {...props} component={Link} />;
+    return <BottomNavigationAction {...props} component={Link} to={props.href} />;
 }

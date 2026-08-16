@@ -1,15 +1,16 @@
-import "server-only";
-
 import { TransactionProvider } from "@/providers/transaction-provider";
+import { useParams } from "react-router-dom";
 
-export default async function SplitLayout({
+export default function SplitLayout({
     children,
-    params,
 }: {
     children: React.ReactNode;
-    params: Promise<{ splitId: string; transactionId: string }>;
 }) {
-    const { transactionId } = await params;
+    const { transactionId } = useParams();
+
+    if (!transactionId) {
+        return null;
+    }
 
     return (
         <div>

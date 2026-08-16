@@ -37,7 +37,7 @@ export function connectWebSocket(splitId: string) {
         return existing.socket;
     }
 
-    const webSocketUrl = process.env.NEXT_PUBLIC_API_URL?.replace("http", "ws");
+    const webSocketUrl = import.meta.env.VITE_INTERNAL_API_URL?.replace("http", "ws");
     const socket = new WebSocket(`${webSocketUrl}/ws/splits/${splitId}`);
 
     const connection: WebSocketConnection = {

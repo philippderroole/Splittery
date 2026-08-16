@@ -1,5 +1,3 @@
-"use server";
-
 import { CreateEntryDto, EditEntityDto, SerializedEntry } from "@/utils/entry";
 import { DELETE, POST, PUT } from "@/utils/request";
 
@@ -8,12 +6,9 @@ export async function createEntry(
     transactionId: string,
     transactionItem: CreateEntryDto
 ): Promise<SerializedEntry> {
-    return await POST(
-        `${process.env.INTERNAL_API_URL}/splits/${splitId}/transactions/${transactionId}/entries`,
-        {
-            body: JSON.stringify(transactionItem),
-        }
-    );
+    return await POST(`${import.meta.env.VITE_INTERNAL_API_URL}/splits/${splitId}/transactions/${transactionId}/entries`, {
+        body: JSON.stringify(transactionItem),
+    });
 }
 
 export async function updateEntry(
@@ -21,12 +16,9 @@ export async function updateEntry(
     transactionId: string,
     entry: EditEntityDto
 ): Promise<SerializedEntry> {
-    return await PUT(
-        `${process.env.INTERNAL_API_URL}/splits/${splitId}/transactions/${transactionId}/entries/${entry.id}`,
-        {
-            body: JSON.stringify(entry),
-        }
-    );
+    return await PUT(`${import.meta.env.VITE_INTERNAL_API_URL}/splits/${splitId}/transactions/${transactionId}/entries/${entry.id}`, {
+        body: JSON.stringify(entry),
+    });
 }
 
 export async function deleteEntry(
@@ -34,7 +26,5 @@ export async function deleteEntry(
     transactionId: string,
     entryId: string
 ): Promise<void> {
-    await DELETE(
-        `${process.env.INTERNAL_API_URL}/splits/${splitId}/transactions/${transactionId}/entries/${entryId}`
-    );
+    await DELETE(`${import.meta.env.VITE_INTERNAL_API_URL}/splits/${splitId}/transactions/${transactionId}/entries/${entryId}`);
 }

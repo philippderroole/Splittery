@@ -20,7 +20,7 @@ import {
     ListItemText,
     Typography,
 } from "@mui/material";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import CreateEntryDialogFAB from "./components/create-entry-dialog-button";
 import { EditEntryDialog } from "./components/edit-entry-dialog";
@@ -51,7 +51,7 @@ export default function TransactionPage() {
 
     return (
         <>
-            <Link href={`/splits/${split.id}/transactions`}>
+            <Link to={`/splits/${split.id}/transactions`}>
                 <IconButton>
                     <ArrowBackIosIcon />
                 </IconButton>

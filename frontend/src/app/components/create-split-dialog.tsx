@@ -1,7 +1,6 @@
 "use client";
 
 import { createMember } from "@/actions/member-service";
-import { createSplit } from "@/actions/split-service";
 import MobileDialog from "@/components/mobile-dialog";
 import { CreateSplitDto } from "@/utils/split";
 import { CreateMemberDto } from "@/utils/user";
@@ -23,6 +22,7 @@ import {
 import { useState } from "react";
 import MemberForm from "../../components/member-form";
 import SplitForm from "../../components/split-form";
+import { createSplit } from "@/service/split-service";
 
 interface CreateSplitDialogProps {
     open: boolean;
