@@ -1,5 +1,3 @@
-"use server";
-
 import { POST } from "@/utils/request";
 import { CreateSplitDto, Split } from "@/utils/split";
 
