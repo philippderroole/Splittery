@@ -1,4 +1,7 @@
-use axum::Extension;
+use axum::{
+    Extension,
+    http::{Method, header},
+};
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 
@@ -9,6 +12,27 @@ mod routes;
 mod services;
 
 use routes::create_routes;
+
+fn cors_layer() -> CorsLayer {
+    if cfg!(debug_assertions) {
+        CorsLayer::new()
+            .allow_origin([
+                axum::http::HeaderValue::from_static("http://localhost:3000"),
+                axum::http::HeaderValue::from_static("http://127.0.0.1:3000"),
+            ])
+            .allow_credentials(true)
+            .allow_methods([
+                Method::GET,
+                Method::POST,
+                Method::PUT,
+                Method::DELETE,
+                Method::OPTIONS,
+            ])
+            .allow_headers([header::CONTENT_TYPE, header::ACCEPT])
+    } else {
+        CorsLayer::very_permissive()
+    }
+}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -27,7 +51,7 @@ async fn main() -> anyhow::Result<()> {
     sqlx::migrate!("./migrations").run(&pool).await?;
 
     let app = create_routes()
-        .layer(CorsLayer::very_permissive())
+        .layer(cors_layer())
         .layer(Extension(pool.clone()))
         .with_state(pool);
 

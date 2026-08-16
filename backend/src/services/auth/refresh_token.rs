@@ -48,8 +48,11 @@ impl From<RefreshToken> for Cookie<'static> {
     fn from(refresh_token: RefreshToken) -> Self {
         Cookie::build(("refresh_token", refresh_token.token))
             .http_only(true)
-            .secure(true)
-            .same_site(SameSite::Strict)
+            .same_site(
+                cfg!(debug_assertions)
+                    .then(|| SameSite::None)
+                    .unwrap_or(SameSite::Strict),
+            )
             .path("/api/v1/auth/refresh")
             .max_age(cookie::time::Duration::seconds(
                 refresh_token

@@ -6,8 +6,11 @@ use uuid::Uuid;
 #[derive(Debug, Clone, Serialize, Deserialize, Type, PartialEq, Eq, Hash)]
 #[sqlx(type_name = "tag_type", rename_all = "lowercase")]
 pub enum TagType {
+    #[sqlx(rename = "alltag")]
     All,
+    #[sqlx(rename = "usertag")]
     User,
+    #[sqlx(rename = "customtag")]
     Custom,
 }
 
