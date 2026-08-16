@@ -1,6 +1,6 @@
 "use client";
 
-import { editMember } from "@/actions/member-service";
+import { editMember } from "@/service/member-service";
 import MobileDialog from "@/components/mobile-dialog";
 import { useSplit } from "@/providers/split-provider";
 import { CreateMemberDto, Member } from "@/utils/user";

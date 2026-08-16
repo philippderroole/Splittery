@@ -1,6 +1,5 @@
 "use client";
 
-import { deleteTransaction } from "@/actions/transaction-service";
 import BaseForm from "@/components/base-form";
 import MobileDialog from "@/components/mobile-dialog";
 import { useSplit } from "@/providers/split-provider";
@@ -15,6 +14,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { deleteTransaction } from "@/service/transaction-service";
 
 interface DeleteTransactionDialogProps {
     transaction: Transaction;

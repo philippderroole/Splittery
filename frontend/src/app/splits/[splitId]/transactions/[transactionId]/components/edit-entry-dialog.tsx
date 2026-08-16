@@ -1,6 +1,6 @@
 "use client";
 
-import { updateEntry } from "@/actions/entry-service";
+import { updateEntry } from "@/service/entry-service";
 import BaseForm, { useFormContext } from "@/components/base-form";
 import ChipSelector from "@/components/chip-selector";
 import AmountField from "@/components/form-fields/amount-field";
