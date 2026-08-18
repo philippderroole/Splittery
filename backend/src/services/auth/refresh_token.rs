@@ -59,7 +59,7 @@ impl RefreshToken {
 
 impl From<RefreshToken> for Cookie<'static> {
     fn from(refresh_token: RefreshToken) -> Self {
-            let mut builder = Cookie::build(("refresh_token", refresh_token.token))
+        let mut builder = Cookie::build(("refresh_token", refresh_token.token))
             .http_only(true)
             .same_site(
                 cfg!(debug_assertions)
@@ -71,7 +71,7 @@ impl From<RefreshToken> for Cookie<'static> {
 
         if let Some(expires_at) = refresh_token.token_expires_at {
             builder = builder.max_age(cookie::time::Duration::seconds(
-                    expires_at.signed_duration_since(Utc::now()).num_seconds(),
+                expires_at.signed_duration_since(Utc::now()).num_seconds(),
             ));
         }
 
