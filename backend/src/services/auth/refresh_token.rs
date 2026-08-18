@@ -8,7 +8,7 @@ use rand::{RngExt, distr::Alphanumeric};
 
 pub struct RefreshToken {
     pub token: String,
-    pub token_expires_at: DateTime<Utc>,
+    pub token_expires_at: Option<DateTime<Utc>>,
 }
 
 impl RefreshToken {
@@ -21,7 +21,20 @@ impl RefreshToken {
 
         Ok(RefreshToken {
             token: refresh_token,
-            token_expires_at: Utc::now() + chrono::Duration::days(30),
+            token_expires_at: Some(Utc::now() + chrono::Duration::days(30)),
+        })
+    }
+
+    pub fn generate_permanent() -> anyhow::Result<RefreshToken> {
+        let refresh_token = rand::rng()
+            .sample_iter(&Alphanumeric)
+            .take(64)
+            .map(char::from)
+            .collect::<String>();
+
+        Ok(RefreshToken {
+            token: refresh_token,
+            token_expires_at: None,
         })
     }
 
@@ -39,14 +52,14 @@ impl RefreshToken {
     pub fn expired() -> RefreshToken {
         RefreshToken {
             token: String::new(),
-            token_expires_at: Utc::now() - chrono::Duration::days(1),
+            token_expires_at: Some(Utc::now() - chrono::Duration::days(1)),
         }
     }
 }
 
 impl From<RefreshToken> for Cookie<'static> {
     fn from(refresh_token: RefreshToken) -> Self {
-        Cookie::build(("refresh_token", refresh_token.token))
+            let mut builder = Cookie::build(("refresh_token", refresh_token.token))
             .http_only(true)
             .same_site(
                 cfg!(debug_assertions)
@@ -54,14 +67,15 @@ impl From<RefreshToken> for Cookie<'static> {
                     .unwrap_or(SameSite::None),
             )
             .secure(!cfg!(debug_assertions))
-            .path("/api/v1/auth/refresh")
-            .max_age(cookie::time::Duration::seconds(
-                refresh_token
-                    .token_expires_at
-                    .signed_duration_since(Utc::now())
-                    .num_seconds(),
-            ))
-            .build()
+            .path("/api/v1/auth/refresh");
+
+        if let Some(expires_at) = refresh_token.token_expires_at {
+            builder = builder.max_age(cookie::time::Duration::seconds(
+                    expires_at.signed_duration_since(Utc::now()).num_seconds(),
+            ));
+        }
+
+        builder.build()
     }
 }
 

@@ -29,6 +29,7 @@ pub async fn login_user(
     pool: &PgPool,
     email: String,
     password: String,
+    anonymous_user_id: Option<Uuid>,
 ) -> anyhow::Result<(AccessToken, RefreshToken), LoginError> {
     let user = sqlx::query_as!(
         User,
@@ -75,6 +76,33 @@ pub async fn login_user(
         LoginError::Unexpected(e)
     })?;
 
+    let mut tx = pool.begin().await.map_err(|e| {
+        LoginError::Unexpected(anyhow::anyhow!("Failed to start login transaction: {}", e))
+    })?;
+
+    if let Some(anonymous_user_id) = anonymous_user_id {
+        sqlx::query!(
+            "
+            UPDATE split_members AS anonymous_member
+            SET user_id = $1
+            WHERE anonymous_member.user_id = $2
+              AND NOT EXISTS (
+                  SELECT 1 FROM split_members AS logged_in_member
+                  WHERE logged_in_member.split_id = anonymous_member.split_id
+                    AND logged_in_member.user_id = $1
+              )
+              AND EXISTS (
+                  SELECT 1 FROM users WHERE id = $2 AND is_anonymous = TRUE
+              )
+            ",
+            user.id,
+            anonymous_user_id,
+        )
+        .execute(&mut *tx)
+        .await
+        .map_err(|e| LoginError::Unexpected(anyhow::anyhow!("Failed to claim splits: {}", e)))?;
+    }
+
     let session = sqlx::query_as!(
         Session,
         "
@@ -88,9 +116,13 @@ pub async fn login_user(
         refresh_token_hash,
         refresh_token.token_expires_at
     )
-    .fetch_one(pool)
+    .fetch_one(&mut *tx)
     .await
     .map_err(|e| LoginError::Unexpected(anyhow::anyhow!("Failed to create session: {}", e)))?;
+
+    tx.commit()
+        .await
+        .map_err(|e| LoginError::Unexpected(anyhow::anyhow!("Failed to commit login: {}", e)))?;
 
     let access_token = AccessToken::generate(session.id.to_string(), user.id.to_string())
         .map_err(LoginError::Unexpected)?;

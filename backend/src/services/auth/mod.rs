@@ -1,7 +1,9 @@
 use sqlx::PgPool;
 
 pub mod access_token;
+mod anonymous;
 mod login;
+pub use anonymous::*;
 mod logout;
 mod refresh;
 pub mod refresh_token;

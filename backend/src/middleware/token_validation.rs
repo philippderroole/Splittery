@@ -69,6 +69,16 @@ pub fn decode_jwt(token: &str) -> anyhow::Result<Claims> {
     Ok(claims)
 }
 
+pub async fn validate_access_token_string(
+    pool: &PgPool,
+    token: &str,
+) -> Result<Claims, StatusCode> {
+    let claims = decode_jwt(token).map_err(|_| StatusCode::UNAUTHORIZED)?;
+    validate_user_exists(pool.clone(), &claims).await?;
+    validate_session(pool.clone(), &claims).await?;
+    Ok(claims)
+}
+
 fn decode_jwt_for_refresh(token: &str) -> anyhow::Result<Claims> {
     let jwt_secret = dotenvy::var("JWT_SECRET")?;
 
@@ -138,7 +148,7 @@ async fn validate_session(pool: Pool<Postgres>, claims: &Claims) -> anyhow::Resu
     Ok(())
 }
 
-fn extract_access_token(jar: &CookieJar, headers: &HeaderMap) -> Option<String> {
+pub fn extract_access_token(jar: &CookieJar, headers: &HeaderMap) -> Option<String> {
     headers
         .get(AUTHORIZATION)
         .and_then(|value| value.to_str().ok())

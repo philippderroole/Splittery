@@ -1,4 +1,6 @@
+mod anonymous;
 mod login;
+pub use anonymous::*;
 mod logout;
 mod refresh;
 mod register;
