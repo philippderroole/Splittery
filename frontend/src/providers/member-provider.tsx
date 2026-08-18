@@ -1,5 +1,3 @@
-"use client";
-
 import { useSplitSocket } from "@/hooks/useSplitSocket";
 import {
     deserializeMember,

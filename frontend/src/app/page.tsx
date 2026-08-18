@@ -1,5 +1,3 @@
-"use client";
-
 import { loginUser, registerUser } from "@/service/auth/auth-service";
 import {
     Alert,
@@ -11,15 +9,36 @@ import {
     Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { CreateSplitDialogButton } from "./components/create-split-dialog-button";
+import { useNavigate } from "react-router-dom";
 import { registerAnonymous } from "@/service/auth/register-anonymous";
 
+function getReturnPath(): string | null {
+    const returnTo = new URLSearchParams(window.location.search).get("returnTo");
+
+    if (returnTo?.startsWith("/") && !returnTo.startsWith("//")) {
+        return returnTo;
+    }
+
+    return null;
+}
+
 export default function HomePage() {
+    const navigate = useNavigate();
     const [mode, setMode] = useState<"register" | "login" | "guest">("register");
     const [form, setForm] = useState({ username: "", email: "", password: "" });
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const returnTo = getReturnPath();
+
+    const completeAuthentication = () => {
+        if (returnTo) {
+            navigate(returnTo, { replace: true });
+            return;
+        }
+
+        navigate("/splits", { replace: true });
+    };
 
     const handleChange = (field: keyof typeof form) => (event: React.ChangeEvent<HTMLInputElement>) => {
         setForm((prev) => ({ ...prev, [field]: event.target.value }));
@@ -42,7 +61,7 @@ export default function HomePage() {
                 setSuccess("Account created successfully.");
             }
 
-            setIsAuthenticated(true);
+            completeAuthentication();
         } catch {
             setError(
                 mode === "login"
@@ -59,13 +78,10 @@ export default function HomePage() {
 
         try {
             await registerAnonymous();
-            setIsAuthenticated(true);
-            setMode("guest");
+            completeAuthentication();
             setSuccess("Continuing without an account.");
         } catch {
-            setMode("guest");
-            setIsAuthenticated(true);
-            setSuccess("Continuing without an account.");
+            setError("Could not continue as a guest. Please try again.");
         }
     };
 
@@ -158,16 +174,7 @@ export default function HomePage() {
                                 Skip registration
                             </Button>
                         </>
-                    ) : (
-                        <Stack spacing={2}>
-                            <Alert severity={mode === "guest" ? "info" : "success"}>
-                                {mode === "guest"
-                                    ? "You are continuing as a guest."
-                                    : "You are signed in and ready to go."}
-                            </Alert>
-                            <CreateSplitDialogButton />
-                        </Stack>
-                    )}
+                    ) : null}
                 </Stack>
             </Paper>
         </Box>

@@ -13,6 +13,20 @@ async function parseResponseBody<T>(res: Response): Promise<T | null> {
     }
 }
 
+let isRedirectingToLogin = false;
+
+function redirectToLoginOnUnauthorized(res: Response): void {
+    if (
+        res.status === 401 &&
+        window.location.pathname !== "/" &&
+        !isRedirectingToLogin
+    ) {
+        isRedirectingToLogin = true;
+        const returnTo = `${window.location.pathname}${window.location.search}`;
+        window.location.assign(`/?returnTo=${encodeURIComponent(returnTo)}`);
+    }
+}
+
 export async function GET(url: string, init?: RequestInit): Promise<any> {
     console.debug("Getting data from:", url);
 
@@ -24,6 +38,7 @@ export async function GET(url: string, init?: RequestInit): Promise<any> {
     });
 
     if (!res.ok) {
+        redirectToLoginOnUnauthorized(res);
         console.error(
             "Failed fetching data:",
             res.status,
@@ -56,6 +71,7 @@ export async function POST(url: string, init?: RequestInit): Promise<any> {
     });
 
     if (!res.ok) {
+        redirectToLoginOnUnauthorized(res);
         console.error(
             "Failed posting data:",
             res.status,
@@ -88,6 +104,7 @@ export async function PUT(url: string, init?: RequestInit): Promise<any> {
     });
 
     if (!res.ok) {
+        redirectToLoginOnUnauthorized(res);
         console.error(
             "Failed putting data:",
             res.status,
@@ -119,6 +136,7 @@ export async function DELETE(url: string, init?: RequestInit): Promise<void> {
     });
 
     if (!res.ok) {
+        redirectToLoginOnUnauthorized(res);
         console.error(
             "Failed deleting data:",
             res.status,

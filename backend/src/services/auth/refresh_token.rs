@@ -50,9 +50,10 @@ impl From<RefreshToken> for Cookie<'static> {
             .http_only(true)
             .same_site(
                 cfg!(debug_assertions)
-                    .then(|| SameSite::None)
-                    .unwrap_or(SameSite::Strict),
+                    .then(|| SameSite::Lax)
+                    .unwrap_or(SameSite::None),
             )
+            .secure(!cfg!(debug_assertions))
             .path("/api/v1/auth/refresh")
             .max_age(cookie::time::Duration::seconds(
                 refresh_token

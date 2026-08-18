@@ -48,9 +48,10 @@ impl From<AccessToken> for Cookie<'static> {
             .http_only(true)
             .same_site(
                 cfg!(debug_assertions)
-                    .then(|| SameSite::None)
-                    .unwrap_or(SameSite::Strict),
+                    .then(|| SameSite::Lax)
+                    .unwrap_or(SameSite::None),
             )
+            .secure(!cfg!(debug_assertions))
             .path("/api/v1/")
             .max_age(cookie::time::Duration::seconds(
                 access_token

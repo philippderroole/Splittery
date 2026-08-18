@@ -1,12 +1,14 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { Route, Routes } from "react-router-dom";
 import HomePage from "./app/page";
+import SplitsPage from "./app/splits/page";
 import SplitBalancesPage from "./app/splits/[splitId]/balances/page";
 import SplitTagsPage from "./app/splits/[splitId]/tags/page";
 import SplitTransactionsPage from "./app/splits/[splitId]/transactions/page";
 import SplitTransactionLayout from "./app/splits/[splitId]/transactions/[transactionId]/layout";
 import SplitTransactionPage from "./app/splits/[splitId]/transactions/[transactionId]/page";
 import SplitLayout from "./app/splits/[splitId]/layout";
+import { SplitsProvider } from "./providers/splits-provider";
 
 function AppLoading() {
     return (
@@ -26,6 +28,14 @@ function App() {
     return (
         <Routes>
             <Route path="/" element={<HomePage />} />
+            <Route
+                path="/splits"
+                element={
+                    <SplitsProvider>
+                        <SplitsPage />
+                    </SplitsProvider>
+                }
+            />
             <Route
                 path="/splits/:splitId"
                 element={
