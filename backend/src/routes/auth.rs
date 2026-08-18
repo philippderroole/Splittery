@@ -47,8 +47,12 @@ pub fn auth_routes() -> Router<PgPool> {
         )
         .layer(middleware::from_fn(validate_access_token_for_refresh));
 
+    let anonymous_routes =
+        Router::new().route("/auth/anonymous", post(controllers::anonymous_auth));
+
     Router::new()
         .merge(public_routes)
         .merge(protected_routes)
         .merge(refresh_routes)
+        .merge(anonymous_routes)
 }

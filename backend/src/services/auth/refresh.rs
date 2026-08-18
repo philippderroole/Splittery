@@ -30,7 +30,11 @@ pub async fn refresh_token(
         .map_err(|e| RefreshError::Unexpected(anyhow!(e)))?
         .ok_or_else(|| RefreshError::SessionNotFound)?;
 
-    if session.revoked_at.is_some() || session.refresh_token_expires_at < Utc::now() {
+    if session.revoked_at.is_some()
+        || session
+            .refresh_token_expires_at
+            .is_some_and(|expires_at| expires_at < Utc::now())
+    {
         tx.rollback()
             .await
             .map_err(|e| RefreshError::Unexpected(anyhow!(e)))?;

@@ -1,0 +1,5 @@
+ALTER TABLE users
+ADD COLUMN is_anonymous BOOLEAN DEFAULT FALSE NOT NULL;
+
+ALTER TABLE sessions
+ALTER COLUMN refresh_token_expires_at DROP NOT NULL;
