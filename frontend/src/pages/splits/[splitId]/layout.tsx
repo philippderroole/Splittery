@@ -1,8 +1,6 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import NavTabs from "@/app/splits/[splitId]/components/nav-tabs";
-import SplitHeader from "@/app/splits/[splitId]/components/split-header";
 import { MembersProvider } from "@/providers/member-provider";
 import { SplitProvider } from "@/providers/split-provider";
 import { TagsProvider } from "@/providers/tag-provider";
@@ -15,6 +13,8 @@ import { Split } from "@/utils/split";
 import { SerializedTransaction } from "@/utils/transaction";
 import { Tag } from "@/utils/tag";
 import { SerializedMember } from "@/utils/user";
+import SplitHeader from "./components/split-header";
+import NavTabs from "./components/nav-tabs";
 
 type SplitLayoutData = {
     split: Split;

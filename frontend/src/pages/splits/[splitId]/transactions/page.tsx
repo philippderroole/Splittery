@@ -1,7 +1,5 @@
-"use client";
-
-import TransactionList from "@/app/splits/[splitId]/transactions/components/transaction-list";
 import { CreateTransactionDialogButton } from "./components/create-transaction-dialog";
+import TransactionList from "./components/transaction-list";
 
 export default function TransactionGroupListPage() {
     return (

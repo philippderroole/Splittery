@@ -1,4 +1,3 @@
-import { loginUser, registerUser } from "@/service/auth/auth-service";
 import {
     Alert,
     Box,
@@ -10,7 +9,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { registerAnonymous } from "@/service/auth/register-anonymous";
+import { useAuth } from "@/providers/auth-provider";
 
 function getReturnPath(): string | null {
     const returnTo = new URLSearchParams(window.location.search).get("returnTo");
@@ -24,14 +23,14 @@ function getReturnPath(): string | null {
 
 export default function HomePage() {
     const navigate = useNavigate();
+    const { isAuthenticated, loginUser, registerUser, registerAnonymousUser } = useAuth();
     const [mode, setMode] = useState<"register" | "login" | "guest">("register");
     const [form, setForm] = useState({ username: "", email: "", password: "" });
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const returnTo = getReturnPath();
 
-    const completeAuthentication = () => {
+    const redirectAfterAuth = () => {
         if (returnTo) {
             navigate(returnTo, { replace: true });
             return;
@@ -40,35 +39,32 @@ export default function HomePage() {
         navigate("/splits", { replace: true });
     };
 
-    const handleChange = (field: keyof typeof form) => (event: React.ChangeEvent<HTMLInputElement>) => {
-        setForm((prev) => ({ ...prev, [field]: event.target.value }));
-    };
-
     const handleSubmit = async () => {
         setError(null);
         setSuccess(null);
 
-        try {
-            if (mode === "login") {
-                await loginUser({ email: form.email, password: form.password });
+        if (mode === "login") {
+            const isAuthenticated = await loginUser({ email: form.email, password: form.password });
+            if (isAuthenticated) {
                 setSuccess("Logged in successfully.");
+                redirectAfterAuth();
             } else {
-                await registerUser({
-                    email: form.email,
-                    password: form.password,
-                    username: form.username,
-                });
-                setSuccess("Account created successfully.");
+                setError("Login failed. Please check your email and password.");
+                return;
             }
-
-            completeAuthentication();
-        } catch {
-            setError(
-                mode === "login"
-                    ? "Login failed. Please check your email and password."
-                    : "Registration failed. Please try again."
-            );
-            setIsAuthenticated(false);
+        } else {
+            const isRegistered = await registerUser({
+                email: form.email,
+                password: form.password,
+                username: form.username,
+            });
+            if (isRegistered) {
+                setSuccess("Account created successfully.");
+                redirectAfterAuth();
+            } else {
+                setError("Registration failed. Please try again.");
+                return;
+            }
         }
     };
 
@@ -76,11 +72,12 @@ export default function HomePage() {
         setError(null);
         setSuccess(null);
 
-        try {
-            await registerAnonymous();
-            completeAuthentication();
+        await registerAnonymousUser();
+        if (isAuthenticated) {
             setSuccess("Continuing without an account.");
-        } catch {
+            redirectAfterAuth();
+            return;
+        } else {
             setError("Could not continue as a guest. Please try again.");
         }
     };
@@ -138,20 +135,20 @@ export default function HomePage() {
                                     <TextField
                                         label="Username"
                                         value={form.username}
-                                        onChange={handleChange("username")}
+                                        onChange={(event) => setForm({ ...form, username: event.target.value })}
                                     />
                                 )}
                                 <TextField
                                     label="Email"
                                     type="email"
                                     value={form.email}
-                                    onChange={handleChange("email")}
+                                    onChange={(event) => setForm({ ...form, email: event.target.value })}
                                 />
                                 <TextField
                                     label="Password"
                                     type="password"
                                     value={form.password}
-                                    onChange={handleChange("password")}
+                                    onChange={(event) => setForm({ ...form, password: event.target.value })}
                                 />
                             </Stack>
 

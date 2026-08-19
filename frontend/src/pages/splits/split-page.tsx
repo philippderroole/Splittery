@@ -1,5 +1,3 @@
-"use client";
-
 import {
     Alert,
     Box,
@@ -12,12 +10,10 @@ import {
     Stack,
     Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CreateSplitDialogButton } from "../components/create-split-dialog-button";
-import { getSplits } from "@/service/split-service";
-import { Split } from "@/utils/split";
 import { useSplits } from "@/providers/splits-provider";
+import { CreateSplitDialogButton } from "@/components/create-split-dialog-button";
 
 export default function SplitsPage() {
     const navigate = useNavigate();
