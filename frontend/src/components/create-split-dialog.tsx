@@ -1,5 +1,3 @@
-"use client";
-
 import { createMember } from "@/service/member-service";
 import MobileDialog from "@/components/mobile-dialog";
 import { CreateSplitDto } from "@/utils/split";
@@ -20,9 +18,9 @@ import {
     Typography,
 } from "@mui/material";
 import { useState } from "react";
-import MemberForm from "../../components/member-form";
-import SplitForm from "../../components/split-form";
 import { createSplit } from "@/service/split-service";
+import SplitForm from "./split-form";
+import MemberForm from "./member-form";
 
 interface CreateSplitDialogProps {
     open: boolean;

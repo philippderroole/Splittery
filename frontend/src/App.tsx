@@ -1,14 +1,16 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { Route, Routes } from "react-router-dom";
-import HomePage from "./app/page";
-import SplitsPage from "./app/splits/page";
-import SplitBalancesPage from "./app/splits/[splitId]/balances/page";
-import SplitTagsPage from "./app/splits/[splitId]/tags/page";
-import SplitTransactionsPage from "./app/splits/[splitId]/transactions/page";
-import SplitTransactionLayout from "./app/splits/[splitId]/transactions/[transactionId]/layout";
-import SplitTransactionPage from "./app/splits/[splitId]/transactions/[transactionId]/page";
-import SplitLayout from "./app/splits/[splitId]/layout";
+import HomePage from "./pages/home-page";
+import SplitsPage from "./pages/splits/split-page";
+import SplitBalancesPage from "./pages/splits/[splitId]/balances/balances-page";
+import SplitTagsPage from "./pages/splits/[splitId]/tags/page";
+import SplitTransactionsPage from "./pages/splits/[splitId]/transactions/page";
+import SplitTransactionLayout from "./pages/splits/[splitId]/transactions/[transactionId]/layout";
+import SplitTransactionPage from "./pages/splits/[splitId]/transactions/[transactionId]/page";
 import { SplitsProvider } from "./providers/splits-provider";
+import PrivateRoute from "./components/private-route";
+import { AuthProvider } from "./providers/auth-provider";
+import SplitLayout from "./pages/splits/[splitId]/layout";
 
 function AppLoading() {
     return (
@@ -24,70 +26,69 @@ function AppLoading() {
     );
 }
 
-function App() {
+export default function App() {
     return (
-        <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route
-                path="/splits"
-                element={
-                    <SplitsProvider>
-                        <SplitsPage />
-                    </SplitsProvider>
-                }
-            />
-            <Route
-                path="/splits/:splitId"
-                element={
-                    <SplitLayout>
-                        <AppLoading />
-                    </SplitLayout>
-                }
-            />
-            <Route
-                path="/splits/:splitId/balances"
-                element={
-                    <SplitLayout>
-                        <SplitBalancesPage />
-                    </SplitLayout>
-                }
-            />
-            <Route
-                path="/splits/:splitId/tags"
-                element={
-                    <SplitLayout>
-                        <SplitTagsPage />
-                    </SplitLayout>
-                }
-            />
-            <Route
-                path="/splits/:splitId/transactions"
-                element={
-                    <SplitLayout>
-                        <SplitTransactionsPage />
-                    </SplitLayout>
-                }
-            />
-            <Route
-                path="/splits/:splitId/transactions/:transactionId"
-                element={
-                    <SplitLayout>
-                        <SplitTransactionLayout>
-                            <SplitTransactionPage />
-                        </SplitTransactionLayout>
-                    </SplitLayout>
-                }
-            />
-            <Route
-                path="*"
-                element={
-                    <Box sx={{ p: 4 }}>
-                        <Typography variant="h4">Page not found</Typography>
-                    </Box>
-                }
-            />
-        </Routes>
+        <AuthProvider>
+            <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route element={<PrivateRoute />}>
+                    <Route path="/splits" element={
+                        <SplitsProvider>
+                            <SplitsPage />
+                        </SplitsProvider>
+                    } />
+                </Route>
+                <Route
+                    path="/splits/:splitId"
+                    element={
+                        <SplitLayout>
+                            <AppLoading />
+                        </SplitLayout>
+                    }
+                />
+                <Route
+                    path="/splits/:splitId/balances"
+                    element={
+                        <SplitLayout>
+                            <SplitBalancesPage />
+                        </SplitLayout>
+                    }
+                />
+                <Route
+                    path="/splits/:splitId/tags"
+                    element={
+                        <SplitLayout>
+                            <SplitTagsPage />
+                        </SplitLayout>
+                    }
+                />
+                <Route
+                    path="/splits/:splitId/transactions"
+                    element={
+                        <SplitLayout>
+                            <SplitTransactionsPage />
+                        </SplitLayout>
+                    }
+                />
+                <Route
+                    path="/splits/:splitId/transactions/:transactionId"
+                    element={
+                        <SplitLayout>
+                            <SplitTransactionLayout>
+                                <SplitTransactionPage />
+                            </SplitTransactionLayout>
+                        </SplitLayout>
+                    }
+                />
+                <Route
+                    path="*"
+                    element={
+                        <Box sx={{ p: 4 }}>
+                            <Typography variant="h4">Page not found</Typography>
+                        </Box>
+                    }
+                />
+            </Routes>
+        </AuthProvider>
     );
 }
-
-export default App;
