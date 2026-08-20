@@ -7,7 +7,7 @@ import {
     TextField,
     Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/providers/auth-provider";
 
@@ -29,6 +29,12 @@ export default function HomePage() {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const returnTo = getReturnPath();
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate("/splits", { replace: true });
+        }
+    }, [isAuthenticated, navigate]);
 
     const redirectAfterAuth = () => {
         if (returnTo) {

@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from "react";
+import { error } from "console";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 export interface AuthPayload {
     email: string;
@@ -22,6 +23,26 @@ export function AuthProvider({
 }: AuthProviderProps) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+    useEffect(() => {
+        isUserAuthenticated();
+    }, []);
+
+    const isUserAuthenticated = async (): Promise<void> => {
+        console.log("Checking if user is authenticated...");
+
+        fetch(`${import.meta.env.VITE_INTERNAL_API_URL}/auth/me`, {
+            method: "GET",
+            credentials: "include",
+        }).then((response) => {
+            if (!response.ok) {
+                throw new Error("Failed to check authentication status.");
+            }
+            setIsAuthenticated(true);
+        }).catch((error) => {
+            setIsAuthenticated(false);
+        });
+    };
+
     const registerUser = async (payload: AuthPayload): Promise<boolean> => {
         return await fetch(`${import.meta.env.VITE_INTERNAL_API_URL}/auth/web/password/register`, {
             method: "POST",
@@ -39,12 +60,11 @@ export function AuthProvider({
                 if (!response.ok) {
                     throw new Error("Failed to register user.");
                 }
-                console.log("User registered successfully.");
                 setIsAuthenticated(true);
                 return true;
             })
             .catch((error) => {
-                console.error("Error registering user:", error);
+                setIsAuthenticated(false);
                 return false;
             });
     };
@@ -58,12 +78,11 @@ export function AuthProvider({
                 if (!response.ok) {
                     throw new Error("Failed to register anonymous user.");
                 }
-                console.log("Anonymous user registered successfully.");
                 setIsAuthenticated(true);
                 return true;
             })
             .catch((error) => {
-                console.error("Error registering anonymous user:", error);
+                setIsAuthenticated(false);
                 return false;
             });
     };
@@ -84,12 +103,11 @@ export function AuthProvider({
                 if (!response.ok) {
                     throw new Error("Failed to log in.");
                 }
-                console.log("User logged in successfully.");
                 setIsAuthenticated(true);
                 return true;
             })
             .catch((error) => {
-                console.error("Error logging in:", error);
+                setIsAuthenticated(false);
                 return false;
             });
     };

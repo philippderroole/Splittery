@@ -1,3 +1,4 @@
+use axum::routing::get;
 use axum::{Router, middleware, routing::post};
 use sqlx::PgPool;
 
@@ -22,7 +23,8 @@ pub fn auth_routes() -> Router<PgPool> {
                         .route("/link", post(controllers::link_oidc_account)),
                 )
                 .route("/web/logout", post(controllers::web_logout))
-                .route("/tauri/logout", post(controllers::tauri_logout)),
+                .route("/tauri/logout", post(controllers::tauri_logout))
+                .route("/me", get(controllers::me)),
         )
         .layer(middleware::from_fn(validate_access_token));
 
@@ -36,23 +38,17 @@ pub fn auth_routes() -> Router<PgPool> {
         .nest(
             "/auth/web/password",
             Router::new()
-                .route("/register", post(controllers::password_web_register))
-                .route("/login", post(controllers::password_web_login)),
-        );
+                .route("/login", post(controllers::password_web_login))
+                .route("/register", post(controllers::password_web_register)),
+        )
+        .route("/auth/anonymous", post(controllers::anonymous_auth));
 
     let refresh_routes = Router::new()
-        .nest(
-            "/auth",
-            Router::new().route("/refresh", post(controllers::refresh_token)),
-        )
+        .route("/auth/refresh", post(controllers::refresh_token))
         .layer(middleware::from_fn(validate_access_token_for_refresh));
-
-    let anonymous_routes =
-        Router::new().route("/auth/anonymous", post(controllers::anonymous_auth));
 
     Router::new()
         .merge(public_routes)
         .merge(protected_routes)
         .merge(refresh_routes)
-        .merge(anonymous_routes)
 }
