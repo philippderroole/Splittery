@@ -1,12 +1,14 @@
 mod anonymous;
 mod login;
-pub use anonymous::*;
 mod logout;
+mod me;
 mod refresh;
 mod register;
 
+pub use anonymous::*;
 pub use login::*;
 pub use logout::*;
+pub use me::*;
 pub use refresh::*;
 pub use register::*;
 
