@@ -34,13 +34,20 @@ pub async fn create_split(pool: &PgPool, name: String) -> Result<Split> {
     Ok(split)
 }
 
-pub async fn get_splits(pool: &PgPool) -> Result<Vec<Split>> {
+pub async fn get_splits(pool: &PgPool, user_id: Uuid) -> Result<Vec<Split>> {
     let query_result = sqlx::query_as!(
         Split,
         "
         SELECT id, public_id, name, created_at, updated_at 
         FROM splits
-        "
+        WHERE id IN (
+            SELECT split_id
+            FROM split_members
+            WHERE user_id = $1
+        )
+        ORDER BY created_at DESC
+        ",
+        user_id
     )
     .fetch_all(pool)
     .await;

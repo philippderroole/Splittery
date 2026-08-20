@@ -6,7 +6,7 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 
-use crate::{models::Split, services};
+use crate::{middleware::UserId, models::Split, services};
 
 #[derive(Debug, Deserialize)]
 pub struct CreateSplitRequest {
@@ -30,8 +30,9 @@ impl From<Split> for SplitResponse {
 
 pub async fn get_all_splits(
     State(pool): State<PgPool>,
+    UserId(user_id): UserId,
 ) -> Result<Json<Vec<SplitResponse>>, StatusCode> {
-    let splits = match services::get_splits(&pool).await {
+    let splits = match services::get_splits(&pool, user_id).await {
         Ok(splits) => splits,
         Err(e) => {
             log::error!("Failed to get splits, {e}");

@@ -1,4 +1,3 @@
-import { error } from "console";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 export interface AuthPayload {
@@ -7,10 +6,17 @@ export interface AuthPayload {
     username?: string;
 }
 
+export interface ChangePasswordPayload {
+    currentPassword: string;
+    newPassword: string;
+}
+
 const AuthContext = createContext({
     loginUser: async (payload: AuthPayload): Promise<boolean> => false,
     registerUser: async (payload: AuthPayload): Promise<boolean> => false,
     registerAnonymousUser: async (): Promise<boolean> => false,
+    logoutUser: async (): Promise<boolean> => false,
+    changePassword: async (payload: ChangePasswordPayload): Promise<boolean> => false,
     isAuthenticated: false,
 });
 
@@ -70,7 +76,7 @@ export function AuthProvider({
     };
 
     const registerAnonymousUser = async (): Promise<boolean> => {
-        return await fetch(`${import.meta.env.VITE_INTERNAL_API_URL}/auth/web/anonymous/register`, {
+        return await fetch(`${import.meta.env.VITE_INTERNAL_API_URL}/auth/web/anonymous`, {
             method: "POST",
             credentials: "include",
         })
@@ -112,8 +118,57 @@ export function AuthProvider({
             });
     };
 
+    const logoutUser = async (): Promise<boolean> => {
+        return await fetch(`${import.meta.env.VITE_INTERNAL_API_URL}/auth/web/logout`, {
+            method: "POST",
+            credentials: "include",
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Failed to log out.");
+                }
+                setIsAuthenticated(false);
+                return true;
+            })
+            .catch((error) => {
+                return false;
+            });
+    };
+
+    const changePassword = async (payload: ChangePasswordPayload): Promise<boolean> => {
+        return await fetch(`${import.meta.env.VITE_INTERNAL_API_URL}/auth/password/change`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+                current_password: payload.currentPassword,
+                new_password: payload.newPassword,
+            }),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Failed to change password.");
+                }
+                return true;
+            })
+            .catch((error) => {
+                return false;
+            });
+    };
+
     return (
-        <AuthContext.Provider value={{ loginUser, registerUser, registerAnonymousUser, isAuthenticated }}>
+        <AuthContext.Provider
+            value={{
+                loginUser,
+                registerUser,
+                registerAnonymousUser,
+                logoutUser,
+                changePassword,
+                isAuthenticated,
+            }}
+        >
             {children}
         </AuthContext.Provider>
     );
