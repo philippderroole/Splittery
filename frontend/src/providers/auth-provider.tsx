@@ -25,13 +25,20 @@ export function AuthProvider({
     const registerUser = async (payload: AuthPayload): Promise<boolean> => {
         return await fetch(`${import.meta.env.VITE_INTERNAL_API_URL}/auth/web/password/register`, {
             method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
             body: JSON.stringify({
                 email: payload.email,
                 password: payload.password,
                 username: payload.username,
             }),
         })
-            .then(() => {
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Failed to register user.");
+                }
                 console.log("User registered successfully.");
                 setIsAuthenticated(true);
                 return true;
@@ -45,8 +52,12 @@ export function AuthProvider({
     const registerAnonymousUser = async (): Promise<boolean> => {
         return await fetch(`${import.meta.env.VITE_INTERNAL_API_URL}/auth/web/anonymous/register`, {
             method: "POST",
+            credentials: "include",
         })
-            .then(() => {
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Failed to register anonymous user.");
+                }
                 console.log("Anonymous user registered successfully.");
                 setIsAuthenticated(true);
                 return true;
@@ -60,12 +71,19 @@ export function AuthProvider({
     const loginUser = async (payload: AuthPayload): Promise<boolean> => {
         return await fetch(`${import.meta.env.VITE_INTERNAL_API_URL}/auth/web/password/login`, {
             method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            credentials: "include",
             body: JSON.stringify({
                 email: payload.email,
                 password: payload.password,
             }),
         })
-            .then(() => {
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error("Failed to log in.");
+                }
                 console.log("User logged in successfully.");
                 setIsAuthenticated(true);
                 return true;
