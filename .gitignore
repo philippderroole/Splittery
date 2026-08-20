@@ -1,2 +1,3 @@
 .idea
 k8s/database-secrets.yml
+k8s/backend-secrets.yml
