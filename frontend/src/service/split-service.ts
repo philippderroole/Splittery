@@ -1,16 +1,28 @@
-import { GET, POST } from "@/utils/request";
 import { CreateSplitDto, Split } from "@/utils/split";
 
 export async function getSplits(): Promise<Split[]> {
-    return await GET(`${import.meta.env.VITE_INTERNAL_API_URL}/splits`);
+    return await fetch(`${import.meta.env.VITE_INTERNAL_API_URL}/splits`, {
+        method: "GET",
+        credentials: "include",
+    })
+        .then((response) => response.json());
 }
 
 export async function getSplit(splitId: string): Promise<Split> {
-    return await GET(`${import.meta.env.VITE_INTERNAL_API_URL}/splits/${splitId}`);
+    return await fetch(`${import.meta.env.VITE_INTERNAL_API_URL}/splits/${splitId}`, {
+        method: "GET",
+        credentials: "include",
+    })
+        .then((response) => response.json());
 }
 
 export async function createSplit(split: CreateSplitDto): Promise<Split> {
-    return await POST(`${import.meta.env.VITE_INTERNAL_API_URL}/splits`, {
+    return await fetch(`${import.meta.env.VITE_INTERNAL_API_URL}/splits`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
         body: JSON.stringify(split),
-    });
+        credentials: "include",
+    }).then((response) => response.json());
 }
