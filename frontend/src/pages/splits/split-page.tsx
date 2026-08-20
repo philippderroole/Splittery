@@ -14,6 +14,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSplits } from "@/providers/splits-provider";
 import { CreateSplitDialogButton } from "@/components/create-split-dialog-button";
+import AccountMenu from "@/components/account-menu";
 
 export default function SplitsPage() {
     const navigate = useNavigate();
@@ -23,6 +24,7 @@ export default function SplitsPage() {
 
     return (
         <Box sx={{ minHeight: "100dvh", bgcolor: "#f5f7fb", p: { xs: 2, sm: 4 } }}>
+            <AccountMenu />
             <Box sx={{ maxWidth: 720, mx: "auto" }}>
                 <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
                     <Box>

@@ -41,7 +41,7 @@ pub fn auth_routes() -> Router<PgPool> {
                 .route("/login", post(controllers::password_web_login))
                 .route("/register", post(controllers::password_web_register)),
         )
-        .route("/auth/anonymous", post(controllers::anonymous_auth));
+        .route("/auth/web/anonymous", post(controllers::anonymous_auth));
 
     let refresh_routes = Router::new()
         .route("/auth/refresh", post(controllers::refresh_token))

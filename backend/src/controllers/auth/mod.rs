@@ -1,4 +1,5 @@
 mod anonymous;
+mod change_password;
 mod login;
 mod logout;
 mod me;
@@ -6,13 +7,12 @@ mod refresh;
 mod register;
 
 pub use anonymous::*;
+pub use change_password::*;
 pub use login::*;
 pub use logout::*;
 pub use me::*;
 pub use refresh::*;
 pub use register::*;
-
-pub async fn change_password() {}
 
 pub async fn reset_password() {}
 

@@ -13,6 +13,7 @@ import { Split } from "@/utils/split";
 import { SerializedTransaction } from "@/utils/transaction";
 import { Tag } from "@/utils/tag";
 import { SerializedMember } from "@/utils/user";
+import AccountMenu from "@/components/account-menu";
 import SplitHeader from "./components/split-header";
 import NavTabs from "./components/nav-tabs";
 
@@ -95,6 +96,7 @@ export default function SplitLayout({
 
     return (
         <div>
+            <AccountMenu />
             <SplitProvider split={data.split}>
                 <TransactionsProvider serializedTransactions={data.transactions}>
                     <MembersProvider serializedMembers={data.members}>
