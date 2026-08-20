@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT * FROM sessions WHERE id = $1",
+  "query": "\n        UPDATE user_identities\n        SET password_hash = $1\n        WHERE user_id = $2\n        RETURNING id, user_id, provider, provider_subject, password_hash, created_at\n        ",
   "describe": {
     "columns": [
       {
@@ -15,42 +15,28 @@
       },
       {
         "ordinal": 2,
-        "name": "client_type",
+        "name": "provider",
         "type_info": "Text"
       },
       {
         "ordinal": 3,
-        "name": "device_id",
+        "name": "provider_subject",
         "type_info": "Text"
       },
       {
         "ordinal": 4,
-        "name": "refresh_token_hash",
-        "type_info": "Bytea"
+        "name": "password_hash",
+        "type_info": "Text"
       },
       {
         "ordinal": 5,
-        "name": "refresh_token_expires_at",
-        "type_info": "Timestamptz"
-      },
-      {
-        "ordinal": 6,
-        "name": "revoked_at",
-        "type_info": "Timestamptz"
-      },
-      {
-        "ordinal": 7,
         "name": "created_at",
-        "type_info": "Timestamptz"
-      },
-      {
-        "ordinal": 8,
-        "name": "last_seen_at",
         "type_info": "Timestamptz"
       }
     ],
     "parameters": {
       "Left": [
+        "Text",
         "Uuid"
       ]
     },
@@ -59,12 +45,9 @@
       false,
       false,
       true,
-      false,
       true,
-      true,
-      false,
       false
     ]
   },
-  "hash": "b61377101cd65dbd8c97702fe3a76f791c43849b84d5e16e4e3d98cbde9f7a17"
+  "hash": "7410aae425d0f69590c98bb6615c0b7e635a7eba50c2e58fb0f0474c0ee07bbb"
 }

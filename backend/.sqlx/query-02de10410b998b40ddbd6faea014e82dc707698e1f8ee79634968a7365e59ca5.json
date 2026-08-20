@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        INSERT INTO sessions (id, user_id, client_type, refresh_token_hash, refresh_token_expires_at)\n        VALUES ($1, $2, $3, $4, $5)\n        RETURNING *\n        ",
+  "query": "\n        INSERT INTO sessions (id, user_id, client_type, refresh_token_hash, refresh_token_expires_at)\n        VALUES ($1, $2, $3, $4, NULL)\n        RETURNING *\n        ",
   "describe": {
     "columns": [
       {
@@ -54,8 +54,7 @@
         "Uuid",
         "Uuid",
         "Text",
-        "Bytea",
-        "Timestamptz"
+        "Bytea"
       ]
     },
     "nullable": [
@@ -70,5 +69,5 @@
       false
     ]
   },
-  "hash": "15c3eb62f5158ffb652090a1a3ffc5c31bd154ff770d91d594fec995ffa65950"
+  "hash": "02de10410b998b40ddbd6faea014e82dc707698e1f8ee79634968a7365e59ca5"
 }
