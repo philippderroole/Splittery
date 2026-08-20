@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO users (id, public_id, username, email, email_verified, is_anonymous)\n        VALUES ($1, $2, $3, $4, FALSE, TRUE)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Varchar",
+        "Varchar",
+        {
+          "Custom": {
+            "name": "citext",
+            "kind": "Simple"
+          }
+        }
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "fdaf1d1fd1c0c106d8faf60a0fac74d2f9668b3b2723eac278d32e4a1f283d5b"
+}

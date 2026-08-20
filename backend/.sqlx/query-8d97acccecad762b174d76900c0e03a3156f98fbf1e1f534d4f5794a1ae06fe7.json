@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE split_members AS anonymous_member\n            SET user_id = $1\n            WHERE anonymous_member.user_id = $2\n              AND NOT EXISTS (\n                  SELECT 1 FROM split_members AS logged_in_member\n                  WHERE logged_in_member.split_id = anonymous_member.split_id\n                    AND logged_in_member.user_id = $1\n              )\n              AND EXISTS (\n                  SELECT 1 FROM users WHERE id = $2 AND is_anonymous = TRUE\n              )\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8d97acccecad762b174d76900c0e03a3156f98fbf1e1f534d4f5794a1ae06fe7"
+}
