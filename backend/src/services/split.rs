@@ -92,6 +92,8 @@ pub async fn track_split_visit(
         r#"
         INSERT INTO split_visits (user_id, split_id, first_visited_at, last_visited_at, visit_count)
         VALUES ($1, $2, NOW(), NOW(), 1)
+        ON CONFLICT (user_id, split_id)
+        DO UPDATE SET last_visited_at = NOW(), visit_count = split_visits.visit_count + 1
         "#,
         user_id,
         split_id

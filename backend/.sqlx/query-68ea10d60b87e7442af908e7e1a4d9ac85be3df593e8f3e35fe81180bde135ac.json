@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO split_visits (user_id, split_id, first_visited_at, last_visited_at, visit_count)\n        VALUES ($1, $2, NOW(), NOW(), 1)\n        ON CONFLICT (user_id, split_id)\n        DO UPDATE SET last_visited_at = NOW(), visit_count = split_visits.visit_count + 1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "68ea10d60b87e7442af908e7e1a4d9ac85be3df593e8f3e35fe81180bde135ac"
+}

@@ -6,230 +6,230 @@ import { Button } from "@mui/material";
 import { createContext, ReactNode, useContext, useState } from "react";
 
 type TransactionFormContextType = {
-    transaction: CreateTransactionDto;
-    setName: (name: string) => void;
-    setAmount: (amount: string) => void;
-    setPayee: (payee: string) => void;
-    setSelectedTags: (tags: string[]) => void;
-    validationErrors: Map<string, string | null>;
-    onSubmit: () => void;
-    onCancel: () => void;
-    isPending: boolean;
+  transaction: CreateTransactionDto;
+  setName: (name: string) => void;
+  setAmount: (amount: string) => void;
+  setPayee: (payee: string) => void;
+  setSelectedTags: (tags: string[]) => void;
+  validationErrors: Map<string, string | null>;
+  onSubmit: () => void;
+  onCancel: () => void;
+  isPending: boolean;
 };
 
 const TransactionFormContext = createContext<TransactionFormContextType | null>(
-    null
+  null,
 );
 
 const useTransactionFormContext = () => {
-    const currentTransactionContext = useContext(TransactionFormContext);
+  const currentTransactionContext = useContext(TransactionFormContext);
 
-    if (!currentTransactionContext) {
-        throw new Error(
-            "useCreateTagContext must be used within a CreateTagContext.Provider"
-        );
-    }
+  if (!currentTransactionContext) {
+    throw new Error(
+      "useCreateTagContext must be used within a CreateTagContext.Provider",
+    );
+  }
 
-    return currentTransactionContext;
+  return currentTransactionContext;
 };
 
 interface TransactionFormCompoundProps {
-    transaction: CreateTransactionDto;
-    setTransaction: (transaction: CreateTransactionDto) => void;
-    children?: ReactNode;
-    onSubmit: (transaction: CreateTransactionDto) => Promise<Error | void>;
-    onCancel: () => void;
-    isPending: boolean;
+  transaction: CreateTransactionDto;
+  setTransaction: (transaction: CreateTransactionDto) => void;
+  children?: ReactNode;
+  onSubmit: (transaction: CreateTransactionDto) => Promise<Error | void>;
+  onCancel: () => void;
+  isPending: boolean;
 }
 
 function Root({
-    transaction,
-    setTransaction,
-    children,
-    onSubmit,
-    onCancel,
-    isPending,
+  transaction,
+  setTransaction,
+  children,
+  onSubmit,
+  onCancel,
+  isPending,
 }: TransactionFormCompoundProps) {
-    const members = useMembers();
+  const members = useMembers();
 
-    const [validationErrors, setValidationErrors] = useState<
-        Map<string, string | null>
-    >(
-        new Map<string, string | null>([
-            ["name", null],
-            ["amount", null],
-            ["payee", null],
-        ])
-    );
+  const [validationErrors, setValidationErrors] = useState<
+    Map<string, string | null>
+  >(
+    new Map<string, string | null>([
+      ["name", null],
+      ["amount", null],
+      ["payee", null],
+    ]),
+  );
 
-    const handleSubmit = async () => {
-        if (isPending) return;
+  const handleSubmit = async () => {
+    if (isPending) return;
 
-        const newTransaction = {
-            ...transaction,
-            name: transaction.name.trim(),
-        };
-
-        const validationErrors = validateTransaction(newTransaction);
-        setValidationErrors(validationErrors);
-        // the validation error is delayed by one render cycle so we use the local variable
-        if (validationErrors.values().some((error) => error !== null)) {
-            return;
-        }
-
-        await onSubmit(newTransaction);
+    const newTransaction = {
+      ...transaction,
+      name: transaction.name.trim(),
     };
 
-    const setName = (name: string) => {
-        setTransaction({ ...transaction, name });
-    };
+    const validationErrors = validateTransaction(newTransaction);
+    setValidationErrors(validationErrors);
+    // the validation error is delayed by one render cycle so we use the local variable
+    if (validationErrors.values().some((error) => error !== null)) {
+      return;
+    }
 
-    const setSelectedTags = (tagIds: string[]) => {
-        setTransaction({ ...transaction, tagIds });
-    };
+    await onSubmit(newTransaction);
+  };
 
-    const setAmount = (amount: string) => {
-        let newAmount;
+  const setName = (name: string) => {
+    setTransaction({ ...transaction, name });
+  };
 
-        if (amount === "") {
-            newAmount = null;
-        } else {
-            newAmount = Number(amount) * 100;
-        }
+  const setSelectedTags = (tagIds: string[]) => {
+    setTransaction({ ...transaction, tagIds });
+  };
 
-        setTransaction({ ...transaction, amount: newAmount });
-    };
+  const setAmount = (amount: string) => {
+    let newAmount;
 
-    const setPayee = (name: string) => {
-        const member = members.find((member) => member.name === name)!;
-        setTransaction({ ...transaction, memberId: member.id || null });
-    };
+    if (amount === "") {
+      newAmount = null;
+    } else {
+      newAmount = Math.round(Number(amount) * 100);
+    }
 
-    const validateTransactionName = (name: string) => {
-        if (!name) {
-            return "Transaction name cannot be empty.";
-        }
-        if (name.length < 3) {
-            return "Transaction name must be at least 3 characters long.";
-        }
-        if (name.length > 50) {
-            return "Transaction name must not exceed 50 characters.";
-        }
+    setTransaction({ ...transaction, amount: newAmount });
+  };
 
-        return null;
-    };
+  const setPayee = (name: string) => {
+    const member = members.find((member) => member.name === name)!;
+    setTransaction({ ...transaction, memberId: member.id || null });
+  };
 
-    const validateTransactionAmount = (
-        amount: CreateTransactionDto["amount"]
-    ) => {
-        if (amount === null || amount === undefined) {
-            return "Amount is required.";
-        }
-        if (amount < -1000000 || amount > 1000000) {
-            return "Amount must be between -1,000,000 and 1,000,000.";
-        }
-        if (amount === 0) {
-            return "Amount cannot be zero.";
-        }
+  const validateTransactionName = (name: string) => {
+    if (!name) {
+      return "Transaction name cannot be empty.";
+    }
+    if (name.length < 3) {
+      return "Transaction name must be at least 3 characters long.";
+    }
+    if (name.length > 50) {
+      return "Transaction name must not exceed 50 characters.";
+    }
 
-        return null;
-    };
+    return null;
+  };
 
-    const validatePayee = (payee: string | null) => {
-        if (!payee || payee === undefined) {
-            return "Payee is required.";
-        }
+  const validateTransactionAmount = (
+    amount: CreateTransactionDto["amount"],
+  ) => {
+    if (amount === null || amount === undefined) {
+      return "Amount is required.";
+    }
+    if (amount < -1000000 || amount > 1000000) {
+      return "Amount must be between -1,000,000 and 1,000,000.";
+    }
+    if (amount === 0) {
+      return "Amount cannot be zero.";
+    }
 
-        return null;
-    };
+    return null;
+  };
 
-    const validateTransaction = (transaction: CreateTransactionDto) => {
-        const nameError = validateTransactionName(transaction.name);
-        const amountError = validateTransactionAmount(transaction.amount);
-        const payeeError = validatePayee(transaction.memberId);
+  const validatePayee = (payee: string | null) => {
+    if (!payee || payee === undefined) {
+      return "Payee is required.";
+    }
 
-        return new Map<string, string | null>([
-            ["name", nameError],
-            ["amount", amountError],
-            ["payee", payeeError],
-        ]);
-    };
+    return null;
+  };
 
-    return (
-        <TransactionFormContext.Provider
-            value={{
-                transaction,
-                setName,
-                setAmount,
-                setPayee,
-                setSelectedTags,
-                onSubmit: handleSubmit,
-                onCancel,
-                isPending,
-                validationErrors,
-            }}
-        >
-            {children}
-        </TransactionFormContext.Provider>
-    );
+  const validateTransaction = (transaction: CreateTransactionDto) => {
+    const nameError = validateTransactionName(transaction.name);
+    const amountError = validateTransactionAmount(transaction.amount);
+    const payeeError = validatePayee(transaction.memberId);
+
+    return new Map<string, string | null>([
+      ["name", nameError],
+      ["amount", amountError],
+      ["payee", payeeError],
+    ]);
+  };
+
+  return (
+    <TransactionFormContext.Provider
+      value={{
+        transaction,
+        setName,
+        setAmount,
+        setPayee,
+        setSelectedTags,
+        onSubmit: handleSubmit,
+        onCancel,
+        isPending,
+        validationErrors,
+      }}
+    >
+      {children}
+    </TransactionFormContext.Provider>
+  );
 }
 
 interface SubmitButtonProps {
-    content: ReactNode;
+  content: ReactNode;
 }
 
 function SubmitButton({ content }: SubmitButtonProps) {
-    const { onSubmit, isPending } = useTransactionFormContext();
+  const { onSubmit, isPending } = useTransactionFormContext();
 
-    return (
-        <Button
-            variant="contained"
-            color="primary"
-            onClick={onSubmit}
-            loading={isPending}
-        >
-            <>{content}</>
-        </Button>
-    );
+  return (
+    <Button
+      variant="contained"
+      color="primary"
+      onClick={onSubmit}
+      loading={isPending}
+    >
+      <>{content}</>
+    </Button>
+  );
 }
 
 function CancelButton() {
-    const { onCancel: onCancelClick, isPending } = useTransactionFormContext();
+  const { onCancel: onCancelClick, isPending } = useTransactionFormContext();
 
-    return (
-        <Button
-            variant="outlined"
-            color="secondary"
-            onClick={onCancelClick}
-            disabled={isPending}
-        >
-            <>Cancel</>
-        </Button>
-    );
+  return (
+    <Button
+      variant="outlined"
+      color="secondary"
+      onClick={onCancelClick}
+      disabled={isPending}
+    >
+      <>Cancel</>
+    </Button>
+  );
 }
 
 interface TitleProps {
-    content: ReactNode | string;
+  content: ReactNode | string;
 }
 
 function Title(props: TitleProps) {
-    return <>{props.content}</>;
+  return <>{props.content}</>;
 }
 
 interface DescriptionProps {
-    content: ReactNode | string;
+  content: ReactNode | string;
 }
 
 function Description(props: DescriptionProps) {
-    return <>{props.content}</>;
+  return <>{props.content}</>;
 }
 
 const TransactionForm = {
-    Root,
-    Title,
-    Description,
-    CancelButton,
-    SubmitButton,
+  Root,
+  Title,
+  Description,
+  CancelButton,
+  SubmitButton,
 };
 
 export default TransactionForm;
