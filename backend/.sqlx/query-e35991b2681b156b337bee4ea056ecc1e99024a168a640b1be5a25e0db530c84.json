@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT id, public_id, name, created_at, updated_at \n        FROM splits\n        WHERE id IN (\n            SELECT split_id\n            FROM split_members\n            WHERE user_id = $1\n        )\n        ORDER BY created_at DESC\n        ",
+  "query": "\n        SELECT id, public_id, name, created_at, updated_at \n        FROM splits\n        WHERE id IN (\n            SELECT split_id\n            FROM split_visits\n            WHERE user_id = $1\n        )\n        ORDER BY created_at DESC\n        ",
   "describe": {
     "columns": [
       {
@@ -42,5 +42,5 @@
       false
     ]
   },
-  "hash": "cccf29744060b210789852f7bc2f9605f8f9bb6adf4882fc5da774351f7cd44f"
+  "hash": "e35991b2681b156b337bee4ea056ecc1e99024a168a640b1be5a25e0db530c84"
 }

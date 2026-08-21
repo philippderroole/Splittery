@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO split_visits (user_id, split_id, first_visited_at, last_visited_at, visit_count)\n        VALUES ($1, $2, NOW(), NOW(), 1)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "875d99f1bb39fa81d3f75a7d416607420502986d63541520ec5e6df04fb9aaed"
+}
