@@ -16,13 +16,20 @@ export async function getSplit(splitId: string): Promise<Split> {
         .then((response) => response.json());
 }
 
+export async function trackSplitVisit(splitId: string): Promise<void> {
+    await fetch(`${import.meta.env.VITE_INTERNAL_API_URL}/splits/${splitId}/visits`, {
+        method: "POST",
+        credentials: "include",
+    });
+}
+
 export async function createSplit(split: CreateSplitDto): Promise<Split> {
     return await fetch(`${import.meta.env.VITE_INTERNAL_API_URL}/splits`, {
         method: "POST",
+        credentials: "include",
         headers: {
             "Content-Type": "application/json",
         },
         body: JSON.stringify(split),
-        credentials: "include",
     }).then((response) => response.json());
 }

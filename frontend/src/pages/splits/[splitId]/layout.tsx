@@ -18,106 +18,121 @@ import SplitHeader from "./components/split-header";
 import NavTabs from "./components/nav-tabs";
 
 type SplitLayoutData = {
-    split: Split;
-    members: SerializedMember[];
-    transactions: SerializedTransaction[];
-    tags: Tag[];
+  split: Split;
+  members: SerializedMember[];
+  transactions: SerializedTransaction[];
+  tags: Tag[];
 };
 
 export default function SplitLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-    const { splitId } = useParams();
-    const [data, setData] = useState<SplitLayoutData | null>(null);
-    const [error, setError] = useState<string | null>(null);
+  const { splitId } = useParams();
+  const [data, setData] = useState<SplitLayoutData | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (!splitId) {
-            setError("Split not found");
-            return;
-        }
-
-        const currentSplitId: string = splitId;
-
-        let cancelled = false;
-
-        async function loadSplit() {
-            try {
-                const [split, tags, members, transactions] = await Promise.all([
-                    getSplit(currentSplitId),
-                    getTags(currentSplitId),
-                    getMembers(currentSplitId),
-                    getTransactions(currentSplitId),
-                ]);
-
-                if (!cancelled) {
-                    setData({ split, tags, members, transactions });
-                }
-            } catch (loadError) {
-                console.error("Error fetching split data:", loadError);
-                if (!cancelled) {
-                    setError("Split not found");
-                }
-            }
-        }
-
-        setData(null);
-        setError(null);
-        loadSplit();
-
-        return () => {
-            cancelled = true;
-        };
-    }, [splitId]);
-
-    if (error) {
-        return (
-            <Box sx={{ p: 4 }}>
-                <Typography variant="h4">{error}</Typography>
-            </Box>
-        );
+  useEffect(() => {
+    if (!splitId) {
+      setError("Split not found");
+      return;
     }
 
-    if (!data) {
-        return (
-            <Box
-                sx={{
-                    minHeight: "100dvh",
-                    display: "grid",
-                    placeItems: "center",
-                }}
-            >
-                <CircularProgress />
-            </Box>
-        );
+    const currentSplitId: string = splitId;
+
+    let cancelled = false;
+
+    async function loadSplit() {
+      try {
+        const [split, tags, members, transactions] = await Promise.all([
+          getSplit(currentSplitId),
+          getTags(currentSplitId),
+          getMembers(currentSplitId),
+          getTransactions(currentSplitId),
+        ]);
+
+        if (!cancelled) {
+          setData({ split, tags, members, transactions });
+        }
+      } catch (loadError) {
+        console.error("Error fetching split data:", loadError);
+        if (!cancelled) {
+          setError("Split not found");
+        }
+      }
     }
 
+    async function trackVisit() {
+      try {
+        await fetch(
+          `${import.meta.env.VITE_INTERNAL_API_URL}/splits/${currentSplitId}/visits`,
+          {
+            method: "POST",
+            credentials: "include",
+          },
+        );
+      } catch (visitError) {
+        console.error("Error tracking split visit:", visitError);
+      }
+    }
+
+    setData(null);
+    setError(null);
+    loadSplit();
+    trackVisit();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [splitId]);
+
+  if (error) {
     return (
-        <div>
-            <AccountMenu />
-            <SplitProvider split={data.split}>
-                <TransactionsProvider serializedTransactions={data.transactions}>
-                    <MembersProvider serializedMembers={data.members}>
-                        <TagsProvider tags={data.tags}>
-                            <SplitHeader />
-                            {children}
-                        </TagsProvider>
-                    </MembersProvider>
-                </TransactionsProvider>
-            </SplitProvider>
-            <div
-                style={{
-                    position: "fixed",
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    zIndex: 1000,
-                }}
-            >
-                <NavTabs />
-            </div>
-        </div>
+      <Box sx={{ p: 4 }}>
+        <Typography variant="h4">{error}</Typography>
+      </Box>
     );
+  }
+
+  if (!data) {
+    return (
+      <Box
+        sx={{
+          minHeight: "100dvh",
+          display: "grid",
+          placeItems: "center",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  return (
+    <div>
+      <AccountMenu />
+      <SplitProvider split={data.split}>
+        <TransactionsProvider serializedTransactions={data.transactions}>
+          <MembersProvider serializedMembers={data.members}>
+            <TagsProvider tags={data.tags}>
+              <SplitHeader />
+              {children}
+            </TagsProvider>
+          </MembersProvider>
+        </TransactionsProvider>
+      </SplitProvider>
+      <div
+        style={{
+          position: "fixed",
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 1000,
+        }}
+      >
+        <NavTabs />
+      </div>
+    </div>
+  );
 }

@@ -6,6 +6,8 @@ use uuid::Uuid;
 
 use crate::controllers::CreateUserRequest;
 use crate::models::user::{User, UserIdentity};
+use crate::services::access_token::AccessToken;
+use crate::services::{RefreshToken, login_user};
 
 pub enum RegisterError {
     AlreadyExists,
@@ -15,7 +17,7 @@ pub enum RegisterError {
 pub async fn register_user(
     pool: &PgPool,
     payload: CreateUserRequest,
-) -> anyhow::Result<User, RegisterError> {
+) -> anyhow::Result<(AccessToken, RefreshToken), RegisterError> {
     let mut tx = pool.begin().await.map_err(|e| {
         RegisterError::Unexpected(anyhow::anyhow!("Failed to start transaction: {}", e))
     })?;
@@ -71,5 +73,12 @@ pub async fn register_user(
         RegisterError::Unexpected(anyhow::anyhow!("Failed to commit transaction: {}", e))
     })?;
 
-    Ok(user)
+    login_user(pool, payload.email, payload.password, None)
+        .await
+        .map_err(|e| {
+            RegisterError::Unexpected(anyhow::anyhow!(
+                "Failed to log in user after registration: {:?}",
+                e
+            ))
+        })
 }

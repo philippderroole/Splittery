@@ -5,7 +5,9 @@ use argon2::{
 use chrono::{DateTime, Utc};
 use cookie::{Cookie, SameSite};
 use rand::{RngExt, distr::Alphanumeric};
+use serde::Serialize;
 
+#[derive(Serialize)]
 pub struct RefreshToken {
     pub token: String,
     pub token_expires_at: Option<DateTime<Utc>>,

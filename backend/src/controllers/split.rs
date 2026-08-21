@@ -5,6 +5,7 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
+use uuid::Uuid;
 
 use crate::{middleware::UserId, models::Split, services};
 
@@ -74,4 +75,22 @@ pub async fn get_split(
     };
 
     Ok(Json(SplitResponse::from(split)))
+}
+
+pub async fn track_split_visit(
+    State(pool): State<PgPool>,
+    UserId(user_id): UserId,
+    Path(split_id): Path<Uuid>,
+) -> Result<StatusCode, StatusCode> {
+    services::track_split_visit(&pool, user_id, split_id)
+        .await
+        .map_err(|e| match e {
+            services::TrackSplitVisitError::SplitNotFoundOrNoAccess => StatusCode::NOT_FOUND,
+            services::TrackSplitVisitError::Unexpected(err) => {
+                log::error!("Failed to track split visit: {err}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+        })?;
+
+    Ok(StatusCode::NO_CONTENT)
 }

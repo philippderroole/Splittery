@@ -1,6 +1,6 @@
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { Route, Routes } from "react-router-dom";
-import HomePage from "./pages/home-page";
+import LoginPage from "./pages/login-page";
 import SplitsPage from "./pages/splits/split-page";
 import SplitBalancesPage from "./pages/splits/[splitId]/balances/balances-page";
 import SplitTagsPage from "./pages/splits/[splitId]/tags/page";
@@ -11,6 +11,7 @@ import { SplitsProvider } from "./providers/splits-provider";
 import PrivateRoute from "./components/private-route";
 import { AuthProvider } from "./providers/auth-provider";
 import SplitLayout from "./pages/splits/[splitId]/layout";
+import LandingPage from "./pages/landing-page";
 
 function AppLoading() {
     return (
@@ -30,7 +31,8 @@ export default function App() {
     return (
         <AuthProvider>
             <Routes>
-                <Route path="/" element={<HomePage />} />
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<LoginPage />} />
                 <Route element={<PrivateRoute />}>
                     <Route path="/splits" element={
                         <SplitsProvider>

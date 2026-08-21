@@ -10,6 +10,7 @@ use crate::{
     services::{RefreshToken, access_token::AccessToken},
 };
 
+#[derive(Debug)]
 pub enum LoginError {
     UserNotFound,
     InvalidPassword,

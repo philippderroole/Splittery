@@ -1,9 +1,11 @@
 use chrono::Utc;
 use cookie::{Cookie, SameSite};
 use jsonwebtoken::{EncodingKey, Header, encode};
+use serde::Serialize;
 
 use crate::middleware::token_validation::Claims;
 
+#[derive(Serialize)]
 pub struct AccessToken {
     pub token: String,
     pub token_expires_at: chrono::DateTime<Utc>,
