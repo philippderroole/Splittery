@@ -1,9 +1,4 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-    name: splittery
----
-apiVersion: v1
-kind: Namespace
-metadata:
-    name: powersync
+  name: splittery
