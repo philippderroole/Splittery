@@ -62,10 +62,12 @@ async function fetchWithRevalidation(
   });
 }
 
-function redirectToLoginOnUnauthorized(res: Response): void {
+function redirectToLoginOnUnauthorized(res: Response, url: string): void {
   if (
     res.status === 401 &&
     window.location.pathname !== "/" &&
+    window.location.pathname !== "/login" &&
+    !url.endsWith("/auth/me") &&
     !isRedirectingToLogin
   ) {
     isRedirectingToLogin = true;
@@ -84,7 +86,7 @@ export async function GET(url: string, init?: RequestInit): Promise<any> {
   });
 
   if (!res.ok) {
-    redirectToLoginOnUnauthorized(res);
+    redirectToLoginOnUnauthorized(res, url);
     console.error(
       "Failed fetching data:",
       res.status,
@@ -116,7 +118,7 @@ export async function POST(url: string, init?: RequestInit): Promise<any> {
   });
 
   if (!res.ok) {
-    redirectToLoginOnUnauthorized(res);
+    redirectToLoginOnUnauthorized(res, url);
     console.error(
       "Failed posting data:",
       res.status,
@@ -148,7 +150,7 @@ export async function PUT(url: string, init?: RequestInit): Promise<any> {
   });
 
   if (!res.ok) {
-    redirectToLoginOnUnauthorized(res);
+    redirectToLoginOnUnauthorized(res, url);
     console.error(
       "Failed putting data:",
       res.status,
@@ -179,7 +181,7 @@ export async function DELETE(url: string, init?: RequestInit): Promise<void> {
   });
 
   if (!res.ok) {
-    redirectToLoginOnUnauthorized(res);
+    redirectToLoginOnUnauthorized(res, url);
     console.error(
       "Failed deleting data:",
       res.status,
