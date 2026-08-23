@@ -3,15 +3,16 @@ import { Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/login-page";
 import SplitsPage from "./pages/splits/split-page";
 import SplitBalancesPage from "./pages/splits/[splitId]/balances/balances-page";
-import SplitTagsPage from "./pages/splits/[splitId]/tags/page";
-import SplitTransactionsPage from "./pages/splits/[splitId]/transactions/page";
+import SplitTagsPage from "./pages/splits/[splitId]/tags/tags-page";
+import SplitTransactionsPage from "./pages/splits/[splitId]/transactions/transactions-page";
 import SplitTransactionLayout from "./pages/splits/[splitId]/transactions/[transactionId]/layout";
-import SplitTransactionPage from "./pages/splits/[splitId]/transactions/[transactionId]/page";
+import SplitTransactionPage from "./pages/splits/[splitId]/transactions/[transactionId]/transaction-page";
 import { SplitsProvider } from "./providers/splits-provider";
 import PrivateRoute from "./components/private-route";
 import { AuthProvider } from "./providers/auth-provider";
 import SplitLayout from "./pages/splits/[splitId]/layout";
 import LandingPage from "./pages/landing-page";
+import SettlePage from "./pages/splits/[splitId]/settle/settle-page";
 
 function AppLoading() {
   return (
@@ -63,6 +64,14 @@ export default function App() {
             element={
               <SplitLayout>
                 <SplitTagsPage />
+              </SplitLayout>
+            }
+          />
+          <Route
+            path="/splits/:splitId/settle"
+            element={
+              <SplitLayout>
+                <SettlePage />
               </SplitLayout>
             }
           />

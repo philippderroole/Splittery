@@ -10,9 +10,12 @@ import { useSplit } from "@/providers/split-provider";
 import { useTags } from "@/providers/tag-provider";
 import { createTransaction } from "@/service/transaction-service";
 import { CreateTransactionDto } from "@/utils/transaction";
+import PaymentIcon from "@mui/icons-material/Payment";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import {
   Alert,
+  Box,
+  Button,
   DialogActions,
   DialogContent,
   DialogContentText,
@@ -20,6 +23,7 @@ import {
   Fab,
   MenuItem,
   TextField,
+  Tooltip,
 } from "@mui/material";
 import React, { useState } from "react";
 
@@ -162,6 +166,159 @@ export function CreateTransactionDialogButton() {
       </Fab>
       <CreateTransactionDialog open={open} onClose={closeDialog} />
     </>
+  );
+}
+
+export function CreateSettlementDialogButton() {
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <>
+      <Tooltip title="Record repayment">
+        <Fab color="secondary" onClick={() => setOpen(true)}>
+          <PaymentIcon />
+        </Fab>
+      </Tooltip>
+      <CreateSettlementDialog open={open} onClose={() => setOpen(false)} />
+    </>
+  );
+}
+
+interface CreateSettlementDialogProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+function CreateSettlementDialog({
+  open,
+  onClose,
+}: CreateSettlementDialogProps) {
+  const split = useSplit();
+  const members = useMembers();
+  const tags = useTags();
+  const [payerId, setPayerId] = useState("");
+  const [recipientId, setRecipientId] = useState("");
+  const [amount, setAmount] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, setPending] = useState(false);
+
+  const reset = () => {
+    setPayerId("");
+    setRecipientId("");
+    setAmount("");
+    setError(null);
+    setPending(false);
+  };
+
+  const close = () => {
+    reset();
+    onClose();
+  };
+
+  const handleSubmit = async () => {
+    const amountInCents = Math.round(Number(amount) * 100);
+    const recipient = members.find((member) => member.id === recipientId);
+    const recipientTag = tags.find(
+      (tag) =>
+        tag.name === recipient?.name && recipient.tagIds.includes(tag.id),
+    );
+
+    if (!payerId || !recipientId || payerId === recipientId) {
+      setError("Choose two different members.");
+      return;
+    }
+    if (!Number.isFinite(amountInCents) || amountInCents <= 0) {
+      setError("Enter a repayment amount greater than zero.");
+      return;
+    }
+    if (!recipientTag) {
+      setError("Could not find the recipient's member tag.");
+      return;
+    }
+
+    setPending(true);
+    try {
+      await createTransaction(split.id, {
+        name: "Repayment",
+        amount: amountInCents,
+        memberId: payerId,
+        tagIds: [recipientTag.id],
+      });
+      close();
+    } catch {
+      setError("Failed to record repayment. Please try again.");
+      setPending(false);
+    }
+  };
+
+  return (
+    <MobileDialog open={open} onClose={close}>
+      <DialogTitle>Record repayment</DialogTitle>
+      <DialogContent sx={{ paddingBottom: 0 }}>
+        <DialogContentText>
+          Record money paid from one member to another. This reduces the
+          recipient's outstanding share.
+        </DialogContentText>
+        <Box sx={{ mt: 2 }}>
+          <TextField
+            required
+            select
+            margin="dense"
+            label="Paid by"
+            value={payerId}
+            onChange={(event) => setPayerId(event.target.value)}
+            fullWidth
+            disabled={isPending}
+          >
+            {members.map((member) => (
+              <MenuItem key={member.id} value={member.id}>
+                {member.name}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            required
+            select
+            margin="dense"
+            label="Paid to"
+            value={recipientId}
+            onChange={(event) => setRecipientId(event.target.value)}
+            fullWidth
+            disabled={isPending}
+          >
+            {members.map((member) => (
+              <MenuItem key={member.id} value={member.id}>
+                {member.name}
+              </MenuItem>
+            ))}
+          </TextField>
+          <TextField
+            required
+            margin="dense"
+            label="Amount"
+            type="number"
+            value={amount}
+            onChange={(event) => setAmount(event.target.value)}
+            inputProps={{ min: 0, step: 0.01 }}
+            fullWidth
+            disabled={isPending}
+          />
+        </Box>
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button variant="outlined" onClick={close} disabled={isPending}>
+          Cancel
+        </Button>
+        <Button variant="contained" onClick={handleSubmit} loading={isPending}>
+          Record
+        </Button>
+      </DialogActions>
+    </MobileDialog>
   );
 }
 

@@ -3,6 +3,7 @@
 import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import CurrencyExchangeIcon from "@mui/icons-material/CurrencyExchange";
 import { BottomNavigation, BottomNavigationAction } from "@mui/material";
 import { Link, useLocation, useParams } from "react-router-dom";
 import React from "react";
@@ -37,11 +38,11 @@ export default function NavTabs() {
                 label="Transactions"
                 href={`${basePath}/transactions`}
             />
-            {/* <BottomNavigationLink
+            <BottomNavigationLink
                 icon={<CurrencyExchangeIcon />}
                 label="Settle"
                 href={`${basePath}/settle`}
-            /> */}
+            />
         </BottomNavigation>
     );
 }

@@ -1,4 +1,7 @@
-import { CreateTransactionDialogButton } from "./components/create-transaction-dialog";
+import {
+    CreateSettlementDialogButton,
+    CreateTransactionDialogButton,
+} from "./components/create-transaction-dialog";
 import TransactionList from "./components/transaction-list";
 
 export default function TransactionGroupListPage() {
@@ -14,7 +17,10 @@ export default function TransactionGroupListPage() {
                     zIndex: 1200,
                 }}
             >
-                <CreateTransactionDialogButton />
+                <div style={{ display: "flex", gap: "1rem" }}>
+                    <CreateSettlementDialogButton />
+                    <CreateTransactionDialogButton />
+                </div>
             </div>
         </>
     );
