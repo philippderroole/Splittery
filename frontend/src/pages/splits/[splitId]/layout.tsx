@@ -6,7 +6,7 @@ import { SplitProvider } from "@/providers/split-provider";
 import { TagsProvider } from "@/providers/tag-provider";
 import { TransactionsProvider } from "@/providers/transactions-provider";
 import { getMembers } from "@/service/member-service";
-import { getSplit } from "@/service/split-service";
+import { getSplit, trackSplitVisit } from "@/service/split-service";
 import { getTags } from "@/service/tag-service";
 import { getTransactions } from "@/service/transaction-service";
 import { Split } from "@/utils/split";
@@ -65,13 +65,7 @@ export default function SplitLayout({
 
     async function trackVisit() {
       try {
-        await fetch(
-          `${import.meta.env.VITE_INTERNAL_API_URL}/splits/${currentSplitId}/visits`,
-          {
-            method: "POST",
-            credentials: "include",
-          },
-        );
+        await trackSplitVisit(currentSplitId);
       } catch (visitError) {
         console.error("Error tracking split visit:", visitError);
       }
