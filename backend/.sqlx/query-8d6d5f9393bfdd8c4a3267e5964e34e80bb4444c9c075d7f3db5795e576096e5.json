@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            COALESCE(expenses.expenses, 0) - COALESCE(shares.total_share, 0) -\n            COALESCE(repayments.received, 0) AS balance\n        FROM split_members AS member\n        LEFT JOIN member_expenses_view AS expenses\n            ON expenses.member_id = member.id AND expenses.split_id = $1\n        LEFT JOIN member_shares AS shares ON shares.member_id = member.id\n        LEFT JOIN (\n            SELECT member_tags.member_id, SUM(transactions.amount) AS received\n            FROM transactions\n            JOIN transaction_tags ON transaction_tags.transaction_id = transactions.id\n            JOIN member_tags ON member_tags.tag_id = transaction_tags.tag_id\n            WHERE transactions.split_id = $1 AND transactions.name = 'Repayment'\n            GROUP BY member_tags.member_id\n        ) AS repayments ON repayments.member_id = member.id\n        WHERE member.id = $2\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "balance",
+        "type_info": "Numeric"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "8d6d5f9393bfdd8c4a3267e5964e34e80bb4444c9c075d7f3db5795e576096e5"
+}

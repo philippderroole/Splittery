@@ -233,9 +233,20 @@ pub async fn get_member_amount_spent(
 ) -> Result<BigDecimal> {
     let query_result = sqlx::query!(
         "
-        SELECT COALESCE(expenses, 0) AS expenses
-        FROM member_expenses_view
-        WHERE split_id = $1 AND member_id = $2
+        SELECT
+            COALESCE(expenses.expenses, 0) - COALESCE(repayments.received, 0) AS expenses
+        FROM split_members AS member
+        LEFT JOIN member_expenses_view AS expenses
+            ON expenses.member_id = member.id AND expenses.split_id = $1
+        LEFT JOIN (
+            SELECT member_tags.member_id, SUM(transactions.amount) AS received
+            FROM transactions
+            JOIN transaction_tags ON transaction_tags.transaction_id = transactions.id
+            JOIN member_tags ON member_tags.tag_id = transaction_tags.tag_id
+            WHERE transactions.split_id = $1 AND transactions.name = 'Repayment'
+            GROUP BY member_tags.member_id
+        ) AS repayments ON repayments.member_id = member.id
+        WHERE member.split_id = $1 AND member.id = $2
         ",
         split_id,
         member_id
@@ -266,4 +277,38 @@ pub async fn get_member_share(pool: &PgPool, member_id: Uuid) -> Result<BigDecim
         None => BigDecimal::from(0),
     })
     .map_err(|e| anyhow!("Failed to get member share: {}", e))
+}
+
+pub async fn get_member_balance(
+    pool: &PgPool,
+    split_id: Uuid,
+    member_id: Uuid,
+) -> Result<BigDecimal> {
+    let result = sqlx::query!(
+        r#"
+        SELECT
+            COALESCE(expenses.expenses, 0) - COALESCE(shares.total_share, 0) -
+            COALESCE(repayments.received, 0) AS balance
+        FROM split_members AS member
+        LEFT JOIN member_expenses_view AS expenses
+            ON expenses.member_id = member.id AND expenses.split_id = $1
+        LEFT JOIN member_shares AS shares ON shares.member_id = member.id
+        LEFT JOIN (
+            SELECT member_tags.member_id, SUM(transactions.amount) AS received
+            FROM transactions
+            JOIN transaction_tags ON transaction_tags.transaction_id = transactions.id
+            JOIN member_tags ON member_tags.tag_id = transaction_tags.tag_id
+            WHERE transactions.split_id = $1 AND transactions.name = 'Repayment'
+            GROUP BY member_tags.member_id
+        ) AS repayments ON repayments.member_id = member.id
+        WHERE member.id = $2
+        "#,
+        split_id,
+        member_id
+    )
+    .fetch_one(pool)
+    .await
+    .map_err(|e| anyhow!("Failed to get member balance: {}", e))?;
+
+    Ok(result.balance.unwrap_or_default())
 }

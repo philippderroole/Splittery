@@ -31,7 +31,7 @@ export default function SettlePage() {
   const settlements = calculateSettlements(
     members.map((member) => ({
       id: member.id,
-      balance: member.amountSpent.getAmount() - member.amountShare.getAmount(),
+      balance: member.amountBalance.getAmount(),
     })),
   );
   const membersById = new Map(members.map((member) => [member.id, member]));

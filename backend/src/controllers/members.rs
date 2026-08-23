@@ -39,19 +39,28 @@ pub struct MemberResponse {
     pub amount_spent: i64,
     #[serde(rename = "amountShare")]
     pub amount_share: i64,
+    #[serde(rename = "amountBalance")]
+    pub amount_balance: i64,
     pub r#type: MemberTypeResponse,
     #[serde(rename = "tagIds")]
     pub public_tag_ids: Vec<String>,
 }
 
 impl MemberResponse {
-    fn from(member: Member, public_split_id: &str, amount_spent: i64, amount_share: i64) -> Self {
+    fn from(
+        member: Member,
+        public_split_id: &str,
+        amount_spent: i64,
+        amount_share: i64,
+        amount_balance: i64,
+    ) -> Self {
         Self {
             public_id: member.public_id,
             name: member.name,
             split_id: public_split_id.to_string(),
             amount_spent,
             amount_share,
+            amount_balance,
             r#type: member.r#type.into(),
             public_tag_ids: member.tags.into_iter().map(|tag| tag.public_id).collect(),
         }
@@ -87,12 +96,19 @@ pub async fn get_all_members(
                 log::error!("Failed to get member share, {e}");
                 StatusCode::INTERNAL_SERVER_ERROR
             })?;
+        let amount_balance = services::get_member_balance(&pool, split_id, member.id)
+            .await
+            .map_err(|e| {
+                log::error!("Failed to get member balance, {e}");
+                StatusCode::INTERNAL_SERVER_ERROR
+            })?;
 
         let member_response = MemberResponse::from(
             member,
             &public_split_id,
             amount_spent.to_i64().unwrap(),
             amount_share.to_i64().unwrap(),
+            amount_balance.to_i64().unwrap(),
         );
 
         members_with_tags_response.push(member_response);
@@ -126,7 +142,7 @@ pub async fn create_member(
             }
         })?;
 
-    let response = MemberResponse::from(member.clone(), &public_split_id, 0, 0);
+    let response = MemberResponse::from(member.clone(), &public_split_id, 0, 0, 0);
 
     controllers::broadcast_split_update(
         &public_split_id,
@@ -177,7 +193,7 @@ pub async fn edit_member(
     controllers::broadcast_split_update(
         &public_split_id,
         &SplitUpdateMessage::MemberUpdated {
-            member: MemberResponse::from(member.clone(), &public_split_id, 0, 0),
+            member: MemberResponse::from(member.clone(), &public_split_id, 0, 0, 0),
             tags: member
                 .tags
                 .clone()
@@ -188,7 +204,13 @@ pub async fn edit_member(
     )
     .await;
 
-    Ok(Json(MemberResponse::from(member, &public_split_id, 0, 0)))
+    Ok(Json(MemberResponse::from(
+        member,
+        &public_split_id,
+        0,
+        0,
+        0,
+    )))
 }
 
 pub async fn delete_member(
