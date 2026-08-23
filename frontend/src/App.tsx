@@ -14,83 +14,86 @@ import SplitLayout from "./pages/splits/[splitId]/layout";
 import LandingPage from "./pages/landing-page";
 
 function AppLoading() {
-    return (
-        <Box
-            sx={{
-                minHeight: "100dvh",
-                display: "grid",
-                placeItems: "center",
-            }}
-        >
-            <CircularProgress />
-        </Box>
-    );
+  return (
+    <Box
+      sx={{
+        minHeight: "100dvh",
+        display: "grid",
+        placeItems: "center",
+      }}
+    >
+      <CircularProgress />
+    </Box>
+  );
 }
 
 export default function App() {
-    return (
-        <AuthProvider>
-            <Routes>
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route element={<PrivateRoute />}>
-                    <Route path="/splits" element={
-                        <SplitsProvider>
-                            <SplitsPage />
-                        </SplitsProvider>
-                    } />
-                </Route>
-                <Route
-                    path="/splits/:splitId"
-                    element={
-                        <SplitLayout>
-                            <AppLoading />
-                        </SplitLayout>
-                    }
-                />
-                <Route
-                    path="/splits/:splitId/balances"
-                    element={
-                        <SplitLayout>
-                            <SplitBalancesPage />
-                        </SplitLayout>
-                    }
-                />
-                <Route
-                    path="/splits/:splitId/tags"
-                    element={
-                        <SplitLayout>
-                            <SplitTagsPage />
-                        </SplitLayout>
-                    }
-                />
-                <Route
-                    path="/splits/:splitId/transactions"
-                    element={
-                        <SplitLayout>
-                            <SplitTransactionsPage />
-                        </SplitLayout>
-                    }
-                />
-                <Route
-                    path="/splits/:splitId/transactions/:transactionId"
-                    element={
-                        <SplitLayout>
-                            <SplitTransactionLayout>
-                                <SplitTransactionPage />
-                            </SplitTransactionLayout>
-                        </SplitLayout>
-                    }
-                />
-                <Route
-                    path="*"
-                    element={
-                        <Box sx={{ p: 4 }}>
-                            <Typography variant="h4">Page not found</Typography>
-                        </Box>
-                    }
-                />
-            </Routes>
-        </AuthProvider>
-    );
+  return (
+    <AuthProvider>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route element={<PrivateRoute />}>
+          <Route
+            path="/splits"
+            element={
+              <SplitsProvider>
+                <SplitsPage />
+              </SplitsProvider>
+            }
+          />
+          <Route
+            path="/splits/:splitId"
+            element={
+              <SplitLayout>
+                <AppLoading />
+              </SplitLayout>
+            }
+          />
+          <Route
+            path="/splits/:splitId/balances"
+            element={
+              <SplitLayout>
+                <SplitBalancesPage />
+              </SplitLayout>
+            }
+          />
+          <Route
+            path="/splits/:splitId/tags"
+            element={
+              <SplitLayout>
+                <SplitTagsPage />
+              </SplitLayout>
+            }
+          />
+          <Route
+            path="/splits/:splitId/transactions"
+            element={
+              <SplitLayout>
+                <SplitTransactionsPage />
+              </SplitLayout>
+            }
+          />
+          <Route
+            path="/splits/:splitId/transactions/:transactionId"
+            element={
+              <SplitLayout>
+                <SplitTransactionLayout>
+                  <SplitTransactionPage />
+                </SplitTransactionLayout>
+              </SplitLayout>
+            }
+          />
+        </Route>
+        <Route
+          path="*"
+          element={
+            <Box sx={{ p: 4 }}>
+              <Typography variant="h4">Page not found</Typography>
+            </Box>
+          }
+        />
+      </Routes>
+    </AuthProvider>
+  );
 }

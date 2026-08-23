@@ -8,11 +8,12 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/providers/auth-provider";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isAuthenticated, loginUser, registerUser, registerAnonymousUser } =
     useAuth();
   const [mode, setMode] = useState<"register" | "login" | "guest">("register");
@@ -22,12 +23,18 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/splits", { replace: true });
+      redirectAfterAuth();
     }
   }, [isAuthenticated]);
 
   const redirectAfterAuth = () => {
-    navigate("/splits", { replace: true });
+    const destination = location.state?.from;
+    navigate(
+      destination
+        ? `${destination.pathname}${destination.search}${destination.hash}`
+        : "/splits",
+      { replace: true },
+    );
   };
 
   const handleSubmit = async () => {
