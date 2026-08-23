@@ -10,15 +10,15 @@ import { Entry } from "@/utils/entry";
 import { Money } from "@/utils/money";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import {
-    Avatar,
-    Box,
-    Button,
-    IconButton,
-    List,
-    ListItem,
-    ListItemButton,
-    ListItemText,
-    Typography,
+  Avatar,
+  Box,
+  Button,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Typography,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import { useState } from "react";
@@ -27,176 +27,170 @@ import { EditEntryDialog } from "./components/edit-entry-dialog";
 import { EditTransactionDialog } from "./components/edit-transaction-dialog";
 
 export default function TransactionPage() {
-    const split = useSplit();
-    const transaction = useTransaction();
+  const split = useSplit();
+  const transaction = useTransaction();
 
-    const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
-    if (!transaction) {
-        return <Typography>Transaction not found</Typography>;
-    }
+  if (!transaction) {
+    return <Typography>Transaction not found</Typography>;
+  }
 
-    const openDialog = () => {
-        setOpen(true);
-    };
+  const openDialog = () => {
+    setOpen(true);
+  };
 
-    const closeDialog = () => {
-        setOpen(false);
-    };
+  const closeDialog = () => {
+    setOpen(false);
+  };
 
-    const remainingAmount: Money = transaction.entries.reduce(
-        (acc, entry) => acc.subtract(entry.amount),
-        transaction.amount
-    );
+  const remainingAmount: Money = transaction.entries.reduce(
+    (acc, entry) => acc.subtract(entry.amount),
+    transaction.amount,
+  );
 
-    return (
-        <>
-            <Link to={`/splits/${split.id}/transactions`}>
-                <IconButton>
-                    <ArrowBackIosIcon />
-                </IconButton>
-            </Link>
-            <TransactionHeader onClick={openDialog} />
-            <List>
-                {transaction.entries.map((entry) => (
-                    <EntryListItem key={entry.id} entry={entry}></EntryListItem>
-                ))}
-                <RemainingEntryListItem
-                    remainingAmount={remainingAmount}
-                    selectedTagIds={transaction.tagIds}
-                    onClick={openDialog}
-                />
-                <ListItem sx={{ minHeight: "140px" }} />
-            </List>
-            <CreateEntryDialogFAB />
-            <EditTransactionDialog
-                open={open}
-                onClose={closeDialog}
-                transaction={transaction}
-            />
-        </>
-    );
+  return (
+    <>
+      <Link to={`/splits/${split.id}/transactions`}>
+        <IconButton>
+          <ArrowBackIosIcon />
+        </IconButton>
+      </Link>
+      <TransactionHeader onClick={openDialog} />
+      <List>
+        {transaction.entries.map((entry) => (
+          <EntryListItem key={entry.id} entry={entry}></EntryListItem>
+        ))}
+        <RemainingEntryListItem
+          remainingAmount={remainingAmount}
+          selectedTagIds={transaction.tagIds}
+          onClick={openDialog}
+        />
+        <ListItem sx={{ minHeight: "140px" }} />
+      </List>
+      <CreateEntryDialogFAB />
+      <EditTransactionDialog
+        open={open}
+        onClose={closeDialog}
+        transaction={transaction}
+      />
+    </>
+  );
 }
 
 interface TransactionHeaderProps {
-    onClick?: () => void;
+  onClick?: () => void;
 }
 
 function TransactionHeader({ onClick }: TransactionHeaderProps) {
-    const transaction = useTransaction();
-    const members = useMembers();
+  const transaction = useTransaction();
+  const members = useMembers();
 
-    const payer = members.find((member) => member.id === transaction.memberId)!;
-    return (
-        <>
-            <Button
-                onClick={onClick}
-                sx={{
-                    width: "100%",
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    flexGrow: 1,
-                    textTransform: "none",
-                    color: "inherit",
-                    padding: 2,
-                }}
-            >
-                <Box
-                    sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "start",
-                        justifyContent: "start",
-                    }}
-                >
-                    <Typography variant="caption" color="textSecondary">
-                        {payer.name} payed
-                    </Typography>
-                    <Typography variant="h4">
-                        {transaction.amount.toString()}
-                    </Typography>
-                    <Typography variant="body1">{transaction.name}</Typography>
-                    <Typography variant="caption">
-                        {getFormattedDateLong(transaction.executedAt)}
-                    </Typography>
-                </Box>
-                <Avatar />
-            </Button>
-        </>
-    );
+  const payer = members.find((member) => member.id === transaction.memberId)!;
+  return (
+    <>
+      <Button
+        onClick={onClick}
+        sx={{
+          width: "100%",
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexGrow: 1,
+          textTransform: "none",
+          color: "inherit",
+          padding: 2,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "start",
+            justifyContent: "start",
+          }}
+        >
+          <Typography variant="caption" color="textSecondary">
+            {payer.name} payed
+          </Typography>
+          <Typography variant="h4">{transaction.amount.toString()}</Typography>
+          <Typography variant="body1">{transaction.name}</Typography>
+          <Typography variant="caption" sx={{ ml: 1 }}>
+            {getFormattedDateLong(transaction.executedAt)}
+          </Typography>
+        </Box>
+        <Avatar />
+      </Button>
+    </>
+  );
 }
 
 interface RemainingEntryListItemProps {
-    remainingAmount: Money;
-    selectedTagIds: string[];
-    onClick?: () => void;
+  remainingAmount: Money;
+  selectedTagIds: string[];
+  onClick?: () => void;
 }
 
 function RemainingEntryListItem({
-    remainingAmount,
-    selectedTagIds,
-    onClick,
+  remainingAmount,
+  selectedTagIds,
+  onClick,
 }: RemainingEntryListItemProps) {
-    return (
-        <ListItemButton onClick={onClick}>
-            <ListItem
-                disablePadding
-                secondaryAction={
-                    <Typography>{remainingAmount.toString()}</Typography>
-                }
-            >
-                <ListItemText
-                    primary="Remaining"
-                    secondary={<TagChips selectedTagIds={selectedTagIds} />}
-                />
-            </ListItem>
-        </ListItemButton>
-    );
+  return (
+    <ListItemButton onClick={onClick}>
+      <ListItem
+        disablePadding
+        secondaryAction={<Typography>{remainingAmount.toString()}</Typography>}
+      >
+        <ListItemText
+          primary="Remaining"
+          secondary={<TagChips selectedTagIds={selectedTagIds} />}
+        />
+      </ListItem>
+    </ListItemButton>
+  );
 }
 
 interface EntryItemProps {
-    entry: Entry;
+  entry: Entry;
 }
 
 function EntryListItem(props: EntryItemProps) {
-    const { entry } = props;
+  const { entry } = props;
 
-    const tags = useTags();
-    const transaction = useTransaction();
+  const tags = useTags();
+  const transaction = useTransaction();
 
-    const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
-    const openDialog = () => {
-        setOpen(true);
-    };
+  const openDialog = () => {
+    setOpen(true);
+  };
 
-    const closeDialog = () => {
-        setOpen(false);
-    };
+  const closeDialog = () => {
+    setOpen(false);
+  };
 
-    return (
-        <>
-            <EditEntryDialog
-                entry={entry}
-                transaction={transaction}
-                open={open}
-                onClose={closeDialog}
-            />
-            <ListItemButton onClick={openDialog}>
-                <ListItem
-                    disablePadding
-                    secondaryAction={
-                        <Typography>{entry.amount.toString()}</Typography>
-                    }
-                >
-                    <ListItemText
-                        primary={entry.name}
-                        secondary={<TagChips selectedTagIds={entry.tagIds} />}
-                    />
-                </ListItem>
-            </ListItemButton>
-        </>
-    );
+  return (
+    <>
+      <EditEntryDialog
+        entry={entry}
+        transaction={transaction}
+        open={open}
+        onClose={closeDialog}
+      />
+      <ListItemButton onClick={openDialog}>
+        <ListItem
+          disablePadding
+          secondaryAction={<Typography>{entry.amount.toString()}</Typography>}
+        >
+          <ListItemText
+            primary={entry.name}
+            secondary={<TagChips selectedTagIds={entry.tagIds} />}
+          />
+        </ListItem>
+      </ListItemButton>
+    </>
+  );
 }

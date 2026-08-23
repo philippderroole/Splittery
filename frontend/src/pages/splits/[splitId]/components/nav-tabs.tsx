@@ -22,7 +22,11 @@ export default function NavTabs() {
   const currentTab = tabPaths.findIndex((p) => pathname.startsWith(p));
 
   return (
-    <BottomNavigation showLabels value={currentTab}>
+    <BottomNavigation
+      showLabels
+      value={currentTab}
+      sx={{ width: "100%", bgcolor: "background.paper" }}
+    >
       <BottomNavigationLink
         icon={<AccountBalanceWalletIcon />}
         label="Balances"

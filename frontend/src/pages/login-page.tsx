@@ -89,8 +89,8 @@ export default function LoginPage() {
         minHeight: "100dvh",
         display: "grid",
         placeItems: "center",
-        bgcolor: "#f5f7fb",
-        p: 3,
+        bgcolor: "background.default",
+        p: { xs: 2, sm: 3 },
       }}
     >
       <Paper
@@ -99,7 +99,7 @@ export default function LoginPage() {
           width: "100%",
           maxWidth: 480,
           p: { xs: 3, sm: 4 },
-          borderRadius: 3,
+          borderRadius: { xs: 2, sm: 3 },
         }}
       >
         <Stack spacing={3}>

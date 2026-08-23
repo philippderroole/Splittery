@@ -104,13 +104,20 @@ export default function SplitLayout({
   }
 
   return (
-    <div>
+    <Box
+      sx={{
+        minHeight: "100dvh",
+        pb: "calc(76px + env(safe-area-inset-bottom))",
+      }}
+    >
       <AccountMenu />
       <SplitProvider split={data.split}>
         <TransactionsProvider serializedTransactions={data.transactions}>
           <MembersProvider serializedMembers={data.members}>
             <TagsProvider tags={data.tags}>
-              <SplitHeader />
+              <Box sx={{ px: { xs: 2, sm: 4 }, pt: { xs: 2, sm: 3 }, pb: 1 }}>
+                <SplitHeader />
+              </Box>
               {children}
             </TagsProvider>
           </MembersProvider>
@@ -127,6 +134,6 @@ export default function SplitLayout({
       >
         <NavTabs />
       </div>
-    </div>
+    </Box>
   );
 }
