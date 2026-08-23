@@ -1,116 +1,118 @@
-"use client";
-
 import { TagChips } from "@/components/tag-chips";
 import { useMembers } from "@/providers/member-provider";
 import { Member } from "@/utils/user";
 import {
-    Avatar,
-    Box,
-    List,
-    ListItem,
-    ListItemAvatar,
-    ListItemButton,
-    ListItemText,
-    Typography,
+  Avatar,
+  Box,
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemButton,
+  ListItemText,
+  Typography,
 } from "@mui/material";
 import { useState } from "react";
 import { CreateMemberDialogFAB } from "./components/create-member-dialog-fab";
 import { EditMemberDialog } from "./components/edit-member-dialog";
 
 export default function SplitPage() {
-    const members = useMembers();
+  const members = useMembers();
 
-    return (
-        <div
-            style={{
-                display: "flex",
-                flexDirection: "column",
-            }}
-        >
-            <List sx={{ width: "100%", padding: 0 }}>
-                {members.map((member) => {
-                    return <SplitUserItem member={member} key={member.id} />;
-                })}
-                <ListItem sx={{ minHeight: "140px" }} />
-            </List>
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <List sx={{ width: "100%", padding: 0 }}>
+        {members.map((member) => {
+          return <SplitUserItem member={member} key={member.id} />;
+        })}
+        <ListItem sx={{ minHeight: "140px" }} />
+      </List>
 
-            <CreateMemberDialogFAB />
-        </div>
-    );
+      <CreateMemberDialogFAB />
+    </div>
+  );
 }
 
 interface SplitUserItemProps {
-    member: Member;
+  member: Member;
 }
 
 function SplitUserItem({ member }: SplitUserItemProps) {
-    const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
 
-    const handleOpen = () => {
-        setOpen(true);
-    };
+  const handleOpen = () => {
+    setOpen(true);
+  };
 
-    const handleClose = () => {
-        setOpen(false);
-    };
+  const handleClose = () => {
+    setOpen(false);
+  };
 
-    return (
-        <>
-            <EditMemberDialog
-                open={open}
-                onClose={handleClose}
-                member={member}
+  return (
+    <>
+      <EditMemberDialog open={open} onClose={handleClose} member={member} />
+      <ListItemButton onClick={handleOpen}>
+        <ListItem
+          disablePadding
+          secondaryAction={
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <ExpenseItem member={member} />
+              <ShareItem member={member} />
+            </Box>
+          }
+        >
+          <ListItemAvatar>
+            <Avatar
+              alt={`Avatar n°${""}}`}
+              src={`/static/images/avatar/${member.avatarUri}.jpg`}
             />
-            <ListItemButton onClick={handleOpen}>
-                <ListItem
-                    disablePadding
-                    secondaryAction={
-                        <>
-                            <ExpenseItem member={member} />
-                            <ShareItem member={member} />
-                        </>
-                    }
-                >
-                    <ListItemAvatar>
-                        <Avatar
-                            alt={`Avatar n°${""}}`}
-                            src={`/static/images/avatar/${member.avatarUri}.jpg`}
-                        />
-                    </ListItemAvatar>
-                    <ListItemText
-                        primary={member.name}
-                        secondary={<TagChips selectedTagIds={member.tagIds} />}
-                    />
-                </ListItem>
-            </ListItemButton>
-        </>
-    );
+          </ListItemAvatar>
+          <ListItemText
+            primary={member.name}
+            secondary={<TagChips selectedTagIds={member.tagIds} />}
+          />
+        </ListItem>
+      </ListItemButton>
+    </>
+  );
 }
 
 function ExpenseItem({ member }: { member: Member }) {
-    return (
-        <Box
-            sx={{
-                textAlign: "right",
-            }}
-        >
-            <Typography variant="body1">
-                {member.amountSpent.toString()}
-            </Typography>
-        </Box>
-    );
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 0.75,
+        textAlign: "right",
+      }}
+    >
+      <Typography variant="caption" color="text.secondary">
+        Paid
+      </Typography>
+      <Typography variant="body1">{member.amountSpent.toString()}</Typography>
+    </Box>
+  );
 }
 
 function ShareItem({ member }: { member: Member }) {
-    return (
-        <Box
-            sx={{
-                textAlign: "right",
-            }}
-        >
-            <Typography variant="body1">
-                {member.amountShare.toString()}
-            </Typography>
-        </Box>
-    );
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        gap: 0.75,
+        textAlign: "right",
+      }}
+    >
+      <Typography variant="caption" color="text.secondary">
+        Share
+      </Typography>
+      <Typography variant="body1">{member.amountShare.toString()}</Typography>
+    </Box>
+  );
 }
